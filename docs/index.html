@@ -110,6 +110,20 @@
     .links a:hover {
       border-color: var(--accent);
     }
+    .asset-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 10px 0 14px;
+    }
+    .asset-links a {
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 13px;
+    }
+    .asset-links a:hover {
+      text-decoration: underline;
+    }
   </style>
 </head>
 <body>
@@ -136,35 +150,55 @@
         </div>
       </div>
       <div class="links">
-        <a href="./progress.png">总进度 PNG</a>
-        <a href="./full-wer.png">Full WER PNG</a>
-        <a href="./core-slice.png">Core Slice PNG</a>
-        <a href="./supplement-slice.png">Supplement Slice PNG</a>
+        <a href="./progress.svg">总进度 SVG</a>
+        <a href="./full-wer.svg">Full WER SVG</a>
+        <a href="./core-slice.svg">Core Slice SVG</a>
+        <a href="./supplement-slice.svg">Supplement Slice SVG</a>
       </div>
     </section>
 
     <section class="section">
       <h2>Overall Progress</h2>
-      <p>所有 run 的当前整体进度，已完成与进行中混合展示。</p>
-      <img class="chart" src="./progress.png" alt="Overall progress">
+      <p>所有 run 的当前整体进度，已完成与进行中混合展示。页面内优先显示 SVG，浏览器里会更清晰。</p>
+      <div class="asset-links">
+        <a href="./progress.svg">原始 SVG</a>
+        <a href="./progress@2x.png">高清 PNG</a>
+        <a href="./progress.png">标准 PNG</a>
+      </div>
+      <img class="chart" src="./progress.svg" alt="Overall progress">
     </section>
 
     <section class="section">
       <h2>Full WER</h2>
       <p>按 epoch 跟踪 full eval 的主指标变化，以及当前 ranking。</p>
-      <img class="chart" src="./full-wer.png" alt="Full WER">
+      <div class="asset-links">
+        <a href="./full-wer.svg">原始 SVG</a>
+        <a href="./full-wer@2x.png">高清 PNG</a>
+        <a href="./full-wer.png">标准 PNG</a>
+      </div>
+      <img class="chart" src="./full-wer.svg" alt="Full WER">
     </section>
 
     <section class="section">
       <h2>Core Slice</h2>
       <p>核心 slice 热力图，覆盖当前已完成的各个 run。</p>
-      <img class="chart" src="./core-slice.png" alt="Core slice heatmap">
+      <div class="asset-links">
+        <a href="./core-slice.svg">原始 SVG</a>
+        <a href="./core-slice@2x.png">高清 PNG</a>
+        <a href="./core-slice.png">标准 PNG</a>
+      </div>
+      <img class="chart" src="./core-slice.svg" alt="Core slice heatmap">
     </section>
 
     <section class="section">
       <h2>Supplement Slice</h2>
       <p>补充诊断 slice 热力图，用于观察额外分布的退化与收益。</p>
-      <img class="chart" src="./supplement-slice.png" alt="Supplement slice heatmap">
+      <div class="asset-links">
+        <a href="./supplement-slice.svg">原始 SVG</a>
+        <a href="./supplement-slice@2x.png">高清 PNG</a>
+        <a href="./supplement-slice.png">标准 PNG</a>
+      </div>
+      <img class="chart" src="./supplement-slice.svg" alt="Supplement slice heatmap">
     </section>
   </main>
 </body>
