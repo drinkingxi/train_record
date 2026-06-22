@@ -39,7 +39,7 @@
       <h1>ATC ASR 训练监控面板</h1>
       <p>47 / 178 两台机器的 ablation 训练状态、full WER 与 slice 结果统一查看。页面每小时刷新一次，图表默认展示当前扫描到的完整 run 集合。</p>
       <div class="meta">
-        <div class="meta-item"><span class="meta-label">更新时间</span><span class="meta-value">2026-06-22 16:15</span></div>
+        <div class="meta-item"><span class="meta-label">更新时间</span><span class="meta-value">2026-06-22 16:18</span></div>
         <div class="meta-item"><span class="meta-label">当前 best full WER</span><span class="meta-value good">16.92</span></div>
         <div class="meta-item"><span class="meta-label">best run</span><span class="meta-value accent">exp00_v3_baseline_maskfix_bsz16</span></div>
         <div class="meta-item"><span class="meta-label">best epoch</span><span class="meta-value">ep12</span></div>
@@ -48,6 +48,7 @@
       </div>
       <div class="links">
         <a href="./progress.svg">总进度 SVG</a>
+        <a href="./run-health.svg">Run Health SVG</a>
         <a href="./full-wer.svg">Full WER SVG</a>
         <a href="./full-wer-ranking.svg">Full WER Ranking SVG</a>
         <a href="./full-wer-delta.svg">Full WER Delta SVG</a>
@@ -58,9 +59,20 @@
     <section class="section">
       <h2>训练中</h2>
       <ul>
-        <li>47 · exp24_v3_fullmix_balanced_epoch5_epoch5_local47_maskfix_ · 5995/60920 steps (10%, ETA 57:09:46)</li><li>47 · exp23_v3_appdenoise45h_epoch5_epoch5_local47_maskfix_bsz · 5812/54155 steps (11%, ETA 52:18:23)</li><li>178 · exp22_v3_atcosim_epoch5_epoch5_remote178_maskfix_bsz4_ep · 6836/48190 steps (14%, ETA 40:14:55)</li><li>178 · exp13_v3_general20h_best_aug_epoch1_remote178_maskfix_bs · 7091/10674 steps (66%, ETA 3:29:17)</li><li>178 · exp19_v3_open_atc_best_general20h_epoch1_remote178_maskf · 7394/9962 steps (74%, ETA 2:25:56)</li><li>178 · exp14_v3_best_combo_epoch1_remote178_maskfix_bsz4_epoch_ · 7479/10350 steps (72%, ETA 2:42:33)</li>
+        <li>47 · exp24_v3_fullmix_balanced_epoch5_epoch5_local47_maskfix_ · 6048/60920 steps (10%, ETA 57:13:08)</li><li>47 · exp23_v3_appdenoise45h_epoch5_epoch5_local47_maskfix_bsz · 5863/54155 steps (11%, ETA 52:24:21)</li><li>178 · exp22_v3_atcosim_epoch5_epoch5_remote178_maskfix_bsz4_ep · 6893/48190 steps (14%, ETA 39:13:29)</li><li>178 · exp13_v3_general20h_best_aug_epoch1_remote178_maskfix_bs · 7147/10674 steps (67%, ETA 3:25:20)</li><li>178 · exp19_v3_open_atc_best_general20h_epoch1_remote178_maskf · 7452/9962 steps (75%, ETA 2:19:11)</li><li>178 · exp14_v3_best_combo_epoch1_remote178_maskfix_bsz4_epoch_ · 7538/10350 steps (73%, ETA 2:46:29)</li>
       </ul>
     </section>
+    
+    <section class="section">
+      <h2>Run Health</h2>
+      <div class="asset-links">
+        <a href="./run-health.svg">原始 SVG</a>
+        <a href="./run-health@2x.png">高清 PNG</a>
+        <a href="./run-health.png">标准 PNG</a>
+      </div>
+      <img class="chart" src="./run-health.svg" alt="Run Health">
+    </section>
+
     
     <section class="section">
       <h2>Overall Progress</h2>
