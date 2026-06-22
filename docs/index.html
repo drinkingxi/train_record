@@ -1,77 +1,171 @@
 <!doctype html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>ATC ASR Train Record</title>
+  <title>ATC ASR Dashboard</title>
   <style>
     :root {
-      color-scheme: light;
-      --bg: #0b1220;
-      --panel: #111827;
-      --text: #e5e7eb;
+      color-scheme: dark;
+      --bg: #09111f;
+      --panel: #0f172a;
+      --panel-2: #111c34;
+      --text: #e5eefb;
       --muted: #94a3b8;
+      --line: #1e293b;
       --accent: #38bdf8;
-      --line: #1f2937;
+      --accent-2: #22c55e;
     }
+    * { box-sizing: border-box; }
     body {
       margin: 0;
       font-family: Arial, sans-serif;
-      background: linear-gradient(180deg, #0b1220 0%, #111827 100%);
+      background: var(--bg);
       color: var(--text);
     }
     main {
-      max-width: 980px;
+      max-width: 1280px;
       margin: 0 auto;
-      padding: 40px 20px 80px;
+      padding: 28px 20px 56px;
+    }
+    .hero {
+      padding: 24px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.98), rgba(17, 28, 52, 0.98));
     }
     h1 {
-      margin: 0 0 12px;
-      font-size: 32px;
-    }
-    p {
       margin: 0 0 10px;
+      font-size: 30px;
+      line-height: 1.2;
+    }
+    .sub {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+    .meta {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-top: 18px;
+    }
+    .meta-item {
+      padding: 14px 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(9, 17, 31, 0.7);
+    }
+    .meta-label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .meta-value {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .meta-value.accent { color: var(--accent); }
+    .meta-value.good { color: var(--accent-2); }
+    .section {
+      margin-top: 22px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+    }
+    .section h2 {
+      margin: 0 0 6px;
+      font-size: 18px;
+    }
+    .section p {
+      margin: 0 0 14px;
       color: var(--muted);
       line-height: 1.5;
     }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 16px;
-      margin-top: 28px;
+    .chart {
+      width: 100%;
+      display: block;
+      border-radius: 8px;
+      background: #ffffff;
+      border: 1px solid #dbe4f0;
     }
-    .card {
-      background: rgba(17, 24, 39, 0.88);
+    .links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+    .links a {
+      color: var(--text);
+      text-decoration: none;
+      padding: 10px 12px;
       border: 1px solid var(--line);
       border-radius: 8px;
-      padding: 16px;
+      background: var(--panel-2);
+      font-size: 14px;
     }
-    .card h2 {
-      margin: 0 0 8px;
-      font-size: 18px;
-      color: var(--accent);
-    }
-    code {
-      font-family: monospace;
-      color: #f8fafc;
+    .links a:hover {
+      border-color: var(--accent);
     }
   </style>
 </head>
 <body>
   <main>
-    <h1>ATC ASR Train Record</h1>
-    <p>This GitHub Pages site hosts static training report assets for WxPusher image embeds.</p>
-    <p>Expected image paths are updated in place, for example <code>core-slice.png</code>, <code>supplement-slice.png</code>, <code>full-wer.png</code>, and <code>progress.png</code>.</p>
-    <div class="grid">
-      <section class="card">
-        <h2>Usage</h2>
-        <p>Point WxPusher HTML <code>&lt;img&gt;</code> tags to the generated PNG files under this site.</p>
-      </section>
-      <section class="card">
-        <h2>Notes</h2>
-        <p>This repository is intentionally public and should contain only derived static report images.</p>
-      </section>
-    </div>
+    <section class="hero">
+      <h1>ATC ASR 训练监控面板</h1>
+      <p class="sub">47 / 178 两台机器的 ablation 训练状态、full WER 与 slice 结果在这里统一查看。这个页面用于承载 Wx 消息中的跳转链接。</p>
+      <div class="meta">
+        <div class="meta-item">
+          <span class="meta-label">更新时间</span>
+          <span class="meta-value">2026-06-22 11:25</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">当前 best full WER</span>
+          <span class="meta-value good">16.92</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">best run</span>
+          <span class="meta-value accent">exp00_v3_baseline</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">训练中 run</span>
+          <span class="meta-value">6</span>
+        </div>
+      </div>
+      <div class="links">
+        <a href="./progress.png">总进度 PNG</a>
+        <a href="./full-wer.png">Full WER PNG</a>
+        <a href="./core-slice.png">Core Slice PNG</a>
+        <a href="./supplement-slice.png">Supplement Slice PNG</a>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>Overall Progress</h2>
+      <p>所有 run 的当前整体进度，已完成与进行中混合展示。</p>
+      <img class="chart" src="./progress.png" alt="Overall progress">
+    </section>
+
+    <section class="section">
+      <h2>Full WER</h2>
+      <p>按 epoch 跟踪 full eval 的主指标变化，以及当前 ranking。</p>
+      <img class="chart" src="./full-wer.png" alt="Full WER">
+    </section>
+
+    <section class="section">
+      <h2>Core Slice</h2>
+      <p>核心 slice 热力图，覆盖当前已完成的各个 run。</p>
+      <img class="chart" src="./core-slice.png" alt="Core slice heatmap">
+    </section>
+
+    <section class="section">
+      <h2>Supplement Slice</h2>
+      <p>补充诊断 slice 热力图，用于观察额外分布的退化与收益。</p>
+      <img class="chart" src="./supplement-slice.png" alt="Supplement slice heatmap">
+    </section>
   </main>
 </body>
 </html>
