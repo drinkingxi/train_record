@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-06-23T12:14:11",
+  "updated_at": "2026-06-23T13:14:11",
   "dashboard_url": "https://drinkingxi.github.io/train_record/",
   "experiments": [
     {
@@ -14,7 +14,7 @@
           "name": "exp29_v4_1_no_colon_prefix_baseline_epoch3_remote178_maskfix_bsz4_epoch_gpu1",
           "path": "/home/xijunting/projects/atc_asr/train/training_checkpoints/qwen3-asr-0.6b-exp29_v4_1_no_colon_prefix_baseline_epoch3_remote178_maskfix_bsz4_epoch_gpu1",
           "active": true,
-          "progress": "1210/28167 steps (4%, ETA 27:35:34)",
+          "progress": "2296/28167 steps (8%, ETA 23:17:43)",
           "latest_epoch": null,
           "latest_step": null,
           "latest_wer": null,
@@ -33,7 +33,7 @@
         "name": "exp29_v4_1_no_colon_prefix_baseline_epoch3_remote178_maskfix_bsz4_epoch_gpu1",
         "path": "/home/xijunting/projects/atc_asr/train/training_checkpoints/qwen3-asr-0.6b-exp29_v4_1_no_colon_prefix_baseline_epoch3_remote178_maskfix_bsz4_epoch_gpu1",
         "active": true,
-        "progress": "1210/28167 steps (4%, ETA 27:35:34)",
+        "progress": "2296/28167 steps (8%, ETA 23:17:43)",
         "latest_epoch": null,
         "latest_step": null,
         "latest_wer": null,
@@ -59,7 +59,7 @@
           "name": "exp60_v4_2_reading_pairs_epoch3_epoch3_remote178_maskfix_bsz4_epoch_gpu0",
           "path": "/home/xijunting/projects/atc_asr/train/training_checkpoints/qwen3-asr-0.6b-exp60_v4_2_reading_pairs_epoch3_epoch3_remote178_maskfix_bsz4_epoch_gpu0",
           "active": true,
-          "progress": "1262/28167 steps (4%, ETA 24:25:28)",
+          "progress": "2347/28167 steps (8%, ETA 23:37:21)",
           "latest_epoch": null,
           "latest_step": null,
           "latest_wer": null,
@@ -78,7 +78,7 @@
         "name": "exp60_v4_2_reading_pairs_epoch3_epoch3_remote178_maskfix_bsz4_epoch_gpu0",
         "path": "/home/xijunting/projects/atc_asr/train/training_checkpoints/qwen3-asr-0.6b-exp60_v4_2_reading_pairs_epoch3_epoch3_remote178_maskfix_bsz4_epoch_gpu0",
         "active": true,
-        "progress": "1262/28167 steps (4%, ETA 24:25:28)",
+        "progress": "2347/28167 steps (8%, ETA 23:37:21)",
         "latest_epoch": null,
         "latest_step": null,
         "latest_wer": null,
