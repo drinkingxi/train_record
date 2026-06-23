@@ -1,7 +1,7 @@
 {
-  "updated_at": "2026-06-23 14:47 CST",
+  "updated_at": "2026-06-23 14:50 CST",
   "title": "Qwen3-ASR v4.3 数据扩充实验计划",
-  "dashboard_note": "这个页面用于动态跟踪实验计划：区分历史 run、当前队列、后续数据配比 ablation，以及暂缓或诊断类实验，避免不同数据版本下的重复实验混在一起。",
+  "dashboard_note": "这个页面用于动态跟踪实验计划：区分历史 run、当前队列、后续数据配比 ablation，以及暂缓或诊断类实验。通用数据和混合数据都已纳入计划；raw exp 编号只作为运行 ID，不代表必须连续执行。",
   "current_base": {
     "id": "exp29_v4_3_no_translation_mismatch_baseline",
     "data_dir": "qwen3_asr_20260623_cleaned_v4_3_verbatim_no_translation_mismatch",
@@ -65,7 +65,12 @@
     {
       "topic": "fullmix",
       "confidence": "medium",
-      "summary": "Balanced fullmix 可作为综合混合基准，但变量太多；需要同时做受控配比实验来拆解贡献。"
+      "summary": "混合数据已包含通用 ASR、降噪、DeepFilter、VAD、open ATC 和 TTS；但 fullmix 变量太多，只作为综合基准，不直接当最终配方。"
+    },
+    {
+      "topic": "general_asr",
+      "confidence": "medium",
+      "summary": "通用数据已进入计划：H1 先做 general 100h 高剂量筛选，H6 的大组合也包含 general 60h；若高剂量有收益，再递减到 60h/30h/10h。"
     },
     {
       "topic": "tts",
@@ -85,7 +90,8 @@
       "priority": 0,
       "category": "history",
       "data_version": "v3/v3.1",
-      "purpose": "历史单因素方向探索。保留结果可见，但不在新机器上重复。"
+      "purpose": "历史单因素方向探索。保留结果可见，但不在新机器上重复。",
+      "plan_label": "历史"
     },
     {
       "id": "exp29_v4_3_no_translation_mismatch_baseline",
@@ -96,7 +102,8 @@
       "data_dir": "qwen3_asr_20260623_cleaned_v4_3_verbatim_no_translation_mismatch",
       "epochs": 1,
       "machine": "167",
-      "purpose": "当前可比较的 v4.3 基线。"
+      "purpose": "当前可比较的 v4.3 基线。",
+      "plan_label": "B0"
     },
     {
       "id": "exp50_v4_3_atcosim_epoch5",
@@ -107,7 +114,8 @@
       "data_dir": "qwen3_asr_20260623_exp40_v4_3_open_atc_atcosim",
       "epochs": 5,
       "machine": "178",
-      "purpose": "在 v4.3 上多 epoch 验证 ATCOSIM。"
+      "purpose": "在 v4.3 上多 epoch 验证 ATCOSIM。",
+      "plan_label": "A1"
     },
     {
       "id": "exp51_v4_3_appdenoise45h_epoch5",
@@ -118,7 +126,8 @@
       "data_dir": "qwen3_asr_20260623_exp31_v4_3_appdenoise45h",
       "epochs": 5,
       "machine": "47",
-      "purpose": "验证 app denoise 在多 epoch 后是否延续 v3 slice 中的改善信号。"
+      "purpose": "验证 app denoise 在多 epoch 后是否延续 v3 slice 中的改善信号。",
+      "plan_label": "A2"
     },
     {
       "id": "exp52_v4_3_fullmix_balanced_epoch5",
@@ -129,7 +138,8 @@
       "data_dir": "qwen3_asr_20260623_exp48_v4_3_fullmix_balanced_v1",
       "epochs": 5,
       "machine": "47",
-      "purpose": "综合 balanced mixture 基准。它用于对照受控配比实验，不默认作为最终配方。"
+      "purpose": "综合 balanced mixture 基准。它用于对照受控配比实验，不默认作为最终配方。",
+      "plan_label": "A3"
     },
     {
       "id": "exp53_v4_3_contiguous_concat30h",
@@ -140,7 +150,8 @@
       "data_dir": "qwen3_asr_20260623_exp53_v4_3_contiguous_concat30h",
       "epochs": 1,
       "machine": "167",
-      "purpose": "主长音频 concat 测试。不在 47/178 重复。"
+      "purpose": "主长音频 concat 测试。不在 47/178 重复。",
+      "plan_label": "L2"
     },
     {
       "id": "exp54_v4_3_contiguous_concat60h_6_18s",
@@ -151,7 +162,8 @@
       "data_dir": "qwen3_asr_20260623_exp54_v4_3_contiguous_concat60h_6_18s",
       "epochs": 1,
       "machine": "167",
-      "purpose": "长音频压力测试。资源允许时在 exp53 后继续跑。"
+      "purpose": "长音频压力测试。资源允许时在 exp53 后继续跑。",
+      "plan_label": "L3"
     },
     {
       "id": "exp57_v4_3_contiguous_concat30h_epoch3",
@@ -162,7 +174,8 @@
       "data_dir": "qwen3_asr_20260623_exp53_v4_3_contiguous_concat30h",
       "epochs": 3,
       "machine": "167",
-      "purpose": "复用 exp53 数据，检查长音频收益在多 epoch 下是否仍然成立。"
+      "purpose": "复用 exp53 数据，检查长音频收益在多 epoch 下是否仍然成立。",
+      "plan_label": "L4"
     },
     {
       "id": "exp58_v4_3_contiguous_concat60h_6_18s_epoch3",
@@ -173,7 +186,8 @@
       "data_dir": "qwen3_asr_20260623_exp54_v4_3_contiguous_concat60h_6_18s",
       "epochs": 3,
       "machine": "167",
-      "purpose": "只有需要 18s 压力测试行为时才跑。"
+      "purpose": "只有需要 18s 压力测试行为时才跑。",
+      "plan_label": "L5"
     },
     {
       "id": "exp61_mini_v4_3_no_translation_mismatch",
@@ -184,7 +198,8 @@
       "data_dir": "qwen3_asr_20260623_mini50k_v4_3_verbatim_no_translation_mismatch",
       "max_steps": 2000,
       "machine": "178",
-      "purpose": "v4.3 vs v4.4 的 matched mini 对照。"
+      "purpose": "v4.3 vs v4.4 的 matched mini 对照。",
+      "plan_label": "M1"
     },
     {
       "id": "exp62_mini_v4_4_reading_pairs_no_translation_mismatch",
@@ -195,7 +210,8 @@
       "data_dir": "qwen3_asr_20260623_mini50k_v4_4_reading_pairs_no_translation_mismatch",
       "max_steps": 2000,
       "machine": "178",
-      "purpose": "matched mini reading-pair 测试；只有明确胜出后才启动 full v4.4。"
+      "purpose": "matched mini reading-pair 测试；只有明确胜出后才启动 full v4.4。",
+      "plan_label": "M2"
     },
     {
       "id": "exp63_v4_3_ttsclone10h_epoch5",
@@ -205,7 +221,8 @@
       "data_version": "v4.3",
       "data_dir": "qwen3_asr_20260623_exp33_v4_3_ttsclone10h",
       "epochs": 5,
-      "purpose": "用足够 epoch 复验 TTS 10h；旧 1 epoch 结果不足以下结论。"
+      "purpose": "用足够 epoch 复验 TTS 10h；旧 1 epoch 结果不足以下结论。",
+      "plan_label": "T1"
     },
     {
       "id": "exp64_v4_3_ttsclone22h_epoch5",
@@ -215,7 +232,8 @@
       "data_version": "v4.3",
       "data_dir": "qwen3_asr_20260623_exp34_v4_3_ttsclone22h",
       "epochs": 5,
-      "purpose": "完整 reviewed TTS 池的剂量测试。"
+      "purpose": "完整 reviewed TTS 池的剂量测试。",
+      "plan_label": "T2"
     },
     {
       "id": "exp65_v4_3_highdose_general100h_epoch3",
@@ -228,7 +246,8 @@
       "caps_hours": {
         "general_asr": 100
       },
-      "purpose": "通用数据先用大剂量筛方向；若 full WER 或 ATC slice 受损，再回退到 60h/30h/10h。"
+      "purpose": "通用数据先用大剂量筛方向；若 full WER 或 ATC slice 受损，再回退到 60h/30h/10h。",
+      "plan_label": "H1"
     },
     {
       "id": "exp66_v4_3_highdose_appdenoise90h_epoch3",
@@ -241,7 +260,8 @@
       "caps_hours": {
         "app_denoise": 90
       },
-      "purpose": "App denoise 先加到更明显的量级；若有效，再在 90h/45h/15h 间找最小有效剂量。"
+      "purpose": "App denoise 先加到更明显的量级；若有效，再在 90h/45h/15h 间找最小有效剂量。",
+      "plan_label": "H2"
     },
     {
       "id": "exp67_v4_3_highdose_deepfilter60h_epoch3",
@@ -254,7 +274,8 @@
       "caps_hours": {
         "deepfilter": 60
       },
-      "purpose": "DeepFilter 单独高剂量筛选；若有效，再与 app denoise 做互斥或组合对照。"
+      "purpose": "DeepFilter 单独高剂量筛选；若有效，再与 app denoise 做互斥或组合对照。",
+      "plan_label": "H3"
     },
     {
       "id": "exp68_v4_3_highdose_vad100h_epoch3",
@@ -267,7 +288,8 @@
       "caps_hours": {
         "vad": 100
       },
-      "purpose": "VAD/切分增强先用大剂量确认是否改变长短音频和 early-EOS 行为。"
+      "purpose": "VAD/切分增强先用大剂量确认是否改变长短音频和 early-EOS 行为。",
+      "plan_label": "H4"
     },
     {
       "id": "exp69_v4_3_highdose_openatc_all_epoch3",
@@ -280,7 +302,8 @@
       "caps_hours": {
         "open_atc": 60
       },
-      "purpose": "UWB-ATCC + ATCOSIM 尽量全量筛选开源 ATC；若有效，再拆 ATCOSIM/UWB 和 cap。"
+      "purpose": "UWB-ATCC + ATCOSIM 尽量全量筛选开源 ATC；若有效，再拆 ATCOSIM/UWB 和 cap。",
+      "plan_label": "H5"
     },
     {
       "id": "exp70_v4_3_highdose_real_aug_combo_epoch3",
@@ -297,7 +320,8 @@
         "vad": 100,
         "open_atc": 60
       },
-      "purpose": "真实/增强数据的大组合压力测试；只用于判断上限和冲突，最终配方仍要回退拆分。"
+      "purpose": "真实/增强数据的大组合压力测试；只用于判断上限和冲突，最终配方仍要回退拆分。",
+      "plan_label": "H6"
     }
   ],
   "machine_policy": [
@@ -314,7 +338,7 @@
     },
     {
       "machine": "178",
-      "role": "负责 ATCOSIM、matched mini，以及后续受控配比漏斗。",
+      "role": "负责 ATCOSIM、matched mini、TTS 10h，以及后续高剂量数据扩充筛选。",
       "queue_now": [
         "exp50_v4_3_atcosim_epoch5",
         "exp61_mini_v4_3_no_translation_mismatch",
@@ -346,10 +370,12 @@
   ],
   "promotion_rules": [
     "v4.3 run 需要和相同或相近 epoch 的 exp29 比较，不再直接和 v3/v4.1 原始结果比较。",
-    "组合实验需要击败 exp29 full WER，或者在目标 slice 改善的同时 full WER 绝对值恶化不超过 0.5。",
+    "高剂量单类 run 如果 full WER 变好，下一轮直接做 1/2 和 1/4 cap 递减。",
+    "高剂量单类 run 如果 full WER 变差但目标 slice 明显变好，保留为专项候选，不直接进最终主配方。",
+    "高剂量单类 run 如果 full WER 和目标 slice 都不改善，低剂量版本暂停。",
     "TTS 只有在 numbers_callsigns、mixed/content_mixed、英文或 callsign-heavy slice 有改善时，才纳入最终配方。",
-    "通用数据默认优先 10h；只有 20h 改善通用/英文 slice 且不伤 ATC slice 时才提高比例。",
     "长音频需要综合 duration_8_12s、duration_ge12s、early-EOS 诊断和 full-WER 是否退化。",
     "只因为旧数据版本或不同测试/slice 定义获胜的 run 不晋级。"
-  ]
+  ],
+  "numbering_note": "编号说明：raw run id 保留历史连续性，已启动的 run 不重命名；页面中的计划编号用于阅读执行顺序。A=当前主线，M=matched mini，L=长音频，T=TTS，H=高剂量数据扩充筛选。exp30-exp49 中很多只是早期数据配方或历史候选，不代表漏跑。"
 }
