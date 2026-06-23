@@ -1,81 +1,81 @@
 {
-  "updated_at": "2026-06-23",
-  "title": "Qwen3-ASR v4.3 Data Expansion Plan",
-  "dashboard_note": "This file is the source for the GitHub Pages experiment-plan view. It separates historical runs, currently active queues, planned data-ratio ablations, and blocked/diagnostic ideas so repeated data-version experiments are visible.",
+  "updated_at": "2026-06-23 14:40 CST",
+  "title": "Qwen3-ASR v4.3 数据扩充实验计划",
+  "dashboard_note": "这个页面用于动态跟踪实验计划：区分历史 run、当前队列、后续数据配比 ablation，以及暂缓或诊断类实验，避免不同数据版本下的重复实验混在一起。",
   "current_base": {
     "id": "exp29_v4_3_no_translation_mismatch_baseline",
     "data_dir": "qwen3_asr_20260623_cleaned_v4_3_verbatim_no_translation_mismatch",
     "status": "active",
-    "reason": "v4.3 is v4.1 verbatim/no-colon plus translation/cross-language mismatch removal. Future full-data ablations should use this base unless the v4.4 matched mini test clearly wins."
+    "reason": "v4.3 基于 v4.1 的 verbatim/no-colon 数据，并进一步剔除了翻译/跨语种不匹配样本。除非 v4.4 matched mini 明显胜出，后续全量 ablation 都以 v4.3 为 base。"
   },
   "data_versions": [
     {
       "version": "v3",
       "status": "archive",
       "data_dir": "qwen3_asr_20260613_exp*_v3_*",
-      "notes": "First ablation generation. Keep for direction finding only; do not use for future training decisions without re-running on v4.3."
+      "notes": "第一批 ablation 数据，只用于判断方向；不再直接作为后续训练决策依据，重要结论需要在 v4.3 上复验。"
     },
     {
       "version": "v3.1",
       "status": "archive",
       "data_dir": "qwen3_asr_20260622_cleaned_v3_1_no_colon_prefix",
-      "notes": "No-colon-prefix cleanup before the v4 verbatim branch. Long-audio experiments from this lineage are historical."
+      "notes": "v4 verbatim 分支之前的无冒号前缀清理版本。来自该版本的长音频实验只作为历史参考。"
     },
     {
       "version": "v4.1",
       "status": "archive",
       "data_dir": "qwen3_asr_20260622_cleaned_v4_1_verbatim_no_colon_prefix",
-      "notes": "Strong verbatim/no-colon signal. Superseded by v4.3 for new experiments."
+      "notes": "verbatim/no-colon 信号明显更好；新实验已由 v4.3 取代。"
     },
     {
       "version": "v4.2",
       "status": "diagnostic",
       "data_dir": "qwen3_asr_20260623_cleaned_v4_2_reading_pairs",
-      "notes": "Reading-pair label strategy before mismatch removal. Use only for matched mini comparison."
+      "notes": "剔除 mismatch 之前的 reading-pair 标签策略，只用于 matched mini 对照。"
     },
     {
       "version": "v4.3",
       "status": "current",
       "data_dir": "qwen3_asr_20260623_cleaned_v4_3_verbatim_no_translation_mismatch",
-      "notes": "Current full-data base for all new ablations."
+      "notes": "当前所有新全量 ablation 的基础数据。"
     },
     {
       "version": "v4.4",
       "status": "diagnostic",
       "data_dir": "qwen3_asr_20260623_cleaned_v4_4_reading_pairs_no_translation_mismatch",
-      "notes": "v4.3 cleanup with reading-pair labels. Promote only if matched mini eval beats v4.3 without output-format regressions."
+      "notes": "在 v4.3 清理基础上改用 reading-pair 标签。只有 matched mini 明显优于 v4.3 且无输出格式退化时才升级。"
     }
   ],
   "findings": [
     {
       "topic": "base",
       "confidence": "high",
-      "summary": "v4.x verbatim/no-colon is the strongest signal so far. Future ablations should not repeat v3 data-version experiments unless a slice-specific result needs confirmation."
+      "summary": "目前最强信号是 v4.x verbatim/no-colon。后续不应重复 v3 数据版本实验，除非某个 slice 结论需要复验。"
     },
     {
       "topic": "open_atc_atcosim",
       "confidence": "medium-high",
-      "summary": "ATCOSIM helps English, longer-duration, and real-source slices. It is the first branch to migrate to v4.3 multi-epoch."
+      "summary": "ATCOSIM 对英文、较长时长和真实来源 slice 有优势，是第一优先迁移到 v4.3 多 epoch 的分支。"
     },
     {
       "topic": "app_denoise",
       "confidence": "medium",
-      "summary": "App denoise is a stable augmentation candidate. It looks better after more than one epoch, so keep the 45h multi-epoch run."
+      "summary": "App denoise 是稳定的增强候选；多于 1 epoch 后表现更合理，因此保留 45h 多 epoch 验证。"
     },
     {
       "topic": "fullmix",
       "confidence": "medium",
-      "summary": "Balanced fullmix is useful as a broad mixture candidate, but it mixes many variables. Use it as a benchmark while also testing controlled ratios."
+      "summary": "Balanced fullmix 可作为综合混合基准，但变量太多；需要同时做受控配比实验来拆解贡献。"
     },
     {
       "topic": "tts",
       "confidence": "low-medium",
-      "summary": "The old TTS 1-epoch runs were not enough to rule it out. Add multi-epoch TTS-only and TTS-in-combo tests before deciding."
+      "summary": "旧 TTS 只有 1 epoch，不能直接排除。需要补 TTS-only 和 TTS-in-combo 的多 epoch 实验后再判断。"
     },
     {
       "topic": "long_audio",
       "confidence": "low-medium",
-      "summary": "Long-audio concat is a 167-focused branch. Do not duplicate it on 47/178 while 167/baseline or long runs are active; decide from long-duration slices, early-EOS diagnostics, and full-WER regression."
+      "summary": "长音频 concat 目前集中在 167，不在 47/178 重复。判断依据应是长时长 slice、early-EOS 诊断和 full-WER 是否退化。"
     }
   ],
   "runs": [
@@ -85,7 +85,7 @@
       "priority": 0,
       "category": "history",
       "data_version": "v3/v3.1",
-      "purpose": "Historical single-factor direction finding. Keep results visible but do not repeat on new machines."
+      "purpose": "历史单因素方向探索。保留结果可见，但不在新机器上重复。"
     },
     {
       "id": "exp29_v4_3_no_translation_mismatch_baseline",
@@ -96,7 +96,7 @@
       "data_dir": "qwen3_asr_20260623_cleaned_v4_3_verbatim_no_translation_mismatch",
       "epochs": 1,
       "machine": "167",
-      "purpose": "Current comparable v4.3 base."
+      "purpose": "当前可比较的 v4.3 基线。"
     },
     {
       "id": "exp50_v4_3_atcosim_epoch5",
@@ -107,29 +107,29 @@
       "data_dir": "qwen3_asr_20260623_exp40_v4_3_open_atc_atcosim",
       "epochs": 5,
       "machine": "178",
-      "purpose": "Validate ATCOSIM over multiple epochs."
+      "purpose": "在 v4.3 上多 epoch 验证 ATCOSIM。"
     },
     {
       "id": "exp51_v4_3_appdenoise45h_epoch5",
-      "status": "queued",
+      "status": "active",
       "priority": 90,
       "category": "promoted_single_factor",
       "data_version": "v4.3",
       "data_dir": "qwen3_asr_20260623_exp31_v4_3_appdenoise45h",
       "epochs": 5,
       "machine": "47",
-      "purpose": "Validate app denoise after the v3 slice signal improved with more epochs."
+      "purpose": "验证 app denoise 在多 epoch 后是否延续 v3 slice 中的改善信号。"
     },
     {
       "id": "exp52_v4_3_fullmix_balanced_epoch5",
-      "status": "queued",
+      "status": "active",
       "priority": 88,
       "category": "mixture_benchmark",
       "data_version": "v4.3",
       "data_dir": "qwen3_asr_20260623_exp48_v4_3_fullmix_balanced_v1",
       "epochs": 5,
       "machine": "47",
-      "purpose": "Broad balanced mixture benchmark. Treat as a baseline for controlled-ratio runs, not as the final recipe by default."
+      "purpose": "综合 balanced mixture 基准。它用于对照受控配比实验，不默认作为最终配方。"
     },
     {
       "id": "exp53_v4_3_contiguous_concat30h",
@@ -140,7 +140,7 @@
       "data_dir": "qwen3_asr_20260623_exp53_v4_3_contiguous_concat30h",
       "epochs": 1,
       "machine": "167",
-      "purpose": "Main long-audio concat test. Do not duplicate on 47/178."
+      "purpose": "主长音频 concat 测试。不在 47/178 重复。"
     },
     {
       "id": "exp54_v4_3_contiguous_concat60h_6_18s",
@@ -151,7 +151,7 @@
       "data_dir": "qwen3_asr_20260623_exp54_v4_3_contiguous_concat60h_6_18s",
       "epochs": 1,
       "machine": "167",
-      "purpose": "Long-audio pressure test. Run only after exp53 if resources allow."
+      "purpose": "长音频压力测试。资源允许时在 exp53 后继续跑。"
     },
     {
       "id": "exp57_v4_3_contiguous_concat30h_epoch3",
@@ -162,7 +162,7 @@
       "data_dir": "qwen3_asr_20260623_exp53_v4_3_contiguous_concat30h",
       "epochs": 3,
       "machine": "167",
-      "purpose": "Reuse exp53 data to check whether long-audio benefits survive multi-epoch training."
+      "purpose": "复用 exp53 数据，检查长音频收益在多 epoch 下是否仍然成立。"
     },
     {
       "id": "exp58_v4_3_contiguous_concat60h_6_18s_epoch3",
@@ -173,7 +173,7 @@
       "data_dir": "qwen3_asr_20260623_exp54_v4_3_contiguous_concat60h_6_18s",
       "epochs": 3,
       "machine": "167",
-      "purpose": "Only run if 18s pressure-test behavior is needed."
+      "purpose": "只有需要 18s 压力测试行为时才跑。"
     },
     {
       "id": "exp61_mini_v4_3_no_translation_mismatch",
@@ -184,7 +184,7 @@
       "data_dir": "qwen3_asr_20260623_mini50k_v4_3_verbatim_no_translation_mismatch",
       "max_steps": 2000,
       "machine": "178",
-      "purpose": "Matched mini control for v4.3 vs v4.4."
+      "purpose": "v4.3 vs v4.4 的 matched mini 对照。"
     },
     {
       "id": "exp62_mini_v4_4_reading_pairs_no_translation_mismatch",
@@ -195,17 +195,17 @@
       "data_dir": "qwen3_asr_20260623_mini50k_v4_4_reading_pairs_no_translation_mismatch",
       "max_steps": 2000,
       "machine": "178",
-      "purpose": "Matched mini reading-pair test. Do not launch a full v4.4 run until this clearly wins."
+      "purpose": "matched mini reading-pair 测试；只有明确胜出后才启动 full v4.4。"
     },
     {
       "id": "exp63_v4_3_ttsclone10h_epoch5",
-      "status": "planned",
+      "status": "active",
       "priority": 80,
       "category": "tts_validation",
       "data_version": "v4.3",
       "data_dir": "qwen3_asr_20260623_exp33_v4_3_ttsclone10h",
       "epochs": 5,
-      "purpose": "Re-test TTS 10h with enough epochs. Old 1-epoch results are inconclusive."
+      "purpose": "用足够 epoch 复验 TTS 10h；旧 1 epoch 结果不足以下结论。"
     },
     {
       "id": "exp64_v4_3_ttsclone22h_epoch5",
@@ -215,7 +215,7 @@
       "data_version": "v4.3",
       "data_dir": "qwen3_asr_20260623_exp34_v4_3_ttsclone22h",
       "epochs": 5,
-      "purpose": "Dose test for full reviewed TTS pool."
+      "purpose": "完整 reviewed TTS 池的剂量测试。"
     },
     {
       "id": "exp65_v4_3_atcosim_appdenoise45h_epoch3",
@@ -229,7 +229,7 @@
         "open_atc_atcosim": 10,
         "app_denoise": 45
       },
-      "purpose": "First controlled combo after single-factor winners."
+      "purpose": "单因素优胜项之后的第一个受控组合。"
     },
     {
       "id": "exp66_v4_3_atcosim_appdenoise45h_general10h_epoch3",
@@ -244,7 +244,7 @@
         "app_denoise": 45,
         "general_asr": 10
       },
-      "purpose": "Low-ratio general regularizer test."
+      "purpose": "低比例通用数据正则化测试。"
     },
     {
       "id": "exp67_v4_3_atcosim_appdenoise45h_general20h_epoch3",
@@ -259,7 +259,7 @@
         "app_denoise": 45,
         "general_asr": 20
       },
-      "purpose": "General dose test. Promote only if general slices improve without ATC full-WER regression."
+      "purpose": "通用数据剂量测试；只有通用/英文 slice 改善且 ATC full-WER 不退化时才晋级。"
     },
     {
       "id": "exp68_v4_3_atcosim_appdenoise45h_general10h_tts10h_epoch3",
@@ -275,7 +275,7 @@
         "general_asr": 10,
         "tts": 10
       },
-      "purpose": "Check whether TTS helps when combined with the strongest real/synthetic mix."
+      "purpose": "检查 TTS 加入当前较强真实/增强混合后是否有帮助。"
     },
     {
       "id": "exp69_v4_3_atcosim_appdenoise45h_general10h_tts22h_epoch3",
@@ -291,7 +291,7 @@
         "general_asr": 10,
         "tts": 22.3
       },
-      "purpose": "TTS dose test inside the best controlled mix."
+      "purpose": "在最佳受控组合内测试 TTS 剂量。"
     },
     {
       "id": "exp70_v4_3_atcosim_appdenoise45h_general10h_long30h_epoch3",
@@ -301,29 +301,29 @@
       "data_version": "v4.3",
       "data_dir": "qwen3_asr_20260623_exp70_v4_3_atcosim_appdenoise_general10h_long30h",
       "epochs": 3,
-      "purpose": "Only build after exp53 proves long-audio value. Requires materialize support for combining contiguous concat rows with other augmentations."
+      "purpose": "仅在 exp53 证明长音频有效后构建；需要先支持 contiguous concat 与其他增强数据组合。"
     }
   ],
   "machine_policy": [
     {
       "machine": "47",
-      "role": "v4.3 promoted single-factor and mixture benchmark",
+      "role": "负责 v4.3 已晋级单因素和 mixture benchmark。",
       "queue_now": [
         "exp51_v4_3_appdenoise45h_epoch5",
         "exp52_v4_3_fullmix_balanced_epoch5"
       ],
       "next_after_current": [
-        "exp63_v4_3_ttsclone10h_epoch5",
         "exp64_v4_3_ttsclone22h_epoch5"
       ]
     },
     {
       "machine": "178",
-      "role": "ATCOSIM, matched mini, then controlled-ratio funnel",
+      "role": "负责 ATCOSIM、matched mini，以及后续受控配比漏斗。",
       "queue_now": [
         "exp50_v4_3_atcosim_epoch5",
         "exp61_mini_v4_3_no_translation_mismatch",
-        "exp62_mini_v4_4_reading_pairs_no_translation_mismatch"
+        "exp62_mini_v4_4_reading_pairs_no_translation_mismatch",
+        "exp63_v4_3_ttsclone10h_epoch5"
       ],
       "next_after_current": [
         "exp65_v4_3_atcosim_appdenoise45h_epoch3",
@@ -335,7 +335,7 @@
     },
     {
       "machine": "167",
-      "role": "v4.3 baseline and long-audio branch; avoid duplicate long-audio runs elsewhere",
+      "role": "负责 v4.3 baseline 和长音频分支；其他机器避免重复长音频实验。",
       "queue_now": [
         "exp29_v4_3_no_translation_mismatch_baseline"
       ],
@@ -348,11 +348,11 @@
     }
   ],
   "promotion_rules": [
-    "Compare v4.3 runs against exp29 at the same or nearest epoch, not against v3/v4.1 raw results.",
-    "A planned combo must beat exp29 full WER or improve target slices without worsening full WER by more than 0.5 absolute WER.",
-    "For TTS, require improvement in numbers_callsigns, mixed/content_mixed, or English/callsign-heavy slices before including it in the final recipe.",
-    "For general data, prefer 10h unless 20h improves general and English slices without hurting ATC slices.",
-    "For long audio, judge duration_8_12s, duration_ge12s, early-EOS diagnostics, and full-WER regression together.",
-    "Do not promote any run that only wins because it used an older data version or a different test/slice definition."
+    "v4.3 run 需要和相同或相近 epoch 的 exp29 比较，不再直接和 v3/v4.1 原始结果比较。",
+    "组合实验需要击败 exp29 full WER，或者在目标 slice 改善的同时 full WER 绝对值恶化不超过 0.5。",
+    "TTS 只有在 numbers_callsigns、mixed/content_mixed、英文或 callsign-heavy slice 有改善时，才纳入最终配方。",
+    "通用数据默认优先 10h；只有 20h 改善通用/英文 slice 且不伤 ATC slice 时才提高比例。",
+    "长音频需要综合 duration_8_12s、duration_ge12s、early-EOS 诊断和 full-WER 是否退化。",
+    "只因为旧数据版本或不同测试/slice 定义获胜的 run 不晋级。"
   ]
 }
