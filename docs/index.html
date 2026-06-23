@@ -11,6 +11,7 @@
     }
     * { box-sizing: border-box; }
     body { margin: 0; font-family: Arial, sans-serif; background: var(--bg); color: var(--text); }
+    button, input { font: inherit; }
     main { max-width: 1280px; margin: 0 auto; padding: 28px 20px 56px; }
     .hero, .section { border: 1px solid var(--line); border-radius: 8px; background: var(--panel); }
     .hero { padding: 24px; background: linear-gradient(180deg, rgba(15, 23, 42, 0.98), rgba(17, 28, 52, 0.98)); }
@@ -32,6 +33,32 @@
     .chart { width: 100%; display: block; border-radius: 8px; background: #ffffff; border: 1px solid #dbe4f0; cursor: zoom-in; }
     ul { margin: 8px 0 0 18px; padding: 0; color: var(--muted); }
     li { margin-bottom: 6px; }
+    .interactive-wer { display: grid; grid-template-columns: minmax(260px, 340px) minmax(0, 1fr); gap: 16px; align-items: start; }
+    .wer-controls, .wer-chart-panel { border: 1px solid var(--line); border-radius: 8px; background: rgba(9,17,31,0.45); padding: 12px; }
+    #werSearch { width: 100%; border: 1px solid var(--line); border-radius: 6px; background: #08111f; color: var(--text); padding: 10px 11px; outline: none; }
+    #werSearch:focus { border-color: var(--accent); }
+    .wer-buttons { display: flex; flex-wrap: wrap; gap: 7px; margin: 10px 0; }
+    .wer-buttons button, .wer-selected-chip { border: 1px solid var(--line); border-radius: 6px; background: var(--panel2); color: var(--text); padding: 7px 9px; cursor: pointer; }
+    .wer-buttons button:hover, .wer-selected-chip:hover { border-color: var(--accent); }
+    .wer-run-list { max-height: 520px; overflow: auto; display: grid; gap: 6px; padding-right: 4px; }
+    .wer-run-item { display: grid; grid-template-columns: 18px minmax(0, 1fr); gap: 8px; padding: 8px; border: 1px solid transparent; border-radius: 6px; color: var(--text); cursor: pointer; }
+    .wer-run-item:hover { border-color: var(--line); background: rgba(17,28,52,0.72); }
+    .wer-run-item input { margin-top: 3px; }
+    .wer-run-main { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; }
+    .wer-run-meta { grid-column: 2; color: var(--muted); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .wer-summary { color: var(--muted); font-size: 13px; margin-bottom: 10px; }
+    .wer-interactive-svg { width: 100%; display: block; border-radius: 8px; background: #ffffff; border: 1px solid #dbe4f0; }
+    .wer-series { transition: opacity 120ms ease; }
+    .wer-series.dim { opacity: 0.12; }
+    .wer-series.focus polyline { stroke-width: 4.2; }
+    .wer-selected-list { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 10px; }
+    .wer-selected-chip { display: inline-flex; align-items: center; gap: 7px; font-size: 12px; max-width: 100%; }
+    .wer-selected-chip span { width: 10px; height: 10px; border-radius: 2px; flex: 0 0 auto; }
+    .wer-empty { color: var(--muted); font-size: 13px; padding: 10px; }
+    @media (max-width: 900px) {
+      .interactive-wer { grid-template-columns: 1fr; }
+      .wer-run-list { max-height: 260px; }
+    }
   </style>
 </head>
 <body>
@@ -40,7 +67,7 @@
       <h1>ATC ASR 训练监控面板</h1>
       <p>47 / 178 / 167 三台机器的 ablation 训练状态、full WER 与 slice 结果统一查看。页面每小时刷新一次，图表默认展示当前扫描到的完整 run 集合。</p>
       <div class="meta">
-        <div class="meta-item"><span class="meta-label">更新时间</span><span class="meta-value">2026-06-23 10:14</span></div>
+        <div class="meta-item"><span class="meta-label">更新时间</span><span class="meta-value">2026-06-23 10:20</span></div>
         <div class="meta-item"><span class="meta-label">当前 best full WER</span><span class="meta-value good">14.58</span></div>
         <div class="meta-item"><span class="meta-label">best run</span><span class="meta-value accent">exp29_v4_verbatim_baseline_epoch1_remote178_maskfix_bsz4_epoch_gpu3</span></div>
         <div class="meta-item"><span class="meta-label">best epoch</span><span class="meta-value">ep1</span></div>
@@ -89,6 +116,174 @@
       </a>
     </section>
 
+    
+    <section class="section">
+      <h2>Interactive Full WER</h2>
+      <p>默认显示 best、baseline、训练中、多 epoch 和 Top WER run；可以搜索并勾选任意 run。图内不放长标签，避免遮挡，悬停曲线或点可看完整信息。</p>
+      <div class="interactive-wer">
+        <div class="wer-controls">
+          <input id="werSearch" type="search" placeholder="搜索 run / 机器 / exp" aria-label="搜索 run">
+          <div class="wer-buttons">
+            <button type="button" data-select="default">关键 run</button>
+            <button type="button" data-select="top10">Top 10</button>
+            <button type="button" data-select="active">训练中</button>
+            <button type="button" data-select="baseline">Baseline</button>
+            <button type="button" data-select="all">全选</button>
+            <button type="button" data-select="clear">清空</button>
+          </div>
+          <div id="werRunList" class="wer-run-list"></div>
+        </div>
+        <div class="wer-chart-panel">
+          <div id="werSummary" class="wer-summary"></div>
+          <svg id="werInteractiveSvg" class="wer-interactive-svg" viewBox="0 0 980 520" role="img" aria-label="Interactive full WER chart"></svg>
+          <div id="werSelectedList" class="wer-selected-list"></div>
+        </div>
+      </div>
+      <script id="fullWerData" type="application/json">[{"id": "178|qwen3-asr-0.6b-exp29_v4_verbatim_baseline_epoch1_remote178_maskfix_bsz4_epoch_gpu3|4", "source": "178", "name": "exp29_v4_verbatim_baseline_epoch1_remote178_maskfix_bsz4_epoch_gpu3", "label": "178 · exp29_v4_verbatim_baseline_epoch1_remote178_maskfix_bsz4_epoch_gpu3", "latestWer": 14.583394276242018, "latestEpoch": 1.0, "active": false, "baseline": true, "multiEpoch": false, "points": [{"epoch": 1.0, "wer": 14.583394276242018}], "best": true, "defaultSelected": true}, {"id": "167|qwen3-asr-0.6b-exp29_v4_verbatim_baseline_epoch1_remote167_maskfix_bsz4_epoch_gpu0|6", "source": "167", "name": "exp29_v4_verbatim_baseline_epoch1_remote167_maskfix_bsz4_epoch_gpu0", "label": "167 · exp29_v4_verbatim_baseline_epoch1_remote167_maskfix_bsz4_epoch_gpu0", "latestWer": 14.70918043976403, "latestEpoch": 1.0, "active": false, "baseline": true, "multiEpoch": false, "points": [{"epoch": 1.0, "wer": 14.70918043976403}], "defaultSelected": true}, {"id": "178|qwen3-asr-0.6b-exp22_v3_atcosim_epoch5_epoch5_remote178_maskfix_bsz4_epoch_gpu2|1", "source": "178", "name": "exp22_v3_atcosim_epoch5_epoch5_remote178_maskfix_bsz4_epoch_gpu2", "label": "178 · exp22_v3_atcosim_epoch5_epoch5_remote178_maskfix_bsz4_epoch_gpu2", "latestWer": 16.113877253527928, "latestEpoch": 2.0, "active": true, "baseline": false, "multiEpoch": true, "points": [{"epoch": 1.0, "wer": 16.821658456053463}, {"epoch": 2.0, "wer": 16.113877253527928}], "defaultSelected": true}, {"id": "178|qwen3-asr-0.6b-exp19_v3_open_atc_best_general20h_epoch1_remote178_maskfix_bsz4_epoch_gpu3|11", "source": "178", "name": "exp19_v3_open_atc_best_general20h_epoch1_remote178_maskfix_bsz4_epoch_gpu3", "label": "178 · exp19_v3_open_atc_best_general20h_epoch1_remote178_maskfix_bsz4_epoch_gpu3", "latestWer": 16.821658456053463, "latestEpoch": 1.0, "active": false, "baseline": false, "multiEpoch": false, "points": [{"epoch": 1.0, "wer": 16.821658456053463}], "defaultSelected": true}, {"id": "47|qwen3-asr-0.6b-exp00_v3_baseline_maskfix_bsz16|19", "source": "47", "name": "exp00_v3_baseline_maskfix_bsz16", "label": "47 · exp00_v3_baseline_maskfix_bsz16", "latestWer": 16.92347871506921, "latestEpoch": 12.0, "active": false, "baseline": true, "multiEpoch": true, "points": [{"epoch": 1.0, "wer": 19.977863174520266}, {"epoch": 2.0, "wer": 18.058923752316282}, {"epoch": 3.0, "wer": 17.45451379820667}, {"epoch": 4.0, "wer": 17.175938016888654}, {"epoch": 5.0, "wer": 17.006802721088434}, {"epoch": 6.0, "wer": 16.899849519332413}, {"epoch": 7.0, "wer": 16.94586426892512}, {"epoch": 8.0, "wer": 16.86378390478678}, {"epoch": 9.0, "wer": 16.777972615005783}, {"epoch": 10.0, "wer": 16.872489397952968}, {"epoch": 11.0, "wer": 16.932184208235395}, {"epoch": 12.0, "wer": 16.92347871506921}], "defaultSelected": true}, {"id": "47|qwen3-asr-0.6b-exp17_v3_open_atc_atcosim_epoch1_maskfix_bsz16_epoch_gpu0|22", "source": "47", "name": "exp17_v3_open_atc_atcosim_epoch1_maskfix_bsz16_epoch_gpu0", "label": "47 · exp17_v3_open_atc_atcosim_epoch1_maskfix_bsz16_epoch_gpu0", "latestWer": 16.93581671452532, "latestEpoch": 1.0, "active": false, "baseline": false, "multiEpoch": false, "points": [{"epoch": 1.0, "wer": 16.93581671452532}], "defaultSelected": true}, {"id": "47|qwen3-asr-0.6b-exp23_v3_appdenoise45h_epoch5_epoch5_local47_maskfix_bsz8_epoch_gpu0|0", "source": "47", "name": "exp23_v3_appdenoise45h_epoch5_epoch5_local47_maskfix_bsz8_epoch_gpu0", "label": "47 · exp23_v3_appdenoise45h_epoch5_epoch5_local47_maskfix_bsz8_epoch_gpu0", "latestWer": 17.33885510328446, "latestEpoch": 2.0, "active": true, "baseline": false, "multiEpoch": true, "points": [{"epoch": 1.0, "wer": 18.521558532005127}, {"epoch": 2.0, "wer": 17.33885510328446}], "defaultSelected": true}, {"id": "47|qwen3-asr-0.6b-exp02_v3_appdenoise45h_epoch1_local47_maskfix_bsz8_epoch_gpu0|18", "source": "47", "name": "exp02_v3_appdenoise45h_epoch1_local47_maskfix_bsz8_epoch_gpu0", "label": "47 · exp02_v3_appdenoise45h_epoch1_local47_maskfix_bsz8_epoch_gpu0", "latestWer": 18.158415102787, "latestEpoch": 1.0, "active": false, "baseline": false, "multiEpoch": false, "points": [{"epoch": 1.0, "wer": 18.158415102787}], "defaultSelected": true}, {"id": "178|qwen3-asr-0.6b-exp13_v3_general20h_best_aug_epoch1_remote178_maskfix_bsz4_epoch_gpu0|9", "source": "178", "name": "exp13_v3_general20h_best_aug_epoch1_remote178_maskfix_bsz4_epoch_gpu0", "label": "178 · exp13_v3_general20h_best_aug_epoch1_remote178_maskfix_bsz4_epoch_gpu0", "latestWer": 18.203186210498824, "latestEpoch": 1.0, "active": false, "baseline": false, "multiEpoch": false, "points": [{"epoch": 1.0, "wer": 18.203186210498824}], "defaultSelected": true}, {"id": "178|qwen3-asr-0.6b-exp20_v3_fullmix_balanced_v1_epoch1_remote178_maskfix_bsz4_epoch_gpu3|33", "source": "178", "name": "exp20_v3_fullmix_balanced_v1_epoch1_remote178_maskfix_bsz4_epoch_gpu3", "label": "178 · exp20_v3_fullmix_balanced_v1_epoch1_remote178_maskfix_bsz4_epoch_gpu3", "latestWer": 18.20816077802236, "latestEpoch": 1.0, "active": false, "baseline": false, "multiEpoch": false, "points": [{"epoch": 1.0, "wer": 18.20816077802236}], "defaultSelected": true}, {"id": "178|qwen3-asr-0.6b-exp06_v3_vad20h_epoch1_remote178_maskfix_bsz4_epoch_gpu0|31", "source": "178", "name": "exp06_v3_vad20h_epoch1_remote178_maskfix_bsz4_epoch_gpu0", "label": "178 · exp06_v3_vad20h_epoch1_remote178_maskfix_bsz4_epoch_gpu0", "latestWer": 18.260393737019488, "latestEpoch": 1.0, "active": false, "baseline": false, "multiEpoch": false, "points": [{"epoch": 1.0, "wer": 18.260393737019488}], "defaultSelected": false}, {"id": "178|qwen3-asr-0.6b-exp11_v3_app15h_tts10h_epoch1_remote178_maskfix_bsz4_epoch_gpu3|25", "source": "178", "name": "exp11_v3_app15h_tts10h_epoch1_remote178_maskfix_bsz4_epoch_gpu3", "label": "178 · exp11_v3_app15h_tts10h_epoch1_remote178_maskfix_bsz4_epoch_gpu3", "latestWer": 18.262881020781254, "latestEpoch": 1.0, "active": false, "baseline": false, "multiEpoch": false, "points": [{"epoch": 1.0, "wer": 18.262881020781254}], "defaultSelected": false}, {"id": "178|qwen3-asr-0.6b-exp14_v3_best_combo_epoch1_remote178_maskfix_bsz4_epoch_gpu1|10", "source": "178", "name": "exp14_v3_best_combo_epoch1_remote178_maskfix_bsz4_epoch_gpu1", "label": "178 · exp14_v3_best_combo_epoch1_remote178_maskfix_bsz4_epoch_gpu1", "latestWer": 18.284022932756283, "latestEpoch": 1.0, "active": false, "baseline": false, "multiEpoch": false, "points": [{"epoch": 1.0, "wer": 18.284022932756283}], "defaultSelected": false}, {"id": "178|qwen3-asr-0.6b-exp07_v3_vad50h_epoch1_remote178_maskfix_bsz4_epoch_gpu3|29", "source": "178", "name": "exp07_v3_vad50h_epoch1_remote178_maskfix_bsz4_epoch_gpu3", "label": "178 · exp07_v3_vad50h_epoch1_remote178_maskfix_bsz4_epoch_gpu3", "latestWer": 18.290241142160703, "latestEpoch": 1.0, "active": false, "baseline": false, "multiEpoch": false, "points": [{"epoch": 1.0, "wer": 18.290241142160703}], "defaultSelected": false}, {"id": "178|qwen3-asr-0.6b-exp10_v3_app15h_deep15h_epoch1_remote178_maskfix_bsz4_epoch_gpu1|26", "source": "178", "name": "exp10_v3_app15h_deep15h_epoch1_remote178_maskfix_bsz4_epoch_gpu1", "label": "178 · exp10_v3_app15h_deep15h_epoch1_remote178_maskfix_bsz4_epoch_gpu1", "latestWer": 18.30143391908866, "latestEpoch": 1.0, "active": false, "baseline": false, "multiEpoch": false, "points": [{"epoch": 1.0, "wer": 18.30143391908866}], "defaultSelected": false}, {"id": "178|qwen3-asr-0.6b-exp03_v3_deepfilter15h_epoch1_remote178_maskfix_bsz4_epoch_gpu0|32", "source": "178", "name": "exp03_v3_deepfilter15h_epoch1_remote178_maskfix_bsz4_epoch_gpu0", "label": "178 · exp03_v3_deepfilter15h_epoch1_remote178_maskfix_bsz4_epoch_gpu0", "latestWer": 18.321332189182804, "latestEpoch": 1.0, "active": false, "baseline": false, "multiEpoch": false, "points": [{"epoch": 1.0, "wer": 18.321332189182804}], "defaultSelected": false}, {"id": "167|qwen3-asr-0.6b-exp25_v31_no_control_contiguous_concat30h_plus0330_epoch1_remote167_maskfix_bsz4_gpu1|3", "source": "167", "name": "exp25_v31_no_control_contiguous_concat30h_plus0330_epoch1_remote167_maskfix_bsz4_gpu1", "label": "167 · exp25_v31_no_control_contiguous_concat30h_plus0330_epoch1_remote167_maskfix_bsz4_gpu1", "latestWer": 18.332835598028968, "latestEpoch": 1.0, "active": false, "baseline": false, "multiEpoch": false, "points": [{"epoch": 1.0, "wer": 18.332835598028968}], "defaultSelected": false}, {"id": "178|qwen3-asr-0.6b-exp12_v3_app15h_vad20h_epoch1_remote178_maskfix_bsz4_epoch_gpu0|24", "source": "178", "name": "exp12_v3_app15h_vad20h_epoch1_remote178_maskfix_bsz4_epoch_gpu0", "label": "178 · exp12_v3_app15h_vad20h_epoch1_remote178_maskfix_bsz4_epoch_gpu0", "latestWer": 18.339986817396063, "latestEpoch": 1.0, "active": false, "baseline": false, "multiEpoch": false, "points": [{"epoch": 1.0, "wer": 18.339986817396063}], "defaultSelected": false}, {"id": "47|qwen3-asr-0.6b-exp00_v3_baseline|28", "source": "47", "name": "exp00_v3_baseline", "label": "47 · exp00_v3_baseline", "latestWer": 18.346409814803003, "latestEpoch": 3.0, "active": false, "baseline": true, "multiEpoch": true, "points": [{"epoch": 1.0, "wer": 20.821373136867173}, {"epoch": 2.0, "wer": 18.99704450256214}, {"epoch": 3.0, "wer": 18.346409814803003}], "defaultSelected": true}, {"id": "47|qwen3-asr-0.6b-exp01_v3_appdenoise15h_epoch1_local47_maskfix_bsz16_epoch_gpu0|20", "source": "47", "name": "exp01_v3_appdenoise15h_epoch1_local47_maskfix_bsz16_epoch_gpu0", "label": "47 · exp01_v3_appdenoise15h_epoch1_local47_maskfix_bsz16_epoch_gpu0", "latestWer": 18.356154161847556, "latestEpoch": 1.0, "active": false, "baseline": false, "multiEpoch": false, "points": [{"epoch": 1.0, "wer": 18.356154161847556}], "defaultSelected": false}, {"id": "178|qwen3-asr-0.6b-exp21_v3_contiguous_concat10h_epoch1_remote178_maskfix_bsz4_epoch_gpu0|27", "source": "178", "name": "exp21_v3_contiguous_concat10h_epoch1_remote178_maskfix_bsz4_epoch_gpu0", "label": "178 · exp21_v3_contiguous_concat10h_epoch1_remote178_maskfix_bsz4_epoch_gpu0", "latestWer": 18.381026999465234, "latestEpoch": 1.0, "active": false, "baseline": false, "multiEpoch": false, "points": [{"epoch": 1.0, "wer": 18.381026999465234}], "defaultSelected": false}, {"id": "167|qwen3-asr-0.6b-exp26_v3_contiguous_concat60h_6_18s_epoch1_remote167_maskfix_bsz4_gpu3|5", "source": "167", "name": "exp26_v3_contiguous_concat60h_6_18s_epoch1_remote167_maskfix_bsz4_gpu3", "label": "167 · exp26_v3_contiguous_concat60h_6_18s_epoch1_remote167_maskfix_bsz4_gpu3", "latestWer": 18.390075158030957, "latestEpoch": 1.0, "active": false, "baseline": false, "multiEpoch": false, "points": [{"epoch": 1.0, "wer": 18.390075158030957}], "defaultSelected": false}, {"id": "167|qwen3-asr-0.6b-exp25_v31_no_control_contiguous_concat30h_epoch1_remote167_maskfix_bsz4_gpu2|2", "source": "167", "name": "exp25_v31_no_control_contiguous_concat30h_epoch1_remote167_maskfix_bsz4_gpu2", "label": "167 · exp25_v31_no_control_contiguous_concat30h_epoch1_remote167_maskfix_bsz4_gpu2", "latestWer": 18.39878552585735, "latestEpoch": 1.0, "active": false, "baseline": false, "multiEpoch": false, "points": [{"epoch": 1.0, "wer": 18.39878552585735}], "defaultSelected": false}, {"id": "178|qwen3-asr-0.6b-exp18_v3_open_atc_uwb_atcosim_epoch1_remote178_maskfix_bsz4_epoch_gpu1|34", "source": "178", "name": "exp18_v3_open_atc_uwb_atcosim_epoch1_remote178_maskfix_bsz4_epoch_gpu1", "label": "178 · exp18_v3_open_atc_uwb_atcosim_epoch1_remote178_maskfix_bsz4_epoch_gpu1", "latestWer": 18.40465619520203, "latestEpoch": 1.0, "active": false, "baseline": false, "multiEpoch": false, "points": [{"epoch": 1.0, "wer": 18.40465619520203}], "defaultSelected": false}, {"id": "47|qwen3-asr-0.6b-exp04_v3_ttsclone10h_epoch1_local47_maskfix_bsz8_epoch_gpu0|17", "source": "47", "name": "exp04_v3_ttsclone10h_epoch1_local47_maskfix_bsz8_epoch_gpu0", "label": "47 · exp04_v3_ttsclone10h_epoch1_local47_maskfix_bsz8_epoch_gpu0", "latestWer": 18.41087440460645, "latestEpoch": 1.0, "active": false, "baseline": false, "multiEpoch": false, "points": [{"epoch": 1.0, "wer": 18.41087440460645}], "defaultSelected": false}, {"id": "47|qwen3-asr-0.6b-exp05_v3_ttsclone22h_epoch1_local47_maskfix_bsz8_epoch_gpu0|7", "source": "47", "name": "exp05_v3_ttsclone22h_epoch1_local47_maskfix_bsz8_epoch_gpu0", "label": "47 · exp05_v3_ttsclone22h_epoch1_local47_maskfix_bsz8_epoch_gpu0", "latestWer": 18.41087440460645, "latestEpoch": 1.0, "active": false, "baseline": false, "multiEpoch": false, "points": [{"epoch": 1.0, "wer": 18.41087440460645}], "defaultSelected": false}, {"id": "47|qwen3-asr-0.6b-exp24_v3_fullmix_balanced_epoch5_epoch5_local47_maskfix_bsz8_epoch_gpu1|8", "source": "47", "name": "exp24_v3_fullmix_balanced_epoch5_epoch5_local47_maskfix_bsz8_epoch_gpu1", "label": "47 · exp24_v3_fullmix_balanced_epoch5_epoch5_local47_maskfix_bsz8_epoch_gpu1", "latestWer": 18.44196545162855, "latestEpoch": 1.0, "active": true, "baseline": false, "multiEpoch": false, "points": [{"epoch": 1.0, "wer": 18.44196545162855}], "defaultSelected": true}, {"id": "178|qwen3-asr-0.6b-exp08_v3_general20h_epoch1_remote178_maskfix_bsz4_epoch_gpu1|30", "source": "178", "name": "exp08_v3_general20h_epoch1_remote178_maskfix_bsz4_epoch_gpu1", "label": "178 · exp08_v3_general20h_epoch1_remote178_maskfix_bsz4_epoch_gpu1", "latestWer": 18.46435100548446, "latestEpoch": 1.0, "active": false, "baseline": false, "multiEpoch": false, "points": [{"epoch": 1.0, "wer": 18.46435100548446}], "defaultSelected": false}, {"id": "178|qwen3-asr-0.6b-exp16_v3_open_atc_uwbfull_epoch1_remote178_maskfix_bsz4_epoch_gpu0|35", "source": "178", "name": "exp16_v3_open_atc_uwbfull_epoch1_remote178_maskfix_bsz4_epoch_gpu0", "label": "178 · exp16_v3_open_atc_uwbfull_epoch1_remote178_maskfix_bsz4_epoch_gpu0", "latestWer": 18.47056921488888, "latestEpoch": 1.0, "active": false, "baseline": false, "multiEpoch": false, "points": [{"epoch": 1.0, "wer": 18.47056921488888}], "defaultSelected": false}, {"id": "47|qwen3-asr-0.6b-exp00_v3_baseline_maskfix_bsz16_stepeval_gpu0|23", "source": "47", "name": "exp00_v3_baseline_maskfix_bsz16_stepeval_gpu0", "label": "47 · exp00_v3_baseline_maskfix_bsz16_stepeval_gpu0", "latestWer": 19.053926206244086, "latestEpoch": 2.659609553699665, "active": false, "baseline": true, "multiEpoch": true, "points": [{"epoch": 0.10638863769349434, "wer": 36.95364238410596}, {"epoch": 0.21277727538698868, "wer": 30.141911069063386}, {"epoch": 0.319165913080483, "wer": 27.568590350047305}, {"epoch": 0.42555455077397736, "wer": 25.657521286660362}, {"epoch": 0.5319431884674717, "wer": 24.427625354777675}, {"epoch": 0.638331826160966, "wer": 23.25449385052034}, {"epoch": 0.7447204638544603, "wer": 22.42194891201514}, {"epoch": 0.8511091015479547, "wer": 22.100283822138127}, {"epoch": 0.957497739241449, "wer": 21.92999053926206}, {"epoch": 1.0638331826160967, "wer": 21.797540208136233}, {"epoch": 1.1702218203095909, "wer": 21.570482497634817}, {"epoch": 1.2766104580030853, "wer": 21.192052980132452}, {"epoch": 1.3829990956965796, "wer": 20.700094607379377}, {"epoch": 1.489387733390074, "wer": 20.586565752128667}, {"epoch": 1.5957763710835682, "wer": 20.473036896877954}, {"epoch": 1.7021650087770626, "wer": 20.11352885525071}, {"epoch": 1.808553646470557, "wer": 20.189214758751184}, {"epoch": 1.9149422841640513, "wer": 20.264900662251655}, {"epoch": 2.021277727538699, "wer": 19.24314096499527}, {"epoch": 2.1276663652321934, "wer": 19.735099337748345}, {"epoch": 2.2340550029256874, "wer": 19.96215704824976}, {"epoch": 2.3404436406191818, "wer": 19.31882686849574}, {"epoch": 2.446832278312676, "wer": 19.337748344370862}, {"epoch": 2.5532209160061705, "wer": 19.45127719962157}, {"epoch": 2.659609553699665, "wer": 19.053926206244086}], "defaultSelected": true}, {"id": "47|qwen3-asr-0.6b-exp15_v3_open_atc_uwb10h_epoch1_maskfix_bsz16_epoch_gpu0|21", "source": "47", "name": "exp15_v3_open_atc_uwb10h_epoch1_maskfix_bsz16_epoch_gpu0", "label": "47 · exp15_v3_open_atc_uwb10h_epoch1_maskfix_bsz16_epoch_gpu0", "latestWer": 19.100809356328657, "latestEpoch": 1.0, "active": false, "baseline": false, "multiEpoch": false, "points": [{"epoch": 1.0, "wer": 19.100809356328657}], "defaultSelected": false}]</script>
+      <script>
+      (() => {
+        const data = JSON.parse(document.getElementById("fullWerData").textContent || "[]");
+        const selected = new Set(data.filter((item) => item.defaultSelected).map((item) => item.id));
+        const palette = ["#22c55e", "#38bdf8", "#f97316", "#a78bfa", "#ef4444", "#14b8a6", "#eab308", "#ec4899", "#60a5fa", "#84cc16", "#f43f5e", "#06b6d4"];
+        const svg = document.getElementById("werInteractiveSvg");
+        const list = document.getElementById("werRunList");
+        const selectedList = document.getElementById("werSelectedList");
+        const summary = document.getElementById("werSummary");
+        const search = document.getElementById("werSearch");
+
+        function el(name, attrs = {}, text = "") {
+          const node = document.createElementNS("http://www.w3.org/2000/svg", name);
+          Object.entries(attrs).forEach(([key, value]) => node.setAttribute(key, value));
+          if (text) node.textContent = text;
+          return node;
+        }
+
+        function htmlEscape(text) {
+          return String(text).replace(/[&<>"']/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
+        }
+
+        function currentFiltered() {
+          const q = search.value.trim().toLowerCase();
+          if (!q) return data;
+          return data.filter((item) => `${item.source} ${item.name} ${item.label}`.toLowerCase().includes(q));
+        }
+
+        function renderList() {
+          const filtered = currentFiltered();
+          list.innerHTML = filtered.map((item) => {
+            const tags = [
+              item.best ? "best" : "",
+              item.active ? "active" : "",
+              item.baseline ? "base" : "",
+              item.multiEpoch ? "multi" : "",
+            ].filter(Boolean).join(" ");
+            return `<label class="wer-run-item" title="${htmlEscape(item.label)}">
+              <input type="checkbox" value="${htmlEscape(item.id)}" ${selected.has(item.id) ? "checked" : ""}>
+              <span class="wer-run-main">${htmlEscape(item.source)} · ${htmlEscape(item.name)}</span>
+              <span class="wer-run-meta">ep${item.latestEpoch} · ${item.latestWer.toFixed(2)} ${htmlEscape(tags)}</span>
+            </label>`;
+          }).join("") || "<div class='wer-empty'>无匹配 run</div>";
+          list.querySelectorAll("input").forEach((input) => {
+            input.addEventListener("change", () => {
+              input.checked ? selected.add(input.value) : selected.delete(input.value);
+              renderChart();
+            });
+          });
+        }
+
+        function renderChart() {
+          const visible = data.filter((item) => selected.has(item.id));
+          svg.innerHTML = "";
+          if (!visible.length) {
+            svg.appendChild(el("text", { x: 32, y: 60, fill: "#64748b", "font-size": 18 }, "未选择 run"));
+            summary.textContent = "当前未选择 run";
+            selectedList.innerHTML = "";
+            return;
+          }
+          const width = 980, height = 520;
+          const left = 58, right = 28, top = 28, bottom = 54;
+          const plotW = width - left - right, plotH = height - top - bottom;
+          const xs = visible.flatMap((item) => item.points.map((p) => p.epoch));
+          const ys = visible.flatMap((item) => item.points.map((p) => p.wer));
+          let minX = Math.min(...xs), maxX = Math.max(...xs);
+          let minY = Math.min(...ys), maxY = Math.max(...ys);
+          if (minX === maxX) maxX += 1;
+          const padY = Math.max(0.35, (maxY - minY) * 0.16);
+          minY = Math.max(0, minY - padY);
+          maxY = maxY + padY;
+          if (minY === maxY) maxY += 1;
+          const px = (x) => left + ((x - minX) / (maxX - minX)) * plotW;
+          const py = (y) => top + ((maxY - y) / (maxY - minY)) * plotH;
+
+          for (let i = 0; i < 6; i += 1) {
+            const yv = minY + ((maxY - minY) * i) / 5;
+            const y = py(yv);
+            svg.appendChild(el("line", { x1: left, y1: y, x2: left + plotW, y2: y, stroke: "#e2e8f0" }));
+            svg.appendChild(el("text", { x: left - 10, y: y + 4, fill: "#64748b", "font-size": 11, "text-anchor": "end" }, yv.toFixed(1)));
+          }
+          svg.appendChild(el("line", { x1: left, y1: top, x2: left, y2: top + plotH, stroke: "#94a3b8" }));
+          svg.appendChild(el("line", { x1: left, y1: top + plotH, x2: left + plotW, y2: top + plotH, stroke: "#94a3b8" }));
+          svg.appendChild(el("text", { x: left + plotW / 2, y: height - 14, fill: "#64748b", "font-size": 12, "text-anchor": "middle" }, "epoch"));
+
+          visible.forEach((item, idx) => {
+            const color = item.best ? "#16a34a" : item.active ? "#2563eb" : item.baseline ? "#dc2626" : palette[idx % palette.length];
+            const points = item.points.map((p) => `${px(p.epoch).toFixed(1)},${py(p.wer).toFixed(1)}`).join(" ");
+            const group = el("g", { class: "wer-series", "data-id": item.id });
+            const title = el("title", {}, `${item.label}\nep${item.latestEpoch}: WER ${item.latestWer.toFixed(2)}`);
+            group.appendChild(title);
+            if (item.points.length > 1) {
+              group.appendChild(el("polyline", { points, fill: "none", stroke: color, "stroke-width": item.best || item.active || item.baseline ? 3.2 : 2.2, "stroke-linecap": "round", "stroke-linejoin": "round" }));
+            }
+            item.points.forEach((p) => {
+              group.appendChild(el("circle", { cx: px(p.epoch), cy: py(p.wer), r: 4.2, fill: color, stroke: "#ffffff", "stroke-width": 1 }));
+            });
+            group.addEventListener("mouseenter", () => {
+              svg.querySelectorAll(".wer-series").forEach((node) => node.classList.add("dim"));
+              group.classList.remove("dim");
+              group.classList.add("focus");
+            });
+            group.addEventListener("mouseleave", () => {
+              svg.querySelectorAll(".wer-series").forEach((node) => node.classList.remove("dim", "focus"));
+            });
+            svg.appendChild(group);
+          });
+
+          const best = visible.slice().sort((a, b) => a.latestWer - b.latestWer)[0];
+          summary.textContent = `${visible.length} 个 run 已显示；当前显示范围内 best: ${best.source} · ${best.name} · ep${best.latestEpoch} · WER ${best.latestWer.toFixed(2)}`;
+          selectedList.innerHTML = visible
+            .slice()
+            .sort((a, b) => a.latestWer - b.latestWer)
+            .map((item, idx) => `<button type="button" class="wer-selected-chip" data-id="${htmlEscape(item.id)}"><span style="background:${item.best ? "#16a34a" : item.active ? "#2563eb" : item.baseline ? "#dc2626" : palette[idx % palette.length]}"></span>${htmlEscape(item.source)} · ${htmlEscape(item.name.slice(0, 54))} · ${item.latestWer.toFixed(2)}</button>`)
+            .join("");
+          selectedList.querySelectorAll("button").forEach((button) => {
+            button.addEventListener("click", () => {
+              selected.delete(button.dataset.id);
+              renderList();
+              renderChart();
+            });
+          });
+        }
+
+        document.querySelectorAll("[data-select]").forEach((button) => {
+          button.addEventListener("click", () => {
+            const mode = button.dataset.select;
+            selected.clear();
+            if (mode === "all") data.forEach((item) => selected.add(item.id));
+            if (mode === "default") data.filter((item) => item.defaultSelected).forEach((item) => selected.add(item.id));
+            if (mode === "top10") data.slice(0, 10).forEach((item) => selected.add(item.id));
+            if (mode === "active") data.filter((item) => item.active).forEach((item) => selected.add(item.id));
+            if (mode === "baseline") data.filter((item) => item.baseline).forEach((item) => selected.add(item.id));
+            renderList();
+            renderChart();
+          });
+        });
+        search.addEventListener("input", renderList);
+        renderList();
+        renderChart();
+      })();
+      </script>
+    </section>
+    
     
     <section class="section">
       <h2>Full WER by Epoch</h2>
