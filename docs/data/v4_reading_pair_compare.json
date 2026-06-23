@@ -1,0 +1,100 @@
+{
+  "updated_at": "2026-06-23T11:20:16",
+  "dashboard_url": "https://drinkingxi.github.io/train_record/",
+  "experiments": [
+    {
+      "id": "v4_1",
+      "title": "v4.1 pure spoken labels",
+      "match": "exp29_v4_1_no_colon_prefix_baseline",
+      "policy": "text=verbatim_text; no colon-prefix / ATC-Control residue rows",
+      "eval_note": "Full eval follows v4.1 spoken labels.",
+      "runs": [
+        {
+          "source": "178",
+          "name": "exp29_v4_1_no_colon_prefix_baseline_epoch3_remote178_maskfix_bsz4_epoch_gpu1",
+          "path": "/home/xijunting/projects/atc_asr/train/training_checkpoints/qwen3-asr-0.6b-exp29_v4_1_no_colon_prefix_baseline_epoch3_remote178_maskfix_bsz4_epoch_gpu1",
+          "active": true,
+          "progress": "228/28167 steps (1%, ETA 24:52:06)",
+          "latest_epoch": null,
+          "latest_step": null,
+          "latest_wer": null,
+          "latest_cer": null,
+          "latest_ser": null,
+          "best_wer": null,
+          "best_epoch": null,
+          "wandb_url": "https://wandb.ai/drinking/whisper-atc-finetune/runs/qwen3-asr-0.6b-exp29_v4_1_no_colon_prefix_baseline_epoch3_remote178_maskfix_bsz4_epoch_gpu1",
+          "points": [],
+          "core_slices": {},
+          "supplement_slices": {}
+        }
+      ],
+      "primary_run": {
+        "source": "178",
+        "name": "exp29_v4_1_no_colon_prefix_baseline_epoch3_remote178_maskfix_bsz4_epoch_gpu1",
+        "path": "/home/xijunting/projects/atc_asr/train/training_checkpoints/qwen3-asr-0.6b-exp29_v4_1_no_colon_prefix_baseline_epoch3_remote178_maskfix_bsz4_epoch_gpu1",
+        "active": true,
+        "progress": "228/28167 steps (1%, ETA 24:52:06)",
+        "latest_epoch": null,
+        "latest_step": null,
+        "latest_wer": null,
+        "latest_cer": null,
+        "latest_ser": null,
+        "best_wer": null,
+        "best_epoch": null,
+        "wandb_url": "https://wandb.ai/drinking/whisper-atc-finetune/runs/qwen3-asr-0.6b-exp29_v4_1_no_colon_prefix_baseline_epoch3_remote178_maskfix_bsz4_epoch_gpu1",
+        "points": [],
+        "core_slices": {},
+        "supplement_slices": {}
+      }
+    },
+    {
+      "id": "v4_2",
+      "title": "v4.2 reading-pair labels",
+      "match": "exp60_v4_2_reading_pairs_epoch3",
+      "policy": "v4.1 filtered rows; text=repaired_raw_text/raw_text, preserving numbers/letters plus parenthetical readings",
+      "eval_note": "Training full eval follows v4.2 reading-pair labels; aligned ignore-parens metrics should be compared when available.",
+      "runs": [
+        {
+          "source": "178",
+          "name": "exp60_v4_2_reading_pairs_epoch3_epoch3_remote178_maskfix_bsz4_epoch_gpu0",
+          "path": "/home/xijunting/projects/atc_asr/train/training_checkpoints/qwen3-asr-0.6b-exp60_v4_2_reading_pairs_epoch3_epoch3_remote178_maskfix_bsz4_epoch_gpu0",
+          "active": true,
+          "progress": "279/28167 steps (1%, ETA 28:31:17)",
+          "latest_epoch": null,
+          "latest_step": null,
+          "latest_wer": null,
+          "latest_cer": null,
+          "latest_ser": null,
+          "best_wer": null,
+          "best_epoch": null,
+          "wandb_url": "https://wandb.ai/drinking/whisper-atc-finetune/runs/qwen3-asr-0.6b-exp60_v4_2_reading_pairs_epoch3_epoch3_remote178_maskfix_bsz4_epoch_gpu0",
+          "points": [],
+          "core_slices": {},
+          "supplement_slices": {}
+        }
+      ],
+      "primary_run": {
+        "source": "178",
+        "name": "exp60_v4_2_reading_pairs_epoch3_epoch3_remote178_maskfix_bsz4_epoch_gpu0",
+        "path": "/home/xijunting/projects/atc_asr/train/training_checkpoints/qwen3-asr-0.6b-exp60_v4_2_reading_pairs_epoch3_epoch3_remote178_maskfix_bsz4_epoch_gpu0",
+        "active": true,
+        "progress": "279/28167 steps (1%, ETA 28:31:17)",
+        "latest_epoch": null,
+        "latest_step": null,
+        "latest_wer": null,
+        "latest_cer": null,
+        "latest_ser": null,
+        "best_wer": null,
+        "best_epoch": null,
+        "wandb_url": "https://wandb.ai/drinking/whisper-atc-finetune/runs/qwen3-asr-0.6b-exp60_v4_2_reading_pairs_epoch3_epoch3_remote178_maskfix_bsz4_epoch_gpu0",
+        "points": [],
+        "core_slices": {},
+        "supplement_slices": {}
+      }
+    }
+  ],
+  "comparison": {
+    "primary_question": "Does preserving standard number/letter forms plus parenthetical readings improve over pure spoken labels?",
+    "fairness_note": "Use same epoch and aligned ignore-parentheses metrics for final judgment. Raw training full WER can use different label targets."
+  }
+}

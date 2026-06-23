@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>v4.1 vs v4.2 Reading-Pair Study</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #08111f; --panel: #101827; --panel2: #142033; --line: #243244; --text: #e6edf7;
+      --muted: #99a8bb; --blue: #38bdf8; --green: #22c55e; --red: #ef4444; --amber: #f59e0b;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font-family: Arial, sans-serif; }
+    main { max-width: 1180px; margin: 0 auto; padding: 28px 18px 56px; }
+    a { color: var(--blue); text-decoration: none; }
+    .hero, .study-card, .section { border: 1px solid var(--line); border-radius: 8px; background: var(--panel); }
+    .hero { padding: 24px; }
+    h1 { margin: 0 0 8px; font-size: 30px; }
+    h2 { margin: 0; font-size: 18px; }
+    p { color: var(--muted); line-height: 1.5; }
+    .hero-meta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; color: var(--muted); font-size: 13px; }
+    .hero-meta span { padding: 8px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel2); }
+    .cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 18px; }
+    .study-card, .section { padding: 16px; margin-top: 18px; }
+    .card-head { display: flex; justify-content: space-between; gap: 12px; align-items: center; }
+    .badge { padding: 5px 8px; border-radius: 999px; font-size: 12px; border: 1px solid var(--line); color: var(--muted); }
+    .badge.running { color: var(--green); border-color: rgba(34,197,94,.5); }
+    .badge.evaluated { color: var(--blue); border-color: rgba(56,189,248,.5); }
+    dl { display: grid; gap: 8px; margin: 14px 0 0; }
+    dl div { display: grid; grid-template-columns: 100px minmax(0, 1fr); gap: 10px; }
+    dt { color: var(--muted); }
+    dd { margin: 0; overflow-wrap: anywhere; }
+    .chart-wrap { overflow-x: auto; margin-top: 12px; }
+    svg { display: block; min-width: 760px; width: 100%; height: auto; background: #fff; border: 1px solid #dbe4f0; border-radius: 8px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 13px; }
+    th, td { border-bottom: 1px solid var(--line); padding: 9px 8px; text-align: left; }
+    th { color: var(--muted); font-weight: 700; }
+    td.num { font-variant-numeric: tabular-nums; text-align: right; }
+    .good { color: var(--green); }
+    .bad { color: var(--red); }
+    .empty { color: var(--muted); padding: 12px 0 4px; }
+    @media (max-width: 820px) {
+      .cards { grid-template-columns: 1fr; }
+      dl div { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="hero">
+      <h1>v4.1 vs v4.2 Reading-Pair Study</h1>
+      <p>独立跟踪 `v4.1` 纯口呼标签与 `v4.2` 原始数字/字母 + 括号念法标签的 3 epoch 对照。最终判断以同 epoch、同评估口径的 full 和 slice 指标为准。</p>
+      <div class="hero-meta">
+        <span>updated 2026-06-23 11:20</span>
+        <span><a href="../">返回总 dashboard</a></span>
+        <span><a href="../data/v4_reading_pair_compare.json">JSON 数据</a></span>
+      </div>
+    </section>
+    <div class="cards">
+    <article class="study-card">
+      <div class="card-head">
+        <h2>v4.1 pure spoken labels</h2>
+        <span class="badge running">running</span>
+      </div>
+      <p>text=verbatim_text; no colon-prefix / ATC-Control residue rows</p>
+      <dl>
+        <div><dt>run</dt><dd>178 · exp29_v4_1_no_colon_prefix_baseline_epoch3_remote178_maskfix_bsz4_epoch_gpu1</dd></div>
+        <div><dt>progress</dt><dd>228/28167 steps (1%, ETA 24:52:06)</dd></div>
+        <div><dt>latest WER</dt><dd>-</dd></div>
+        <div><dt>best WER</dt><dd>- @ ep-</dd></div>
+      </dl>
+      <div class="card-links"><a href="https://wandb.ai/drinking/whisper-atc-finetune/runs/qwen3-asr-0.6b-exp29_v4_1_no_colon_prefix_baseline_epoch3_remote178_maskfix_bsz4_epoch_gpu1">wandb</a></div>
+    </article>
+    
+
+    <article class="study-card">
+      <div class="card-head">
+        <h2>v4.2 reading-pair labels</h2>
+        <span class="badge running">running</span>
+      </div>
+      <p>v4.1 filtered rows; text=repaired_raw_text/raw_text, preserving numbers/letters plus parenthetical readings</p>
+      <dl>
+        <div><dt>run</dt><dd>178 · exp60_v4_2_reading_pairs_epoch3_epoch3_remote178_maskfix_bsz4_epoch_gpu0</dd></div>
+        <div><dt>progress</dt><dd>279/28167 steps (1%, ETA 28:31:17)</dd></div>
+        <div><dt>latest WER</dt><dd>-</dd></div>
+        <div><dt>best WER</dt><dd>- @ ep-</dd></div>
+      </dl>
+      <div class="card-links"><a href="https://wandb.ai/drinking/whisper-atc-finetune/runs/qwen3-asr-0.6b-exp60_v4_2_reading_pairs_epoch3_epoch3_remote178_maskfix_bsz4_epoch_gpu0">wandb</a></div>
+    </article>
+    </div>
+    <section class="section">
+      <h2>Epoch Full Metrics</h2>
+      <p>训练脚本产出的原始 full eval。注意：v4.2 原始 full eval 的标签包含括号读法，和 v4.1 纯口呼标签不是最终公平口径。</p>
+      <div class="chart-wrap"><svg id="epochChart" viewBox="0 0 900 430" role="img" aria-label="Epoch WER comparison"></svg></div>
+      <div id="fullTable"></div>
+    </section>
+    <section class="section">
+      <h2>Key Slice Delta</h2>
+      <p>显示 `v4.2 - v4.1` 的 WER 差值；负数表示 v4.2 更好。没有 slice 结果时会显示等待状态。</p>
+      <div id="sliceTable"></div>
+    </section>
+    <section class="section">
+      <h2>Current Judgment</h2>
+      <div id="judgment" class="empty">等待 epoch eval 和 slice eval 结果。</div>
+    </section>
+  </main>
+  <script id="studyData" type="application/json">{"updated_at": "2026-06-23T11:20:16", "dashboard_url": "https://drinkingxi.github.io/train_record/", "experiments": [{"id": "v4_1", "title": "v4.1 pure spoken labels", "match": "exp29_v4_1_no_colon_prefix_baseline", "policy": "text=verbatim_text; no colon-prefix / ATC-Control residue rows", "eval_note": "Full eval follows v4.1 spoken labels.", "runs": [{"source": "178", "name": "exp29_v4_1_no_colon_prefix_baseline_epoch3_remote178_maskfix_bsz4_epoch_gpu1", "path": "/home/xijunting/projects/atc_asr/train/training_checkpoints/qwen3-asr-0.6b-exp29_v4_1_no_colon_prefix_baseline_epoch3_remote178_maskfix_bsz4_epoch_gpu1", "active": true, "progress": "228/28167 steps (1%, ETA 24:52:06)", "latest_epoch": null, "latest_step": null, "latest_wer": null, "latest_cer": null, "latest_ser": null, "best_wer": null, "best_epoch": null, "wandb_url": "https://wandb.ai/drinking/whisper-atc-finetune/runs/qwen3-asr-0.6b-exp29_v4_1_no_colon_prefix_baseline_epoch3_remote178_maskfix_bsz4_epoch_gpu1", "points": [], "core_slices": {}, "supplement_slices": {}}], "primary_run": {"source": "178", "name": "exp29_v4_1_no_colon_prefix_baseline_epoch3_remote178_maskfix_bsz4_epoch_gpu1", "path": "/home/xijunting/projects/atc_asr/train/training_checkpoints/qwen3-asr-0.6b-exp29_v4_1_no_colon_prefix_baseline_epoch3_remote178_maskfix_bsz4_epoch_gpu1", "active": true, "progress": "228/28167 steps (1%, ETA 24:52:06)", "latest_epoch": null, "latest_step": null, "latest_wer": null, "latest_cer": null, "latest_ser": null, "best_wer": null, "best_epoch": null, "wandb_url": "https://wandb.ai/drinking/whisper-atc-finetune/runs/qwen3-asr-0.6b-exp29_v4_1_no_colon_prefix_baseline_epoch3_remote178_maskfix_bsz4_epoch_gpu1", "points": [], "core_slices": {}, "supplement_slices": {}}}, {"id": "v4_2", "title": "v4.2 reading-pair labels", "match": "exp60_v4_2_reading_pairs_epoch3", "policy": "v4.1 filtered rows; text=repaired_raw_text/raw_text, preserving numbers/letters plus parenthetical readings", "eval_note": "Training full eval follows v4.2 reading-pair labels; aligned ignore-parens metrics should be compared when available.", "runs": [{"source": "178", "name": "exp60_v4_2_reading_pairs_epoch3_epoch3_remote178_maskfix_bsz4_epoch_gpu0", "path": "/home/xijunting/projects/atc_asr/train/training_checkpoints/qwen3-asr-0.6b-exp60_v4_2_reading_pairs_epoch3_epoch3_remote178_maskfix_bsz4_epoch_gpu0", "active": true, "progress": "279/28167 steps (1%, ETA 28:31:17)", "latest_epoch": null, "latest_step": null, "latest_wer": null, "latest_cer": null, "latest_ser": null, "best_wer": null, "best_epoch": null, "wandb_url": "https://wandb.ai/drinking/whisper-atc-finetune/runs/qwen3-asr-0.6b-exp60_v4_2_reading_pairs_epoch3_epoch3_remote178_maskfix_bsz4_epoch_gpu0", "points": [], "core_slices": {}, "supplement_slices": {}}], "primary_run": {"source": "178", "name": "exp60_v4_2_reading_pairs_epoch3_epoch3_remote178_maskfix_bsz4_epoch_gpu0", "path": "/home/xijunting/projects/atc_asr/train/training_checkpoints/qwen3-asr-0.6b-exp60_v4_2_reading_pairs_epoch3_epoch3_remote178_maskfix_bsz4_epoch_gpu0", "active": true, "progress": "279/28167 steps (1%, ETA 28:31:17)", "latest_epoch": null, "latest_step": null, "latest_wer": null, "latest_cer": null, "latest_ser": null, "best_wer": null, "best_epoch": null, "wandb_url": "https://wandb.ai/drinking/whisper-atc-finetune/runs/qwen3-asr-0.6b-exp60_v4_2_reading_pairs_epoch3_epoch3_remote178_maskfix_bsz4_epoch_gpu0", "points": [], "core_slices": {}, "supplement_slices": {}}}], "comparison": {"primary_question": "Does preserving standard number/letter forms plus parenthetical readings improve over pure spoken labels?", "fairness_note": "Use same epoch and aligned ignore-parentheses metrics for final judgment. Raw training full WER can use different label targets."}}</script>
+  <script>
+  (() => {
+    const payload = JSON.parse(document.getElementById("studyData").textContent);
+    const exps = payload.experiments || [];
+    const colors = { v4_1: "#2563eb", v4_2: "#dc2626" };
+    const labels = { v4_1: "v4.1", v4_2: "v4.2" };
+    const keySlices = ["full", "numbers_callsigns", "zh_atc", "english_atc", "mixed_atc", "duration_8_12s", "duration_ge12s"];
+    function fmt(v) { return v === null || v === undefined || Number.isNaN(v) ? "-" : Number(v).toFixed(2); }
+    function esc(text) { return String(text).replace(/[&<>"']/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch])); }
+    function primary(id) { return exps.find(e => e.id === id)?.primary_run || null; }
+
+    function renderChart() {
+      const svg = document.getElementById("epochChart");
+      const runs = exps.map(e => [e.id, e.primary_run]).filter(x => x[1] && x[1].points?.length);
+      svg.innerHTML = "";
+      if (!runs.length) {
+        svg.innerHTML = "<text x='28' y='48' fill='#64748b' font-size='18'>waiting for epoch metrics</text>";
+        return;
+      }
+      const W=900,H=430,L=58,R=24,T=28,B=52,pw=W-L-R,ph=H-T-B;
+      const all = runs.flatMap(([id,r]) => r.points.filter(p => p.wer !== null && p.wer !== undefined));
+      const xs = all.map(p => p.epoch), ys = all.map(p => p.wer);
+      let minX=Math.min(...xs), maxX=Math.max(...xs), minY=Math.min(...ys), maxY=Math.max(...ys);
+      if (minX===maxX) maxX += 1;
+      const pad=Math.max(.25,(maxY-minY)*.18); minY=Math.max(0,minY-pad); maxY+=pad;
+      const px=x=>L+((x-minX)/(maxX-minX))*pw, py=y=>T+((maxY-y)/(maxY-minY))*ph;
+      function node(n,a,t="") { const e=document.createElementNS("http://www.w3.org/2000/svg",n); Object.entries(a).forEach(([k,v])=>e.setAttribute(k,v)); if(t)e.textContent=t; return e; }
+      for(let i=0;i<6;i++) { const yv=minY+(maxY-minY)*i/5, y=py(yv); svg.appendChild(node("line",{x1:L,y1:y,x2:L+pw,y2:y,stroke:"#e2e8f0"})); svg.appendChild(node("text",{x:L-10,y:y+4,fill:"#64748b","font-size":11,"text-anchor":"end"},yv.toFixed(1))); }
+      svg.appendChild(node("line",{x1:L,y1:T,x2:L,y2:T+ph,stroke:"#94a3b8"}));
+      svg.appendChild(node("line",{x1:L,y1:T+ph,x2:L+pw,y2:T+ph,stroke:"#94a3b8"}));
+      runs.forEach(([id,r]) => {
+        const pts = r.points.filter(p => p.wer !== null && p.wer !== undefined);
+        const poly = pts.map(p => `${px(p.epoch).toFixed(1)},${py(p.wer).toFixed(1)}`).join(" ");
+        svg.appendChild(node("polyline",{points:poly,fill:"none",stroke:colors[id],"stroke-width":3,"stroke-linecap":"round","stroke-linejoin":"round"}));
+        pts.forEach(p => {
+          const c=node("circle",{cx:px(p.epoch),cy:py(p.wer),r:4.5,fill:colors[id],stroke:"#fff","stroke-width":1});
+          c.appendChild(node("title",{},`${labels[id]} ep${p.epoch} WER ${fmt(p.wer)} CER ${fmt(p.cer)}`));
+          svg.appendChild(c);
+        });
+        svg.appendChild(node("text",{x:L+12,y:T+18+(id==="v4_1"?0:20),fill:colors[id],"font-size":13},labels[id]));
+      });
+    }
+
+    function renderFullTable() {
+      const rows = [];
+      exps.forEach(e => (e.primary_run?.points || []).forEach(p => rows.push({id:e.id,label:labels[e.id],...p})));
+      document.getElementById("fullTable").innerHTML = rows.length ? `<table><thead><tr><th>exp</th><th>epoch</th><th class="num">WER</th><th class="num">CER</th><th class="num">SER</th><th class="num">loss</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${esc(r.label)}</td><td>ep${fmt(r.epoch)}</td><td class="num">${fmt(r.wer)}</td><td class="num">${fmt(r.cer)}</td><td class="num">${fmt(r.ser)}</td><td class="num">${fmt(r.eval_loss)}</td></tr>`).join("")}</tbody></table>` : "<div class='empty'>等待 epoch_metrics.csv。</div>";
+    }
+
+    function renderSliceTable() {
+      const a = primary("v4_1"), b = primary("v4_2");
+      if (!a || !b) { document.getElementById("sliceTable").innerHTML = "<div class='empty'>等待两个 run 都出现。</div>"; return; }
+      const rows = keySlices.map(name => {
+        const av = a.core_slices?.[name]?.wer ?? (name === "full" ? a.latest_wer : null);
+        const bv = b.core_slices?.[name]?.wer ?? (name === "full" ? b.latest_wer : null);
+        const delta = av !== null && av !== undefined && bv !== null && bv !== undefined ? bv - av : null;
+        return {name,av,bv,delta};
+      });
+      document.getElementById("sliceTable").innerHTML = `<table><thead><tr><th>slice</th><th class="num">v4.1 WER</th><th class="num">v4.2 WER</th><th class="num">v4.2-v4.1</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${esc(r.name)}</td><td class="num">${fmt(r.av)}</td><td class="num">${fmt(r.bv)}</td><td class="num ${r.delta === null ? "" : r.delta < 0 ? "good" : "bad"}">${fmt(r.delta)}</td></tr>`).join("")}</tbody></table>`;
+    }
+
+    function renderJudgment() {
+      const a = primary("v4_1"), b = primary("v4_2");
+      let text = "等待两个实验至少完成 epoch1。";
+      if (a?.latest_wer !== null && a?.latest_wer !== undefined && b?.latest_wer !== null && b?.latest_wer !== undefined) {
+        const d = b.latest_wer - a.latest_wer;
+        text = `当前原始 full WER 差值 v4.2-v4.1 = ${fmt(d)}。${d < -0.2 ? "v4.2 暂时领先，但仍需 ignore-parens 对齐指标确认。" : d > 0.2 ? "v4.1 暂时领先，reading-pair 可能增加了输出负担。" : "两者接近，需要看数字/呼号 slice 和对齐指标。"}`;
+      }
+      document.getElementById("judgment").textContent = text;
+    }
+    renderChart(); renderFullTable(); renderSliceTable(); renderJudgment();
+  })();
+  </script>
+</body>
+</html>
