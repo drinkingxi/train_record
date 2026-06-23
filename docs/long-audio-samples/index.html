@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ATC ASR Long Audio Samples</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --ink: #18202f;
+      --muted: #657084;
+      --line: #dfe4ec;
+      --accent: #2457a6;
+      --accent-soft: #e9f0fb;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.5;
+    }
+    header {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 32px 20px 18px;
+    }
+    .topline {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    h1 {
+      margin: 0;
+      font-size: clamp(26px, 4vw, 42px);
+      letter-spacing: 0;
+    }
+    .summary {
+      margin: 12px 0 0;
+      max-width: 820px;
+      color: var(--muted);
+      font-size: 15px;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    main {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 10px 20px 44px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 16px;
+    }
+    .sample-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px;
+      box-shadow: 0 1px 2px rgba(24, 32, 47, 0.04);
+    }
+    .sample-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .sample-index {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    h2 {
+      margin: 2px 0 0;
+      font-size: 18px;
+      letter-spacing: 0;
+      line-height: 1.28;
+    }
+    .pill {
+      flex: 0 0 auto;
+      background: var(--accent-soft);
+      color: var(--accent);
+      border-radius: 999px;
+      padding: 5px 9px;
+      font-weight: 700;
+      font-size: 13px;
+    }
+    audio { width: 100%; margin: 2px 0 12px; }
+    .meta {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin: 0 0 12px;
+    }
+    .meta div {
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 8px;
+      min-width: 0;
+    }
+    dt { color: var(--muted); font-size: 11px; font-weight: 700; text-transform: uppercase; }
+    dd { margin: 2px 0 0; font-size: 13px; overflow-wrap: anywhere; }
+    .transcript {
+      margin: 0;
+      padding: 12px;
+      border-left: 3px solid var(--accent);
+      background: #f5f7fb;
+      border-radius: 0 6px 6px 0;
+      font-size: 14px;
+    }
+    .source-audio {
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 11px;
+      overflow-wrap: anywhere;
+    }
+    @media (max-width: 520px) {
+      .grid { grid-template-columns: 1fr; }
+      .meta { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="topline">
+      <h1>ATC ASR Long Audio Samples</h1>
+      <a href="../">Dashboard</a>
+    </div>
+    <p class="summary">12 条从 exp71/exp72 长音频拼接训练数据中抽取的代表样本，覆盖中文、英文、0330、Bilibili、YouTube VASA 和 YouTube non-VASA。音频为组合后的训练样本，可直接在线播放核对拼接听感。</p>
+  </header>
+  <main>
+    <section class="grid">
+      <article class="sample-card">
+        <div class="sample-head">
+          <div>
+            <div class="sample-index">#01 · exp71</div>
+            <h2>exp71 0330 Chinese 8-12s</h2>
+          </div>
+          <div class="pill">10.04s</div>
+        </div>
+        <audio controls preload="metadata" src="assets/sample_01_exp71_0330_zh_8_12s.wav"></audio>
+        <dl class="meta">
+          <div><dt>Source</dt><dd>0330_zh</dd></div>
+          <div><dt>Bucket</dt><dd>8-12s</dd></div>
+          <div><dt>Segments</dt><dd>3</dd></div>
+          <div><dt>Gap</dt><dd>760 ms</dd></div>
+        </dl>
+        <p class="transcript">白鹭八三八洞北京你好, 继续下降到四两保持, 下降率两千 呃, 证实下高度四两白鹭八三八洞 白鹭八三八洞正确, 高度是四两</p>
+        <p class="source-audio">0330_zh::区域管制中心_7月C02录音_U01_C02EC_010_AG_20250721080000-20250721200000_U01_C02EC_010_AG</p>
+      </article>
+      <article class="sample-card">
+        <div class="sample-head">
+          <div>
+            <div class="sample-index">#02 · exp71</div>
+            <h2>exp71 Bilibili Chinese 6-8s</h2>
+          </div>
+          <div class="pill">7.00s</div>
+        </div>
+        <audio controls preload="metadata" src="assets/sample_02_exp71_bilibili_zh_6_8s.wav"></audio>
+        <dl class="meta">
+          <div><dt>Source</dt><dd>bilibili_zh_vendor_release_61h_20260609</dd></div>
+          <div><dt>Bucket</dt><dd>6-8s</dd></div>
+          <div><dt>Segments</dt><dd>3</dd></div>
+          <div><dt>Gap</dt><dd>500 ms</dd></div>
+        </dl>
+        <p class="transcript">国航2869, 下降到4800 下4800, 国航2869 四川8284, 下降到修正海压5400, 修正海压是1016</p>
+        <p class="source-audio">/home/xijunting/projects/atc_asr/data/bilibili_zh_vendor_release_61h_20260609/audio_wav16k/BV1mj411B71c.wav</p>
+      </article>
+      <article class="sample-card">
+        <div class="sample-head">
+          <div>
+            <div class="sample-index">#03 · exp71</div>
+            <h2>exp71 YouTube VASA English 8-12s</h2>
+          </div>
+          <div class="pill">10.00s</div>
+        </div>
+        <audio controls preload="metadata" src="assets/sample_03_exp71_youtube_vasaviation_8_12s.wav"></audio>
+        <dl class="meta">
+          <div><dt>Source</dt><dd>youtube_vasaviation_vendor_release_20260601</dd></div>
+          <div><dt>Bucket</dt><dd>8-12s</dd></div>
+          <div><dt>Segments</dt><dd>2</dd></div>
+          <div><dt>Gap</dt><dd>0 ms</dd></div>
+        </dl>
+        <p class="transcript">ABD666 heavy, turn right heading 280, descend and maintain 3000&#x27; 3000&#x27; on the heading 280; ABD666</p>
+        <p class="source-audio">/home/xijunting/projects/atc_asr/data/youtube_vasaviation_vendor_release_20260601/audio_wav16k/vas_002030.wav</p>
+      </article>
+      <article class="sample-card">
+        <div class="sample-head">
+          <div>
+            <div class="sample-index">#04 · exp71</div>
+            <h2>exp71 YouTube non-VASA English 8-12s</h2>
+          </div>
+          <div class="pill">10.00s</div>
+        </div>
+        <audio controls preload="metadata" src="assets/sample_04_exp71_youtube_non_vasa_8_12s.wav"></audio>
+        <dl class="meta">
+          <div><dt>Source</dt><dd>youtube_non_vasa_vendor_release_82h_20260608</dd></div>
+          <div><dt>Bucket</dt><dd>8-12s</dd></div>
+          <div><dt>Segments</dt><dd>2</dd></div>
+          <div><dt>Gap</dt><dd>0 ms</dd></div>
+        </dl>
+        <p class="transcript">November 514X cross WHEZY at 2, 000. Cleared RNAV 24 approach. All right, cleared RNAV 24, 14X.</p>
+        <p class="source-audio">/home/xijunting/projects/atc_asr/data/youtube_non_vasa_vendor_release_82h_20260608/audio_wav16k/bt6eIrHPE3I.wav</p>
+      </article>
+      <article class="sample-card">
+        <div class="sample-head">
+          <div>
+            <div class="sample-index">#05 · exp71</div>
+            <h2>exp71 Bilibili English 8-12s</h2>
+          </div>
+          <div class="pill">10.00s</div>
+        </div>
+        <audio controls preload="metadata" src="assets/sample_05_exp71_bilibili_en_8_12s.wav"></audio>
+        <dl class="meta">
+          <div><dt>Source</dt><dd>bilibili_en_vendor_release_12h_20260609</dd></div>
+          <div><dt>Bucket</dt><dd>8-12s</dd></div>
+          <div><dt>Segments</dt><dd>3</dd></div>
+          <div><dt>Gap</dt><dd>2000 ms</dd></div>
+        </dl>
+        <p class="transcript">Line up and wait 4L, Delta 1891. Delta 860, just lost the localizer. Brickyard 5772, going around.</p>
+        <p class="source-audio">/home/xijunting/projects/atc_asr/data/bilibili_en_vendor_release_12h_20260609/audio_wav16k/BV12T4y1U7ih.wav</p>
+      </article>
+      <article class="sample-card">
+        <div class="sample-head">
+          <div>
+            <div class="sample-index">#06 · exp72</div>
+            <h2>exp72 0330 Chinese 12-18s</h2>
+          </div>
+          <div class="pill">14.50s</div>
+        </div>
+        <audio controls preload="metadata" src="assets/sample_06_exp72_0330_zh_12_18s.wav"></audio>
+        <dl class="meta">
+          <div><dt>Source</dt><dd>0330_zh</dd></div>
+          <div><dt>Bucket</dt><dd>12-18s</dd></div>
+          <div><dt>Segments</dt><dd>4</dd></div>
+          <div><dt>Gap</dt><dd>1030 ms</dd></div>
+        </dl>
+        <p class="transcript">森地六五四八请讲 请问一下前机是不是都保持这个航向八十海里出去 森地六五四八, 稍等, 前机是联系前方了, 我就后续不太了解了 我跟您通报一下, 现在我只能这个航向大概八十海里我才能出去</p>
+        <p class="source-audio">0330_zh::区域管制中心_7月F04录音_7.2_U01_F04EC_029_AG_20250702080000-20250702200000_U01_F04EC_029_AG</p>
+      </article>
+      <article class="sample-card">
+        <div class="sample-head">
+          <div>
+            <div class="sample-index">#07 · exp72</div>
+            <h2>exp72 Bilibili Chinese 12-18s</h2>
+          </div>
+          <div class="pill">15.00s</div>
+        </div>
+        <audio controls preload="metadata" src="assets/sample_07_exp72_bilibili_zh_12_18s.wav"></audio>
+        <dl class="meta">
+          <div><dt>Source</dt><dd>bilibili_zh_vendor_release_61h_20260609</dd></div>
+          <div><dt>Bucket</dt><dd>12-18s</dd></div>
+          <div><dt>Segments</dt><dd>5</dd></div>
+          <div><dt>Gap</dt><dd>1500 ms</dd></div>
+        </dl>
+        <p class="transcript">塔台你好, 南方3302, W滑行. 南方3302, 塔台, 16L跑道外等待. 16L跑道外等待, 南方3302. 南方3302, 进跑道等待16L. 进跑道等待16L, 南方3302.</p>
+        <p class="source-audio">/home/xijunting/projects/atc_asr/data/bilibili_zh_vendor_release_61h_20260609/audio_wav16k/BV19b41147sy.wav</p>
+      </article>
+      <article class="sample-card">
+        <div class="sample-head">
+          <div>
+            <div class="sample-index">#08 · exp72</div>
+            <h2>exp72 YouTube VASA English 12-18s</h2>
+          </div>
+          <div class="pill">15.00s</div>
+        </div>
+        <audio controls preload="metadata" src="assets/sample_08_exp72_youtube_vasaviation_12_18s.wav"></audio>
+        <dl class="meta">
+          <div><dt>Source</dt><dd>youtube_vasaviation_vendor_release_20260601</dd></div>
+          <div><dt>Bucket</dt><dd>12-18s</dd></div>
+          <div><dt>Segments</dt><dd>3</dd></div>
+          <div><dt>Gap</dt><dd>1500 ms</dd></div>
+        </dl>
+        <p class="transcript">Center, Jetblue 401 passing 32.5 for 360 Center, Jetblue 401? Descend FL290, Jetblue 401</p>
+        <p class="source-audio">/home/xijunting/projects/atc_asr/data/youtube_vasaviation_vendor_release_20260601/audio_wav16k/vas_000899.wav</p>
+      </article>
+      <article class="sample-card">
+        <div class="sample-head">
+          <div>
+            <div class="sample-index">#09 · exp72</div>
+            <h2>exp72 YouTube non-VASA English 12-18s</h2>
+          </div>
+          <div class="pill">15.00s</div>
+        </div>
+        <audio controls preload="metadata" src="assets/sample_09_exp72_youtube_non_vasa_12_18s.wav"></audio>
+        <dl class="meta">
+          <div><dt>Source</dt><dd>youtube_non_vasa_vendor_release_82h_20260608</dd></div>
+          <div><dt>Bucket</dt><dd>12-18s</dd></div>
+          <div><dt>Segments</dt><dd>3</dd></div>
+          <div><dt>Gap</dt><dd>0 ms</dd></div>
+        </dl>
+        <p class="transcript">Brickyard 5739, turn left heading 290. Brickyard 5739, Boston, are you with me? Yes, sir, 3000.</p>
+        <p class="source-audio">/home/xijunting/projects/atc_asr/data/youtube_non_vasa_vendor_release_82h_20260608/audio_wav16k/e-BsWIZ2MFo.wav</p>
+      </article>
+      <article class="sample-card">
+        <div class="sample-head">
+          <div>
+            <div class="sample-index">#10 · exp72</div>
+            <h2>exp72 Bilibili English 12-18s</h2>
+          </div>
+          <div class="pill">15.00s</div>
+        </div>
+        <audio controls preload="metadata" src="assets/sample_10_exp72_bilibili_en_12_18s.wav"></audio>
+        <dl class="meta">
+          <div><dt>Source</dt><dd>bilibili_en_vendor_release_12h_20260609</dd></div>
+          <div><dt>Bucket</dt><dd>12-18s</dd></div>
+          <div><dt>Segments</dt><dd>3</dd></div>
+          <div><dt>Gap</dt><dd>1000 ms</dd></div>
+        </dl>
+        <p class="transcript">Left 360, Ifly 0022. Ifly 0022, turn left heading of 335. Left 335, Ifly 0022.</p>
+        <p class="source-audio">/home/xijunting/projects/atc_asr/data/bilibili_en_vendor_release_12h_20260609/audio_wav16k/BV1M7STBZED5.wav</p>
+      </article>
+      <article class="sample-card">
+        <div class="sample-head">
+          <div>
+            <div class="sample-index">#11 · exp72</div>
+            <h2>exp72 YouTube VASA English 6-8s</h2>
+          </div>
+          <div class="pill">7.00s</div>
+        </div>
+        <audio controls preload="metadata" src="assets/sample_11_exp72_youtube_vasaviation_6_8s.wav"></audio>
+        <dl class="meta">
+          <div><dt>Source</dt><dd>youtube_vasaviation_vendor_release_20260601</dd></div>
+          <div><dt>Bucket</dt><dd>6-8s</dd></div>
+          <div><dt>Segments</dt><dd>2</dd></div>
+          <div><dt>Gap</dt><dd>1000 ms</dd></div>
+        </dl>
+        <p class="transcript">Air Shuttle 6107, what runway can we expect? Air Shuttle 6107, either 26R or 26L. Probably 26R.</p>
+        <p class="source-audio">/home/xijunting/projects/atc_asr/data/youtube_vasaviation_vendor_release_20260601/audio_wav16k/vas_001874.wav</p>
+      </article>
+      <article class="sample-card">
+        <div class="sample-head">
+          <div>
+            <div class="sample-index">#12 · exp72</div>
+            <h2>exp72 0330 Chinese 8-12s</h2>
+          </div>
+          <div class="pill">9.98s</div>
+        </div>
+        <audio controls preload="metadata" src="assets/sample_12_exp72_0330_zh_8_12s.wav"></audio>
+        <dl class="meta">
+          <div><dt>Source</dt><dd>0330_zh</dd></div>
+          <div><dt>Bucket</dt><dd>8-12s</dd></div>
+          <div><dt>Segments</dt><dd>2</dd></div>
+          <div><dt>Gap</dt><dd>780 ms</dd></div>
+        </dl>
+        <p class="transcript">国航幺八五, 国航幺八五, 高度是拐五 我知道, 上高度拐千五, 重量比较大, 上升率比较小, 另外我现在申请个航向幺三洞, 国航幺八五</p>
+        <p class="source-audio">0330_zh::区域管制中心_7月F04录音_7.15_U01_F04EC_029_AG_20250715080000-20250715200000_U01_F04EC_029_AG</p>
+      </article>
+    </section>
+  </main>
+</body>
+</html>
