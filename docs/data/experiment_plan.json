@@ -1,0 +1,358 @@
+{
+  "updated_at": "2026-06-23",
+  "title": "Qwen3-ASR v4.3 Data Expansion Plan",
+  "dashboard_note": "This file is the source for the GitHub Pages experiment-plan view. It separates historical runs, currently active queues, planned data-ratio ablations, and blocked/diagnostic ideas so repeated data-version experiments are visible.",
+  "current_base": {
+    "id": "exp29_v4_3_no_translation_mismatch_baseline",
+    "data_dir": "qwen3_asr_20260623_cleaned_v4_3_verbatim_no_translation_mismatch",
+    "status": "active",
+    "reason": "v4.3 is v4.1 verbatim/no-colon plus translation/cross-language mismatch removal. Future full-data ablations should use this base unless the v4.4 matched mini test clearly wins."
+  },
+  "data_versions": [
+    {
+      "version": "v3",
+      "status": "archive",
+      "data_dir": "qwen3_asr_20260613_exp*_v3_*",
+      "notes": "First ablation generation. Keep for direction finding only; do not use for future training decisions without re-running on v4.3."
+    },
+    {
+      "version": "v3.1",
+      "status": "archive",
+      "data_dir": "qwen3_asr_20260622_cleaned_v3_1_no_colon_prefix",
+      "notes": "No-colon-prefix cleanup before the v4 verbatim branch. Long-audio experiments from this lineage are historical."
+    },
+    {
+      "version": "v4.1",
+      "status": "archive",
+      "data_dir": "qwen3_asr_20260622_cleaned_v4_1_verbatim_no_colon_prefix",
+      "notes": "Strong verbatim/no-colon signal. Superseded by v4.3 for new experiments."
+    },
+    {
+      "version": "v4.2",
+      "status": "diagnostic",
+      "data_dir": "qwen3_asr_20260623_cleaned_v4_2_reading_pairs",
+      "notes": "Reading-pair label strategy before mismatch removal. Use only for matched mini comparison."
+    },
+    {
+      "version": "v4.3",
+      "status": "current",
+      "data_dir": "qwen3_asr_20260623_cleaned_v4_3_verbatim_no_translation_mismatch",
+      "notes": "Current full-data base for all new ablations."
+    },
+    {
+      "version": "v4.4",
+      "status": "diagnostic",
+      "data_dir": "qwen3_asr_20260623_cleaned_v4_4_reading_pairs_no_translation_mismatch",
+      "notes": "v4.3 cleanup with reading-pair labels. Promote only if matched mini eval beats v4.3 without output-format regressions."
+    }
+  ],
+  "findings": [
+    {
+      "topic": "base",
+      "confidence": "high",
+      "summary": "v4.x verbatim/no-colon is the strongest signal so far. Future ablations should not repeat v3 data-version experiments unless a slice-specific result needs confirmation."
+    },
+    {
+      "topic": "open_atc_atcosim",
+      "confidence": "medium-high",
+      "summary": "ATCOSIM helps English, longer-duration, and real-source slices. It is the first branch to migrate to v4.3 multi-epoch."
+    },
+    {
+      "topic": "app_denoise",
+      "confidence": "medium",
+      "summary": "App denoise is a stable augmentation candidate. It looks better after more than one epoch, so keep the 45h multi-epoch run."
+    },
+    {
+      "topic": "fullmix",
+      "confidence": "medium",
+      "summary": "Balanced fullmix is useful as a broad mixture candidate, but it mixes many variables. Use it as a benchmark while also testing controlled ratios."
+    },
+    {
+      "topic": "tts",
+      "confidence": "low-medium",
+      "summary": "The old TTS 1-epoch runs were not enough to rule it out. Add multi-epoch TTS-only and TTS-in-combo tests before deciding."
+    },
+    {
+      "topic": "long_audio",
+      "confidence": "low-medium",
+      "summary": "Long-audio concat is a 167-focused branch. Do not duplicate it on 47/178 while 167/baseline or long runs are active; decide from long-duration slices, early-EOS diagnostics, and full-WER regression."
+    }
+  ],
+  "runs": [
+    {
+      "id": "exp00-exp28_v3_archive",
+      "status": "archive",
+      "priority": 0,
+      "category": "history",
+      "data_version": "v3/v3.1",
+      "purpose": "Historical single-factor direction finding. Keep results visible but do not repeat on new machines."
+    },
+    {
+      "id": "exp29_v4_3_no_translation_mismatch_baseline",
+      "status": "active",
+      "priority": 100,
+      "category": "baseline",
+      "data_version": "v4.3",
+      "data_dir": "qwen3_asr_20260623_cleaned_v4_3_verbatim_no_translation_mismatch",
+      "epochs": 1,
+      "machine": "167",
+      "purpose": "Current comparable v4.3 base."
+    },
+    {
+      "id": "exp50_v4_3_atcosim_epoch5",
+      "status": "active",
+      "priority": 95,
+      "category": "promoted_single_factor",
+      "data_version": "v4.3",
+      "data_dir": "qwen3_asr_20260623_exp40_v4_3_open_atc_atcosim",
+      "epochs": 5,
+      "machine": "178",
+      "purpose": "Validate ATCOSIM over multiple epochs."
+    },
+    {
+      "id": "exp51_v4_3_appdenoise45h_epoch5",
+      "status": "queued",
+      "priority": 90,
+      "category": "promoted_single_factor",
+      "data_version": "v4.3",
+      "data_dir": "qwen3_asr_20260623_exp31_v4_3_appdenoise45h",
+      "epochs": 5,
+      "machine": "47",
+      "purpose": "Validate app denoise after the v3 slice signal improved with more epochs."
+    },
+    {
+      "id": "exp52_v4_3_fullmix_balanced_epoch5",
+      "status": "queued",
+      "priority": 88,
+      "category": "mixture_benchmark",
+      "data_version": "v4.3",
+      "data_dir": "qwen3_asr_20260623_exp48_v4_3_fullmix_balanced_v1",
+      "epochs": 5,
+      "machine": "47",
+      "purpose": "Broad balanced mixture benchmark. Treat as a baseline for controlled-ratio runs, not as the final recipe by default."
+    },
+    {
+      "id": "exp53_v4_3_contiguous_concat30h",
+      "status": "planned_167_only",
+      "priority": 70,
+      "category": "long_audio",
+      "data_version": "v4.3",
+      "data_dir": "qwen3_asr_20260623_exp53_v4_3_contiguous_concat30h",
+      "epochs": 1,
+      "machine": "167",
+      "purpose": "Main long-audio concat test. Do not duplicate on 47/178."
+    },
+    {
+      "id": "exp54_v4_3_contiguous_concat60h_6_18s",
+      "status": "planned_167_only",
+      "priority": 60,
+      "category": "long_audio",
+      "data_version": "v4.3",
+      "data_dir": "qwen3_asr_20260623_exp54_v4_3_contiguous_concat60h_6_18s",
+      "epochs": 1,
+      "machine": "167",
+      "purpose": "Long-audio pressure test. Run only after exp53 if resources allow."
+    },
+    {
+      "id": "exp57_v4_3_contiguous_concat30h_epoch3",
+      "status": "planned_167_only",
+      "priority": 62,
+      "category": "long_audio",
+      "data_version": "v4.3",
+      "data_dir": "qwen3_asr_20260623_exp53_v4_3_contiguous_concat30h",
+      "epochs": 3,
+      "machine": "167",
+      "purpose": "Reuse exp53 data to check whether long-audio benefits survive multi-epoch training."
+    },
+    {
+      "id": "exp58_v4_3_contiguous_concat60h_6_18s_epoch3",
+      "status": "planned_167_only",
+      "priority": 50,
+      "category": "long_audio",
+      "data_version": "v4.3",
+      "data_dir": "qwen3_asr_20260623_exp54_v4_3_contiguous_concat60h_6_18s",
+      "epochs": 3,
+      "machine": "167",
+      "purpose": "Only run if 18s pressure-test behavior is needed."
+    },
+    {
+      "id": "exp61_mini_v4_3_no_translation_mismatch",
+      "status": "active",
+      "priority": 85,
+      "category": "mini_label_strategy",
+      "data_version": "v4.3",
+      "data_dir": "qwen3_asr_20260623_mini50k_v4_3_verbatim_no_translation_mismatch",
+      "max_steps": 2000,
+      "machine": "178",
+      "purpose": "Matched mini control for v4.3 vs v4.4."
+    },
+    {
+      "id": "exp62_mini_v4_4_reading_pairs_no_translation_mismatch",
+      "status": "active",
+      "priority": 85,
+      "category": "mini_label_strategy",
+      "data_version": "v4.4",
+      "data_dir": "qwen3_asr_20260623_mini50k_v4_4_reading_pairs_no_translation_mismatch",
+      "max_steps": 2000,
+      "machine": "178",
+      "purpose": "Matched mini reading-pair test. Do not launch a full v4.4 run until this clearly wins."
+    },
+    {
+      "id": "exp63_v4_3_ttsclone10h_epoch5",
+      "status": "planned",
+      "priority": 80,
+      "category": "tts_validation",
+      "data_version": "v4.3",
+      "data_dir": "qwen3_asr_20260623_exp33_v4_3_ttsclone10h",
+      "epochs": 5,
+      "purpose": "Re-test TTS 10h with enough epochs. Old 1-epoch results are inconclusive."
+    },
+    {
+      "id": "exp64_v4_3_ttsclone22h_epoch5",
+      "status": "planned",
+      "priority": 78,
+      "category": "tts_validation",
+      "data_version": "v4.3",
+      "data_dir": "qwen3_asr_20260623_exp34_v4_3_ttsclone22h",
+      "epochs": 5,
+      "purpose": "Dose test for full reviewed TTS pool."
+    },
+    {
+      "id": "exp65_v4_3_atcosim_appdenoise45h_epoch3",
+      "status": "planned",
+      "priority": 76,
+      "category": "controlled_ratio",
+      "data_version": "v4.3",
+      "data_dir": "qwen3_asr_20260623_exp65_v4_3_atcosim10h_appdenoise45h",
+      "epochs": 3,
+      "caps_hours": {
+        "open_atc_atcosim": 10,
+        "app_denoise": 45
+      },
+      "purpose": "First controlled combo after single-factor winners."
+    },
+    {
+      "id": "exp66_v4_3_atcosim_appdenoise45h_general10h_epoch3",
+      "status": "planned",
+      "priority": 74,
+      "category": "controlled_ratio",
+      "data_version": "v4.3",
+      "data_dir": "qwen3_asr_20260623_exp66_v4_3_atcosim10h_appdenoise45h_general10h",
+      "epochs": 3,
+      "caps_hours": {
+        "open_atc_atcosim": 10,
+        "app_denoise": 45,
+        "general_asr": 10
+      },
+      "purpose": "Low-ratio general regularizer test."
+    },
+    {
+      "id": "exp67_v4_3_atcosim_appdenoise45h_general20h_epoch3",
+      "status": "planned",
+      "priority": 68,
+      "category": "controlled_ratio",
+      "data_version": "v4.3",
+      "data_dir": "qwen3_asr_20260623_exp67_v4_3_atcosim10h_appdenoise45h_general20h",
+      "epochs": 3,
+      "caps_hours": {
+        "open_atc_atcosim": 10,
+        "app_denoise": 45,
+        "general_asr": 20
+      },
+      "purpose": "General dose test. Promote only if general slices improve without ATC full-WER regression."
+    },
+    {
+      "id": "exp68_v4_3_atcosim_appdenoise45h_general10h_tts10h_epoch3",
+      "status": "planned",
+      "priority": 66,
+      "category": "tts_in_combo",
+      "data_version": "v4.3",
+      "data_dir": "qwen3_asr_20260623_exp68_v4_3_atcosim10h_appdenoise45h_general10h_tts10h",
+      "epochs": 3,
+      "caps_hours": {
+        "open_atc_atcosim": 10,
+        "app_denoise": 45,
+        "general_asr": 10,
+        "tts": 10
+      },
+      "purpose": "Check whether TTS helps when combined with the strongest real/synthetic mix."
+    },
+    {
+      "id": "exp69_v4_3_atcosim_appdenoise45h_general10h_tts22h_epoch3",
+      "status": "planned",
+      "priority": 64,
+      "category": "tts_in_combo",
+      "data_version": "v4.3",
+      "data_dir": "qwen3_asr_20260623_exp69_v4_3_atcosim10h_appdenoise45h_general10h_tts22h",
+      "epochs": 3,
+      "caps_hours": {
+        "open_atc_atcosim": 10,
+        "app_denoise": 45,
+        "general_asr": 10,
+        "tts": 22.3
+      },
+      "purpose": "TTS dose test inside the best controlled mix."
+    },
+    {
+      "id": "exp70_v4_3_atcosim_appdenoise45h_general10h_long30h_epoch3",
+      "status": "blocked",
+      "priority": 55,
+      "category": "controlled_ratio_long",
+      "data_version": "v4.3",
+      "data_dir": "qwen3_asr_20260623_exp70_v4_3_atcosim_appdenoise_general10h_long30h",
+      "epochs": 3,
+      "purpose": "Only build after exp53 proves long-audio value. Requires materialize support for combining contiguous concat rows with other augmentations."
+    }
+  ],
+  "machine_policy": [
+    {
+      "machine": "47",
+      "role": "v4.3 promoted single-factor and mixture benchmark",
+      "queue_now": [
+        "exp51_v4_3_appdenoise45h_epoch5",
+        "exp52_v4_3_fullmix_balanced_epoch5"
+      ],
+      "next_after_current": [
+        "exp63_v4_3_ttsclone10h_epoch5",
+        "exp64_v4_3_ttsclone22h_epoch5"
+      ]
+    },
+    {
+      "machine": "178",
+      "role": "ATCOSIM, matched mini, then controlled-ratio funnel",
+      "queue_now": [
+        "exp50_v4_3_atcosim_epoch5",
+        "exp61_mini_v4_3_no_translation_mismatch",
+        "exp62_mini_v4_4_reading_pairs_no_translation_mismatch"
+      ],
+      "next_after_current": [
+        "exp65_v4_3_atcosim_appdenoise45h_epoch3",
+        "exp66_v4_3_atcosim_appdenoise45h_general10h_epoch3",
+        "exp67_v4_3_atcosim_appdenoise45h_general20h_epoch3",
+        "exp68_v4_3_atcosim_appdenoise45h_general10h_tts10h_epoch3",
+        "exp69_v4_3_atcosim_appdenoise45h_general10h_tts22h_epoch3"
+      ]
+    },
+    {
+      "machine": "167",
+      "role": "v4.3 baseline and long-audio branch; avoid duplicate long-audio runs elsewhere",
+      "queue_now": [
+        "exp29_v4_3_no_translation_mismatch_baseline"
+      ],
+      "next_after_current": [
+        "exp53_v4_3_contiguous_concat30h",
+        "exp57_v4_3_contiguous_concat30h_epoch3",
+        "exp54_v4_3_contiguous_concat60h_6_18s",
+        "exp58_v4_3_contiguous_concat60h_6_18s_epoch3"
+      ]
+    }
+  ],
+  "promotion_rules": [
+    "Compare v4.3 runs against exp29 at the same or nearest epoch, not against v3/v4.1 raw results.",
+    "A planned combo must beat exp29 full WER or improve target slices without worsening full WER by more than 0.5 absolute WER.",
+    "For TTS, require improvement in numbers_callsigns, mixed/content_mixed, or English/callsign-heavy slices before including it in the final recipe.",
+    "For general data, prefer 10h unless 20h improves general and English slices without hurting ATC slices.",
+    "For long audio, judge duration_8_12s, duration_ge12s, early-EOS diagnostics, and full-WER regression together.",
+    "Do not promote any run that only wins because it used an older data version or a different test/slice definition."
+  ]
+}
