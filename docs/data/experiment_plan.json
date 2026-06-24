@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-06-24 15:15 CST",
+  "updated_at": "2026-06-24 15:34 CST",
   "title": "Qwen3-ASR v4.3 数据扩充实验计划",
   "dashboard_note": "这个页面用于动态跟踪实验计划：区分历史 run、当前队列、后续数据配比 ablation，以及暂缓或诊断类实验。通用数据和混合数据都已纳入计划；raw exp 编号只作为运行 ID，不代表必须连续执行。",
   "current_base": {
@@ -71,6 +71,11 @@
       "topic": "general_asr",
       "confidence": "medium",
       "summary": "exp65 general 100h 已完成 3 epoch：full WER 13.4777，收敛稳定且略优于当前 baseline/TTS10h 可比结果，但英文、YouTube/B站和长音频 slice 仍弱；general 可保留为组合 regularizer，不单独作为主方向晋级。"
+    },
+    {
+      "topic": "deepfilter",
+      "confidence": "medium",
+      "summary": "exp67 DeepFilter 60h 已完成 3 epoch：full WER 13.2894 / CER 12.7750 / SER 64.5424，优于 exp65 general100h，但长音频、英文、YouTube/B站 slice 仍弱；DeepFilter 可保留为高剂量组合候选，不是 long-audio/eos 主解。"
     },
     {
       "topic": "tts",
@@ -317,7 +322,7 @@
     },
     {
       "id": "exp67_v4_3_highdose_deepfilter60h_epoch3",
-      "status": "planned",
+      "status": "completed",
       "priority": 68,
       "category": "highdose_screen",
       "data_version": "v4.3",
@@ -326,7 +331,31 @@
       "caps_hours": {
         "deepfilter": 60
       },
-      "purpose": "DeepFilter 单独高剂量筛选；若有效，再与 app denoise 做互斥或组合对照。",
+      "purpose": "DeepFilter 单独高剂量筛选。已完成：full WER 13.2894 / CER 12.7750 / SER 64.5424，优于 exp65 general100h；中文和 full 有收益，但英文、YouTube/B站和长音频 slice 仍偏弱。保留为组合候选，不作为 long-audio/eos 主解。",
+      "result_summary": {
+        "host": "167",
+        "run_dir": "train/training_checkpoints/qwen3-asr-0.6b-exp67_v43_deepfilter60h_e3_b8_g2",
+        "completed_at": "2026-06-24T14:04:11",
+        "best_checkpoint": "checkpoint-29124",
+        "epoch": 3,
+        "step": 29124,
+        "full": {
+          "wer": 13.2894,
+          "cer": 12.775,
+          "ser": 64.5424,
+          "eval_loss": 0.3864
+        },
+        "key_slices": {
+          "zh_atc_wer": 11.8228,
+          "english_atc_wer": 17.8347,
+          "mixed_atc_wer": 17.2044,
+          "numbers_callsigns_wer": 13.7487,
+          "duration_long_audio_ge8s_wer": 18.567,
+          "source_youtube_vasaviation_wer": 19.3087,
+          "source_bilibili_all_wer": 18.4781
+        },
+        "decision": "keep_as_combo_candidate_not_long_audio_solution"
+      },
       "plan_label": "H3"
     },
     {
