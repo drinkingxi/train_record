@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-06-24 17:16 CST",
+  "updated_at": "2026-06-24 17:48 CST",
   "title": "Qwen3-ASR v4.3 数据扩充实验计划",
   "dashboard_note": "这个页面用于动态跟踪实验计划：区分历史 run、当前队列、后续数据配比 ablation，以及暂缓或诊断类实验。通用数据和混合数据都已纳入计划；raw exp 编号只作为运行 ID，不代表必须连续执行。",
   "current_base": {
@@ -53,14 +53,19 @@
       "summary": "目前最强信号是 v4.x verbatim/no-colon。后续不应重复 v3 数据版本实验，除非某个 slice 结论需要复验。"
     },
     {
+      "topic": "baseline",
+      "confidence": "high",
+      "summary": "exp29 v4.3 baseline 已续跑到 5 epoch：full WER 13.6621 / CER 13.0874 / SER 65.6943，作为后续 v4.3 多 epoch 对照基线。"
+    },
+    {
       "topic": "open_atc_atcosim",
       "confidence": "medium-high",
       "summary": "ATCOSIM 对英文、较长时长和真实来源 slice 有优势，是第一优先迁移到 v4.3 多 epoch 的分支。"
     },
     {
       "topic": "app_denoise",
-      "confidence": "medium",
-      "summary": "App denoise 是稳定的增强候选；多于 1 epoch 后表现更合理，因此保留 45h 多 epoch 验证。"
+      "confidence": "medium-high",
+      "summary": "exp66 app denoise 90h 已完成 3 epoch：full WER 13.3763 / CER 12.7943 / SER 64.7302，相比 exp29 5ep 基线 full、英文、长音频和 YouTube slice 均有改善，但略弱于 exp67 DeepFilter；保留为有效增强候选，继续对照 exp51 45h 与后续 15h 递减。"
     },
     {
       "topic": "fullmix",
@@ -100,15 +105,39 @@
     },
     {
       "id": "exp29_v4_3_no_translation_mismatch_baseline",
-      "status": "active",
+      "status": "completed",
       "priority": 100,
       "category": "baseline",
       "data_version": "v4.3",
       "data_dir": "qwen3_asr_20260623_cleaned_v4_3_verbatim_no_translation_mismatch",
       "epochs": 5,
       "machine": "167",
-      "purpose": "当前 v4.3 主基线；先产出 1 epoch 结果，后续复用同一 exp29 output_dir 续跑到 5 epoch，避免新增 baseline 编号。",
-      "plan_label": "B0"
+      "purpose": "当前 v4.3 主基线；已在 167 续跑到 5 epoch，作为 v4.3 后续多 epoch/高剂量结果的主要对照。",
+      "plan_label": "B0",
+      "result_summary": {
+        "host": "167",
+        "run_dir": "train/training_checkpoints/qwen3-asr-0.6b-exp29_v4_3_no_translation_mismatch_baseline_epoch1_remote167_maskfix_bsz8_epoch_gpu0",
+        "completed_at": "2026-06-24T16:34:57",
+        "best_checkpoint": "checkpoint-23085",
+        "epoch": 5,
+        "step": 23085,
+        "full": {
+          "wer": 13.6621,
+          "cer": 13.0874,
+          "ser": 65.6943,
+          "eval_loss": 0.3978
+        },
+        "key_slices": {
+          "zh_atc_wer": 12.1517,
+          "english_atc_wer": 18.3315,
+          "mixed_atc_wer": 17.6691,
+          "numbers_callsigns_wer": 14.1336,
+          "duration_long_audio_ge8s_wer": 19.3374,
+          "source_youtube_vasaviation_wer": 19.6758,
+          "source_bilibili_all_wer": 18.1196
+        },
+        "decision": "baseline_for_v4_3_multi_epoch_comparison"
+      }
     },
     {
       "id": "exp50_v4_3_atcosim_epoch5",
@@ -261,14 +290,15 @@
     },
     {
       "id": "exp64_v4_3_ttsclone22h_epoch5",
-      "status": "planned",
+      "status": "active",
       "priority": 78,
       "category": "tts_validation",
       "data_version": "v4.3",
       "data_dir": "qwen3_asr_20260623_exp34_v4_3_ttsclone22h",
       "epochs": 5,
-      "purpose": "完整 reviewed TTS 池的剂量测试。",
-      "plan_label": "T2"
+      "purpose": "正在 167 GPU0 跑 full reviewed TTS 22h 的 5 epoch 对照；用于和 exp63 TTS10h 判断 TTS 剂量是否过量。",
+      "plan_label": "T2",
+      "machine": "167"
     },
     {
       "id": "exp65_v4_3_highdose_general100h_epoch3",
@@ -308,7 +338,7 @@
     },
     {
       "id": "exp66_v4_3_highdose_appdenoise90h_epoch3",
-      "status": "planned",
+      "status": "completed",
       "priority": 74,
       "category": "highdose_screen",
       "data_version": "v4.3",
@@ -317,8 +347,33 @@
       "caps_hours": {
         "app_denoise": 90
       },
-      "purpose": "App denoise 先加到更明显的量级；若有效，再在 90h/45h/15h 间找最小有效剂量。",
-      "plan_label": "H2"
+      "purpose": "App denoise 90h 高剂量筛选。已完成：full WER 13.3763 / CER 12.7943 / SER 64.7302，相比 exp29 5ep 基线整体改善，英文、numbers/callsigns、长音频和 YouTube slice 也有小幅收益；但略弱于 exp67 DeepFilter。保留为有效增强候选，需和 exp51 45h、后续 15h 递减对照决定剂量。",
+      "plan_label": "H2",
+      "machine": "167",
+      "result_summary": {
+        "host": "167",
+        "run_dir": "train/training_checkpoints/qwen3-asr-0.6b-exp66_v43_appdenoise90h_e3_b8_g1",
+        "completed_at": "2026-06-24T16:16:12",
+        "best_checkpoint": "checkpoint-31998",
+        "epoch": 3,
+        "step": 31998,
+        "full": {
+          "wer": 13.3763,
+          "cer": 12.7943,
+          "ser": 64.7302,
+          "eval_loss": 0.3874
+        },
+        "key_slices": {
+          "zh_atc_wer": 11.9724,
+          "english_atc_wer": 17.7265,
+          "mixed_atc_wer": 17.3593,
+          "numbers_callsigns_wer": 13.7926,
+          "duration_long_audio_ge8s_wer": 18.933,
+          "source_youtube_vasaviation_wer": 19.2705,
+          "source_bilibili_all_wer": 18.1196
+        },
+        "decision": "keep_as_effective_aug_candidate_compare_45h_and_15h_dose"
+      }
     },
     {
       "id": "exp67_v4_3_highdose_deepfilter60h_epoch3",
@@ -360,7 +415,7 @@
     },
     {
       "id": "exp68_v4_3_highdose_vad100h_epoch3",
-      "status": "planned",
+      "status": "active",
       "priority": 66,
       "category": "highdose_screen",
       "data_version": "v4.3",
@@ -369,12 +424,13 @@
       "caps_hours": {
         "vad": 100
       },
-      "purpose": "VAD/切分增强先用大剂量确认是否改变长短音频和 early-EOS 行为。",
-      "plan_label": "H4"
+      "purpose": "正在 167 GPU2 跑 VAD/切分增强 100h 高剂量筛选，重点看长短音频和 early-EOS 相关 slice。",
+      "plan_label": "H4",
+      "machine": "167"
     },
     {
       "id": "exp69_v4_3_highdose_openatc_all_epoch3",
-      "status": "planned",
+      "status": "active",
       "priority": 64,
       "category": "highdose_screen",
       "data_version": "v4.3",
@@ -383,8 +439,9 @@
       "caps_hours": {
         "open_atc": 60
       },
-      "purpose": "UWB-ATCC + ATCOSIM 尽量全量筛选开源 ATC；若有效，再拆 ATCOSIM/UWB 和 cap。",
-      "plan_label": "H5"
+      "purpose": "正在 167 GPU3 跑 open ATC all/cap 60h 高剂量筛选，重点看英文、YouTube 和 ATC 真实来源 slice。",
+      "plan_label": "H5",
+      "machine": "167"
     },
     {
       "id": "exp70_v4_3_highdose_real_aug_combo_epoch3",
@@ -424,22 +481,19 @@
         "exp50_v4_3_atcosim_epoch5",
         "exp61_mini_v4_3_no_translation_mismatch",
         "exp62_mini_v4_4_reading_pairs_no_translation_mismatch",
-        "exp63_v4_3_ttsclone10h_epoch5"
+        "exp63_v4_3_ttsclone10h_epoch5",
+        "exp70_v4_3_highdose_real_aug_combo_epoch3",
+        "exp74_mini_v4_3_orig_long_mild_ge8_concat05"
       ],
-      "next_after_current": [
-        "exp65_v4_3_highdose_general100h_epoch3",
-        "exp66_v4_3_highdose_appdenoise90h_epoch3",
-        "exp67_v4_3_highdose_deepfilter60h_epoch3",
-        "exp68_v4_3_highdose_vad100h_epoch3",
-        "exp69_v4_3_highdose_openatc_all_epoch3",
-        "exp70_v4_3_highdose_real_aug_combo_epoch3"
-      ]
+      "next_after_current": []
     },
     {
       "machine": "167",
-      "role": "负责 v4.3 baseline exp29 续跑；长音频训练分支已从自动队列移除，仅保留手动诊断候选。",
+      "role": "负责 v4.3 baseline、高剂量筛选和 TTS22h；长音频 full 训练仍为手动诊断候选。",
       "queue_now": [
-        "exp29_v4_3_no_translation_mismatch_baseline"
+        "exp64_v4_3_ttsclone22h_epoch5",
+        "exp68_v4_3_highdose_vad100h_epoch3",
+        "exp69_v4_3_highdose_openatc_all_epoch3"
       ],
       "next_after_current": []
     }
