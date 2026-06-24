@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-06-24 17:48 CST",
+  "updated_at": "2026-06-24 17:56 CST",
   "title": "Qwen3-ASR v4.3 数据扩充实验计划",
   "dashboard_note": "这个页面用于动态跟踪实验计划：区分历史 run、当前队列、后续数据配比 ablation，以及暂缓或诊断类实验。通用数据和混合数据都已纳入计划；raw exp 编号只作为运行 ID，不代表必须连续执行。",
   "current_base": {
@@ -55,7 +55,7 @@
     {
       "topic": "baseline",
       "confidence": "high",
-      "summary": "exp29 v4.3 baseline 已续跑到 5 epoch：full WER 13.6621 / CER 13.0874 / SER 65.6943，作为后续 v4.3 多 epoch 对照基线。"
+      "summary": "exp29 v4.3 baseline 已评估到 5 epoch：full WER 13.6621 / CER 13.0874 / SER 65.6943；现沿用同一 exp29 output_dir 从 checkpoint-23085 续跑到 8 epoch，用于确认 baseline 是否仍继续收益。"
     },
     {
       "topic": "open_atc_atcosim",
@@ -105,15 +105,23 @@
     },
     {
       "id": "exp29_v4_3_no_translation_mismatch_baseline",
-      "status": "completed",
+      "status": "active",
       "priority": 100,
       "category": "baseline",
       "data_version": "v4.3",
       "data_dir": "qwen3_asr_20260623_cleaned_v4_3_verbatim_no_translation_mismatch",
-      "epochs": 5,
+      "epochs": 8,
       "machine": "167",
-      "purpose": "当前 v4.3 主基线；已在 167 续跑到 5 epoch，作为 v4.3 后续多 epoch/高剂量结果的主要对照。",
+      "purpose": "当前 v4.3 主基线；已在 167 评估到 5 epoch，当前沿用同一 exp29 output_dir 从 checkpoint-23085 继续到 8 epoch。若 epoch6-8 仍改善，再继续延长同一 exp29。",
       "plan_label": "B0",
+      "active_run": {
+        "host": "167",
+        "gpu": 1,
+        "run_name": "exp29_v43_baseline_e8_resume_g1",
+        "resume_from": "train/training_checkpoints/qwen3-asr-0.6b-exp29_v4_3_no_translation_mismatch_baseline_epoch1_remote167_maskfix_bsz8_epoch_gpu0/checkpoint-23085",
+        "target_epochs": 8,
+        "started_at": "2026-06-24T17:53:57"
+      },
       "result_summary": {
         "host": "167",
         "run_dir": "train/training_checkpoints/qwen3-asr-0.6b-exp29_v4_3_no_translation_mismatch_baseline_epoch1_remote167_maskfix_bsz8_epoch_gpu0",
