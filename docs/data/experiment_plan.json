@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-06-25 09:15 CST",
+  "updated_at": "2026-06-25 10:16 CST",
   "title": "Qwen3-ASR v4.3 数据扩充实验计划",
   "dashboard_note": "这个页面用于动态跟踪实验计划：区分历史 run、当前队列、后续数据配比 ablation，以及暂缓或诊断类实验。通用数据和混合数据都已纳入计划；raw exp 编号只作为运行 ID，不代表必须连续执行。",
   "current_base": {
@@ -89,8 +89,8 @@
     },
     {
       "topic": "long_audio",
-      "confidence": "low-medium",
-      "summary": "长音频 concat 目前集中在 167，不在 47/178 重复。新增原始长音频上采样 mini 对照，用于区分“真实长片段比例不足”和“app-style 多句连续输入不足”。判断依据应是长时长 slice、early-EOS 诊断和 full-WER 是否退化。"
+      "confidence": "medium-high",
+      "summary": "会话 019eee5a 和当前 mini/rich-slice 证据基本确认：提升原始长音频片段占比/上采样是更优先的训练修正方向；exp73 在 >=6s / >=8s duration slice 有小幅收益且 full mini 基本不伤，exp74 少量 concat 虽也改善部分长时长 slice 但 full mini 退化，因此后续优先做原始长片段上采样 full-scale，concat 只保留诊断。"
     },
     {
       "topic": "atcosim_lead",
@@ -100,12 +100,17 @@
     {
       "topic": "long_mini",
       "confidence": "medium",
-      "summary": "exp73/74 是必要的长音频上采样 mini 对照。mini 整体 eval 中 exp73 与 v4.3 mini baseline 基本持平，exp74 较弱；关键结论等待 exp61/73/74 的 full-derived rich slice，尤其 duration_8_12s / duration_long_audio_ge8s。"
+      "summary": "exp73/74 已完成 mini 对照：exp73 全量 WER 16.8633，>=6s WER 22.2367 优于 baseline 23.5371，>=8s WER 22.6158 也略优于 baseline 22.8883；exp74 最好全量 WER 17.3460，弱于 exp61/73。full-derived rich eval 正在 167 跑，完成后只用于确认长音频 slice 和 early-EOS，不改变“上采样优先、concat 降级”的当前计划。"
     },
     {
       "topic": "training_policy",
       "confidence": "high",
       "summary": "后续有希望的方向不再只跑 3-5 epoch：强候选默认设置 12 epoch，并启用 load_best_model_at_end + early_stopping_patience=3；每 epoch full eval 并派生 slice，按 full WER、目标 slice 和 early-EOS 诊断共同选 checkpoint。"
+    },
+    {
+      "topic": "augmentation_direction_summary",
+      "confidence": "medium-high",
+      "summary": "截至 2026-06-25：ATCOSIM 是主收益方向；原始长片段上采样是长音频/EOS 专项优先方向；DeepFilter/AppDenoise 对 full/中文/数字呼号有小幅收益，可作为轻量组合候选；general 100h 只适合作 regularizer；TTS 10h 优于 22h 倾向，小剂量候选；VAD/open_atc_all/fullmix 等待或只作为组合参考。"
     }
   ],
   "runs": [
@@ -169,9 +174,9 @@
       "category": "promoted_single_factor",
       "data_version": "v4.3",
       "data_dir": "qwen3_asr_20260623_exp40_v4_3_open_atc_atcosim",
-      "epochs": 5,
+      "epochs": 12,
       "machine": "178",
-      "purpose": "ATCOSIM v4.3 多 epoch，是当前最强方向。epoch4 full WER 11.1440，duration_long_audio_ge8s WER 16.5065；等 epoch5 完成后若仍无退化，优先同名续跑到 12 epoch / patience3。",
+      "purpose": "ATCOSIM v4.3 是当前最强方向；已从 checkpoint-47360 同名续跑到 12 epoch，并启用 best-checkpoint/early-stop patience=3。后续同一数据继续训练时优先续原 run/WandB，不另开 exp75。",
       "plan_label": "A1",
       "result_summary": {
         "host": "178",
@@ -189,7 +194,16 @@
           "source_youtube_vasaviation_wer": 19.0334,
           "source_bilibili_all_wer": 17.0442
         },
-        "decision": "primary_candidate_resume_to_12_if_epoch5_holds"
+        "decision": "primary_candidate_resumed_to_12_same_run"
+      },
+      "active_run": {
+        "host": "178",
+        "gpu": 0,
+        "run_name": "exp50_v4_3_atcosim_epoch5_epoch5_maskfix_bsz8_epoch_gpu3",
+        "resume_from": "checkpoint-47360",
+        "target_epochs": 12,
+        "wandb_resume": true,
+        "started_at": "2026-06-25T10:12"
       }
     },
     {
@@ -321,7 +335,7 @@
       "data_dir": "qwen3_asr_20260623_mini50k_v4_3_orig_long_mild_ge8",
       "max_steps": 2000,
       "machine": "178",
-      "purpose": "长音频上采样 mini 对照，已完成 2000 step：mini_eval_1000 WER 16.8633，和 exp61 baseline 基本持平；等待 full-derived rich slice 判断长音频 bucket 是否提升。",
+      "purpose": "长音频上采样 mini 对照，已完成 2000 step：full mini 基本持平，>=6s/>=8s duration slice 小幅改善。该方向从“候选”提升为后续 full-scale ablation 的首选长音频修正；当前等待 167 full-derived rich eval 完成确认。",
       "plan_label": "L6",
       "queue_policy": "manual_only_not_in_scheduler",
       "result_summary": {
@@ -333,19 +347,25 @@
           "cer": 16.6765,
           "ser": 74.6
         },
-        "decision": "pending_rich_slice_compare"
+        "mini_duration_slice": {
+          "duration_ge6s_wer": 22.2367,
+          "baseline_duration_ge6s_wer": 23.5371,
+          "duration_ge8s_wer": 22.6158,
+          "baseline_duration_ge8s_wer": 22.8883
+        },
+        "decision": "promote_orig_long_upsampling_to_full_ablation_pending_full_rich_eval"
       }
     },
     {
       "id": "exp74_mini_v4_3_orig_long_mild_ge8_concat05",
-      "status": "active",
+      "status": "completed",
       "priority": 92,
       "category": "long_audio_mini",
       "data_version": "v4.3",
       "data_dir": "qwen3_asr_20260623_mini50k_v4_3_orig_long_mild_ge8_concat05",
       "max_steps": 2000,
       "machine": "178",
-      "purpose": "长音频上采样 + 少量 concat mini 对照。第一轮 2000 step 已完成，mini_eval_1000 WER 17.4839；曾被 scheduler 重复拉起，scheduler 已停止，当前允许第二轮自然完成作为复验，随后补 full-derived rich slice。",
+      "purpose": "原始长音频上采样 + 5% concat mini 对照。虽然部分 duration slice 也有改善，但 full mini 明显弱于 exp61/73；concat 不进入下一批训练计划，只保留 full-derived rich slice 诊断。",
       "plan_label": "L7",
       "queue_policy": "manual_only_not_in_scheduler",
       "result_summary": {
@@ -353,11 +373,17 @@
         "run_dir": "train/training_checkpoints/qwen3-asr-0.6b-exp74_origlong_concat05_s2000_178g1",
         "best_step": 2000,
         "mini_eval_1000": {
-          "wer": 17.4839,
-          "cer": 17.0256,
-          "ser": 75.4
+          "wer": 17.346,
+          "cer": 16.944,
+          "ser": 74.3
         },
-        "decision": "rerun_once_then_rich_slice_compare"
+        "mini_duration_slice": {
+          "duration_ge6s_wer": 22.3017,
+          "baseline_duration_ge6s_wer": 23.5371,
+          "duration_ge8s_wer": 22.4796,
+          "baseline_duration_ge8s_wer": 22.8883
+        },
+        "decision": "reject_concat_for_next_training_keep_diagnostic_only"
       }
     },
     {
@@ -571,21 +597,22 @@
     },
     {
       "id": "exp75_v4_3_atcosim_epoch12",
-      "status": "planned",
+      "status": "superseded",
       "priority": 98,
       "category": "long_training",
       "data_version": "v4.3",
       "data_dir": "qwen3_asr_20260623_exp40_v4_3_open_atc_atcosim",
       "epochs": 12,
       "machine": "178",
-      "purpose": "如果 exp50 epoch5 仍保持领先，复用同一 ATCOSIM 数据继续长训到 12 epoch，启用 best-checkpoint/early-stop patience=3；目标是确认是否像历史 7epoch 最优一样继续收敛。",
+      "purpose": "已由同名续跑 exp50 取代；同一数据/同一方向后续不再另起 exp75，避免 W&B 和 checkpoint 断裂。",
       "plan_label": "LT1",
       "training_policy": {
         "target_epochs": 12,
         "early_stopping_patience": 3,
         "load_best_model_at_end": true,
         "eval_strategy": "full_eval_each_epoch_plus_derived_slices"
-      }
+      },
+      "queue_policy": "do_not_run_use_exp50_resume"
     },
     {
       "id": "exp76_v4_3_atcosim_uwb_epoch12",
@@ -646,6 +673,97 @@
         "early_stopping_patience": 3,
         "load_best_model_at_end": true
       }
+    },
+    {
+      "id": "exp79_v4_3_orig_long_upsample_full_epoch12",
+      "status": "planned",
+      "priority": 94,
+      "category": "long_audio_upsampling",
+      "data_version": "v4.3",
+      "data_dir": "qwen3_asr_20260625_exp79_v4_3_orig_long_upsample_full",
+      "epochs": 12,
+      "machine": "167_or_178",
+      "purpose": "把 exp73 的原始长片段上采样策略扩展到 full-scale：提高原训练数据中 8-12s 与 >=12s 真实片段采样权重，不合成/拼接新语音。用于验证长音频/EOS 能力是否由训练分布中长片段比例不足导致。",
+      "plan_label": "L8",
+      "needs_data_materialize": true,
+      "blocked_on": [
+        "exp73 full-derived rich eval"
+      ],
+      "training_policy": {
+        "target_epochs": 12,
+        "early_stopping_patience": 3,
+        "load_best_model_at_end": true,
+        "eval_strategy": "full_eval_each_epoch_plus_derived_slices"
+      },
+      "selection_focus": [
+        "duration_6_8s",
+        "duration_8_12s",
+        "duration_ge12s",
+        "early_eos_rate",
+        "full_wer_delta"
+      ]
+    },
+    {
+      "id": "exp80_v4_3_atcosim_orig_long_upsample_epoch12",
+      "status": "planned",
+      "priority": 92,
+      "category": "long_audio_atcosim_combo",
+      "data_version": "v4.3",
+      "data_dir": "qwen3_asr_20260625_exp80_v4_3_atcosim_orig_long_upsample",
+      "epochs": 12,
+      "machine": "167_or_178",
+      "purpose": "在当前最强 ATCOSIM 配方上叠加原始长片段上采样。若 exp79 证明长音频收益真实且 full WER 不伤，则这是最可能进入最终模型的长音频修正组合。",
+      "plan_label": "L9",
+      "needs_data_materialize": true,
+      "blocked_on": [
+        "exp50 resumed-to-12 checkpoint trend",
+        "exp79 epoch/full eval"
+      ],
+      "training_policy": {
+        "target_epochs": 12,
+        "early_stopping_patience": 3,
+        "load_best_model_at_end": true,
+        "eval_strategy": "full_eval_each_epoch_plus_derived_slices"
+      },
+      "selection_focus": [
+        "full_wer",
+        "duration_8_12s",
+        "duration_ge12s",
+        "source_youtube_vasaviation",
+        "numbers_callsigns"
+      ]
+    },
+    {
+      "id": "exp81_v4_3_atcosim_long_light_aug_epoch12",
+      "status": "planned",
+      "priority": 80,
+      "category": "final_recipe_candidate",
+      "data_version": "v4.3",
+      "data_dir": "qwen3_asr_20260625_exp81_v4_3_atcosim_long_light_aug",
+      "epochs": 12,
+      "machine": "167_or_178",
+      "purpose": "最终配方候选：ATCOSIM + 原始长片段上采样 + 小剂量有效真实增强。增强只从已证实有益的 DeepFilter/AppDenoise/TTS10/general20 中选择，避免 fullmix 式变量过多。",
+      "plan_label": "FR1",
+      "needs_data_materialize": true,
+      "blocked_on": [
+        "exp50/76/77 first full eval",
+        "exp79/80 long-audio result",
+        "exp63/64 TTS dose comparison",
+        "exp66/67/70 direction comparison"
+      ],
+      "training_policy": {
+        "target_epochs": 12,
+        "early_stopping_patience": 3,
+        "load_best_model_at_end": true,
+        "eval_strategy": "full_eval_each_epoch_plus_derived_slices"
+      },
+      "selection_focus": [
+        "full_wer",
+        "duration_long_audio_ge8s",
+        "english_atc",
+        "numbers_callsigns",
+        "mixed_atc"
+      ]
     }
   ],
   "machine_policy": [
@@ -658,34 +776,35 @@
         "exp64_v4_3_ttsclone22h_epoch5"
       ],
       "next_after_current": [
-        "exp75_v4_3_atcosim_epoch12 if exp50 epoch5 holds and data synced"
+        "finish exp51/52/64; then run small-dose validation only if GPU free, not duplicate exp50/76/77"
       ]
     },
     {
       "machine": "178",
       "role": "负责 ATCOSIM、matched mini、TTS 10h，以及后续高剂量数据扩充筛选。",
       "queue_now": [
-        "exp50_v4_3_atcosim_epoch5",
-        "exp63_v4_3_ttsclone10h_epoch5",
-        "exp70_v4_3_highdose_real_aug_combo_epoch3",
-        "exp74_mini_v4_3_orig_long_mild_ge8_concat05 rerun-once",
-        "long_mini_rich_slice_backfill_wait_gpu1"
+        "exp50 resume-to-12 on GPU0",
+        "exp76 ATCOSIM+UWB epoch12 on GPU1",
+        "exp77 ATCOSIM+general20 epoch12 on GPU2",
+        "exp61/73/74 rich eval on GPU3"
       ],
       "next_after_current": [
-        "exp75_v4_3_atcosim_epoch12",
-        "exp76/77 after materialize"
+        "exp79 long upsample full after exp73 rich eval",
+        "exp80 ATCOSIM+long upsample if exp79 confirms"
       ]
     },
     {
       "machine": "167",
-      "role": "负责 v4.3 baseline、高剂量筛选和 TTS22h；长音频 full 训练仍为手动诊断候选。",
+      "role": "负责 v4.3 baseline、高剂量筛选、长音频 full-derived rich eval；后续优先承接 exp79/80 的上采样 full-scale。",
       "queue_now": [
         "exp29_v4_3_no_translation_mismatch_baseline",
         "exp68_v4_3_highdose_vad100h_epoch3",
-        "exp69_v4_3_highdose_openatc_all_epoch3"
+        "exp69_v4_3_highdose_openatc_all_epoch3",
+        "exp73/74 long-mini rich slice full eval on free GPUs"
       ],
       "next_after_current": [
-        "materialize_or_sync_exp46_exp47_for_ATCOSIM_combos"
+        "exp79_v4_3_orig_long_upsample_full_epoch12 after materialize",
+        "avoid duplicate ATCOSIM combo already running on 178"
       ]
     }
   ],
@@ -695,8 +814,12 @@
     "高剂量单类 run 如果 full WER 变差但目标 slice 明显变好，保留为专项候选，不直接进最终主配方。",
     "高剂量单类 run 如果 full WER 和目标 slice 都不改善，低剂量版本暂停。",
     "TTS 只有在 numbers_callsigns、mixed/content_mixed、英文或 callsign-heavy slice 有改善时，才纳入最终配方。",
-    "长音频需要综合 duration_8_12s、duration_ge12s、early-EOS 诊断和 full-WER 是否退化。",
-    "只因为旧数据版本或不同测试/slice 定义获胜的 run 不晋级。"
+    "长音频上采样 mini 有小幅长时长收益，保留做完整 ablation；拼接音频 concat mini 全量退化，默认舍弃，只保留诊断留档。",
+    "长音频完整 ablation 需要综合 duration_6_8s、duration_8_12s、duration_ge12s、early-EOS 诊断和 full-WER 是否退化。",
+    "只因为旧数据版本或不同测试/slice 定义获胜的 run 不晋级。",
+    "长音频修正优先走“原始长片段上采样”，不再优先走 contiguous concat；concat 只有在 full-derived rich slice 明确补足上采样无法覆盖的问题时才恢复。",
+    "同一数据、同一方向的继续训练必须优先 resume 原 output_dir 和 W&B run；只有新数据组合才新开 exp 编号。",
+    "长音频上采样进入最终配方前，必须证明 full WER 不明显退化，同时 duration_8_12s / duration_ge12s 或 early-EOS 诊断有稳定改善。"
   ],
-  "numbering_note": "编号说明：raw run id 保留历史连续性，已启动的 run 不重命名；页面中的计划编号用于阅读执行顺序。A=当前主线，M=matched mini，L=长音频，T=TTS，H=高剂量数据扩充筛选。exp30-exp49 中很多只是早期数据配方或历史候选，不代表漏跑。 2026-06-23 更新：167 长音频计划 run 已暂停，不再作为待训练队列展示。"
+  "numbering_note": "编号说明：raw run id 保留历史连续性，已启动的 run 不重命名；页面中的计划编号用于阅读执行顺序。A=当前主线，M=matched mini，L=长音频，T=TTS，H=高剂量数据扩充筛选。exp30-exp49 中很多只是早期数据配方或历史候选，不代表漏跑。 2026-06-23 更新：167 长音频计划 run 已暂停，不再作为待训练队列展示。 2026-06-25 更新：exp79/80/81 是长音频上采样和最终配方候选；exp75 被 exp50 同名续跑取代。"
 }
