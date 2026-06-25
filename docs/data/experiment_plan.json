@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-06-25 18:16 CST",
+  "updated_at": "2026-06-25 19:16 CST",
   "title": "Qwen3-ASR v4.3 数据扩充实验计划",
   "dashboard_note": "这个页面用于动态跟踪实验计划：区分历史 run、当前队列、后续数据配比 ablation，以及暂缓或诊断类实验。通用数据和混合数据都已纳入计划；raw exp 编号只作为运行 ID，不代表必须连续执行。",
   "current_base": {
@@ -65,7 +65,7 @@
     {
       "topic": "app_denoise",
       "confidence": "medium-high",
-      "summary": "exp66 app denoise 90h 已完成 3 epoch：full WER 13.3763 / CER 12.7943 / SER 64.7302，相比 exp29 5ep 基线 full、英文、长音频和 YouTube slice 均有改善，但略弱于 exp67 DeepFilter；保留为有效增强候选，继续对照 exp51 45h 与后续 15h 递减。"
+      "summary": "exp66 app denoise 90h 已完成 3 epoch：full WER 13.3763 / CER 12.7943 / SER 64.7302，相比 exp29 当前续跑到 epoch6 的 full WER 13.3743 基本持平，中文略好但英文/长音频不占优；已在 167 GPU2 启动 exp30 app15h 递减剂量验证，继续等待 exp51 45h 完成。"
     },
     {
       "topic": "fullmix",
@@ -80,7 +80,7 @@
     {
       "topic": "deepfilter",
       "confidence": "medium",
-      "summary": "exp67 DeepFilter 60h 已完成 3 epoch：full WER 13.2894 / CER 12.7750 / SER 64.5424，优于 exp65 general100h，但长音频、英文、YouTube/B站 slice 仍弱；DeepFilter 可保留为高剂量组合候选，不是 long-audio/eos 主解。"
+      "summary": "exp67 DeepFilter 60h 已完成 3 epoch：full WER 13.2894 / CER 12.7750 / SER 64.5424，是非 ATCOSIM 单类增强里较强方向；但英文、YouTube/B站和长音频 slice 仍弱。已在 167 GPU3 启动 exp32 DeepFilter15h 递减剂量验证，不作为 long-audio/eos 主解。"
     },
     {
       "topic": "tts",
@@ -90,7 +90,7 @@
     {
       "topic": "long_audio",
       "confidence": "medium-high",
-      "summary": "会话 019eee5a 和当前 mini/rich-slice 证据基本确认：提升原始长音频片段占比/上采样是更优先的训练修正方向。由于 ATCOSIM 信号最强且当前急需找到最佳数据组合，后续优先跑 ATCOSIM + 原始长片段上采样（exp80）；base-only 上采样（exp79）降为低优先级机制验证。"
+      "summary": "会话 019eee5a 和当前 mini/rich-slice 证据基本确认：提升原始长音频片段占比/上采样是更优先的训练修正方向。由于 ATCOSIM 信号最强且当前急需找到最佳数据组合，后续优先跑 ATCOSIM + 原始长片段上采样（exp80）；base-only 上采样（exp79）只保留 167 GPU0 一份机制验证，178 上重复 exp79 已停止。"
     },
     {
       "topic": "atcosim_lead",
@@ -110,7 +110,7 @@
     {
       "topic": "augmentation_direction_summary",
       "confidence": "medium-high",
-      "summary": "截至 2026-06-25：ATCOSIM 是主收益方向；后续组合实验默认基于 ATCOSIM。原始长片段上采样是长音频/EOS 专项优先方向，先跑 exp80（ATCOSIM+long upsample）寻找最佳组合，exp79 仅作低优先级机制验证；DeepFilter/AppDenoise/TTS10/general20 作为小剂量候选。"
+      "summary": "截至 2026-06-25 19:05：ATCOSIM 是主收益方向；后续组合实验默认基于 ATCOSIM。exp69 openATC all 和 exp70 highdose combo 证明 openATC/组合方向有效但弱于 exp50；单类增强里 DeepFilter60h 较强，app denoise90h 与 baseline 接近，VAD100/general100 不单独晋级。空卡已用于 exp30 app15h 与 exp32 DeepFilter15h 递减剂量验证。"
     }
   ],
   "runs": [
@@ -124,6 +124,48 @@
       "plan_label": "历史"
     },
     {
+      "id": "exp30_v4_3_appdenoise15h_epoch3",
+      "status": "running",
+      "priority": 73,
+      "category": "dose_down_validation",
+      "data_version": "v4.3",
+      "data_dir": "qwen3_asr_20260623_exp30_v4_3_appdenoise15h",
+      "epochs": 3,
+      "machine": "167",
+      "purpose": "app denoise 高剂量 90h 与当前 baseline 接近，45h 正在 47 跑；补 15h 递减剂量验证，判断少量增强是否足够且更不伤英文/长音频。",
+      "plan_label": "D1",
+      "launched": {
+        "host": "167",
+        "gpu": 2,
+        "run_name": "exp30_app15_e3_g2",
+        "run_dir": "train/training_checkpoints/qwen3-asr-0.6b-exp30_app15_e3_g2",
+        "started_at": "2026-06-25T18:56:00+08:00",
+        "materialized_rows": 310689,
+        "materialized_hours": 322.3346
+      }
+    },
+    {
+      "id": "exp32_v4_3_deepfilter15h_epoch3",
+      "status": "running",
+      "priority": 72,
+      "category": "dose_down_validation",
+      "data_version": "v4.3",
+      "data_dir": "qwen3_asr_20260623_exp32_v4_3_deepfilter15h",
+      "epochs": 3,
+      "machine": "167",
+      "purpose": "DeepFilter60h 是非 ATCOSIM 单类增强里较强方向；补 15h 递减剂量验证，判断是否能保留收益并减少对英文/YouTube/B站/长音频的副作用。",
+      "plan_label": "D2",
+      "launched": {
+        "host": "167",
+        "gpu": 3,
+        "run_name": "exp32_df15_e3_g3",
+        "run_dir": "train/training_checkpoints/qwen3-asr-0.6b-exp32_df15_e3_g3",
+        "started_at": "2026-06-25T18:59:00+08:00",
+        "materialized_rows": 310640,
+        "materialized_hours": 322.3349
+      }
+    },
+    {
       "id": "exp29_v4_3_no_translation_mismatch_baseline",
       "status": "completed",
       "priority": 100,
@@ -132,7 +174,7 @@
       "data_dir": "qwen3_asr_20260623_cleaned_v4_3_verbatim_no_translation_mismatch",
       "epochs": 8,
       "machine": "167",
-      "purpose": "当前 v4.3 主基线；已在 167 评估到 5 epoch，当前沿用同一 exp29 output_dir 从 checkpoint-23085 继续到 8 epoch。若 epoch6-8 仍改善，再继续延长同一 exp29。",
+      "purpose": "当前 v4.3 主基线；已在 167 续跑到 epoch6，best full WER 13.3743，仍在同一 output_dir 继续到 8 epoch。若 epoch6-8 仍改善，再继续延长同一 exp29。",
       "plan_label": "B0",
       "active_run": {
         "host": "167",
@@ -145,24 +187,23 @@
       "result_summary": {
         "host": "167",
         "run_dir": "train/training_checkpoints/qwen3-asr-0.6b-exp29_v4_3_no_translation_mismatch_baseline_epoch1_remote167_maskfix_bsz8_epoch_gpu0",
-        "completed_at": "2026-06-24T16:34:57",
-        "best_checkpoint": "checkpoint-23085",
-        "epoch": 5,
-        "step": 23085,
+        "completed_at": "2026-06-25T18:40:00",
+        "best_checkpoint": "checkpoint-55404",
+        "epoch": 6,
+        "step": 55404,
         "full": {
-          "wer": 13.6621,
-          "cer": 13.0874,
-          "ser": 65.6943,
-          "eval_loss": 0.3978
+          "wer": 13.3743,
+          "cer": 12.6554,
+          "ser": 64.4422
         },
         "key_slices": {
-          "zh_atc_wer": 12.1517,
-          "english_atc_wer": 18.3315,
-          "mixed_atc_wer": 17.6691,
-          "numbers_callsigns_wer": 14.1336,
-          "duration_long_audio_ge8s_wer": 19.3374,
-          "source_youtube_vasaviation_wer": 19.6758,
-          "source_bilibili_all_wer": 18.1196
+          "zh_atc_wer": 12.0536,
+          "english_atc_wer": 17.462,
+          "mixed_atc_wer": 17.3335,
+          "numbers_callsigns_wer": 13.6669,
+          "duration_long_audio_ge8s_wer": 18.6055,
+          "source_youtube_vasaviation_wer": 19.3087,
+          "source_bilibili_all_wer": 17.533
         },
         "decision": "baseline_for_v4_3_multi_epoch_comparison"
       }
@@ -388,7 +429,7 @@
     },
     {
       "id": "exp63_v4_3_ttsclone10h_epoch5",
-      "status": "active",
+      "status": "completed",
       "priority": 80,
       "category": "tts_validation",
       "data_version": "v4.3",
@@ -419,23 +460,24 @@
     },
     {
       "id": "exp64_v4_3_ttsclone22h_epoch5",
-      "status": "completed",
+      "status": "active",
       "priority": 78,
       "category": "tts_validation",
       "data_version": "v4.3",
       "data_dir": "qwen3_asr_20260623_exp34_v4_3_ttsclone22h",
       "epochs": 5,
-      "purpose": "TTS22h 5 epoch 对照当前只保留 47 GPU1 的有效进度；167 上重复启动的 exp64 已停止。当前 epoch2 full WER 13.8738，暂弱于 exp63 TTS10h。",
+      "purpose": "TTS22h 5 epoch 对照当前只保留 47 GPU1 的有效进度；167 上重复启动的 exp64 已停止。当前 epoch4 full WER 13.1655，暂优于 exp63 TTS10h，但需等 epoch5 完成后看是否回退以及 numbers/callsigns、mixed、英文 slice。",
       "plan_label": "T2",
       "machine": "47",
       "result_summary": {
         "host": "47",
         "run_dir": "train/training_checkpoints/qwen3-asr-0.6b-exp64_v43_tts22h_e5_b8_g1",
-        "epoch": 2,
-        "step": 19530,
+        "epoch": 4,
+        "step": 39060,
         "full": {
-          "wer": 13.8738,
-          "cer": null
+          "wer": 13.1655,
+          "cer": 12.5242,
+          "ser": 64.1417
         },
         "decision": "continue_to_epoch5_compare_with_exp63"
       }
@@ -555,7 +597,7 @@
     },
     {
       "id": "exp68_v4_3_highdose_vad100h_epoch3",
-      "status": "active",
+      "status": "completed",
       "priority": 66,
       "category": "highdose_screen",
       "data_version": "v4.3",
@@ -564,13 +606,35 @@
       "caps_hours": {
         "vad": 100
       },
-      "purpose": "正在 167 GPU2 跑 VAD/切分增强 100h 高剂量筛选，重点看长短音频和 early-EOS 相关 slice。",
+      "purpose": "VAD/切分增强 100h 高剂量筛选已完成：full WER 13.3597 / CER 12.6967 / SER 64.8554。相比 exp29 epoch6 baseline 只有很小整体差异，英文/长音频/YouTube 不明显占优；不单独晋级，若进入组合只能小剂量。",
       "plan_label": "H4",
-      "machine": "167"
+      "machine": "167",
+      "result_summary": {
+        "host": "167",
+        "run_dir": "train/training_checkpoints/qwen3-asr-0.6b-exp68_v43_vad100h_e3_b8_g2",
+        "best_checkpoint": "checkpoint-35607",
+        "epoch": 3,
+        "step": 35607,
+        "full": {
+          "wer": 13.3597,
+          "cer": 12.6967,
+          "ser": 64.8554
+        },
+        "key_slices": {
+          "zh_atc_wer": 12.0279,
+          "english_atc_wer": 17.4941,
+          "mixed_atc_wer": 17.4368,
+          "numbers_callsigns_wer": 13.6071,
+          "duration_long_audio_ge8s_wer": 18.5285,
+          "source_youtube_vasaviation_wer": 19.3393,
+          "source_bilibili_all_wer": 17.5819
+        },
+        "decision": "do_not_promote_highdose_vad_standalone_keep_only_small_combo_candidate"
+      }
     },
     {
       "id": "exp69_v4_3_highdose_openatc_all_epoch3",
-      "status": "active",
+      "status": "completed",
       "priority": 64,
       "category": "highdose_screen",
       "data_version": "v4.3",
@@ -579,13 +643,35 @@
       "caps_hours": {
         "open_atc": 60
       },
-      "purpose": "正在 167 GPU3 跑 open ATC all/cap 60h 高剂量筛选，重点看英文、YouTube 和 ATC 真实来源 slice。",
+      "purpose": "open ATC all/cap 60h 高剂量筛选已完成。epoch3 full WER 12.9742 / CER 10.5300 / SER 61.8910，明显优于非 openATC 单类增强，但弱于 exp50 ATCOSIM；说明 openATC 有效，但当前全量混合不如 ATCOSIM 单源干净。",
       "plan_label": "H5",
-      "machine": "167"
+      "machine": "167",
+      "result_summary": {
+        "host": "167",
+        "run_dir": "train/training_checkpoints/qwen3-asr-0.6b-exp69_v43_openatc_all_e3_b8_g3",
+        "best_checkpoint": "checkpoint-29475",
+        "epoch": 3,
+        "step": 29475,
+        "full": {
+          "wer": 12.9742,
+          "cer": 10.53,
+          "ser": 61.891
+        },
+        "key_slices": {
+          "zh_atc_wer": 11.9273,
+          "english_atc_wer": 17.8868,
+          "mixed_atc_wer": 17.1399,
+          "numbers_callsigns_wer": 13.8285,
+          "duration_long_audio_ge8s_wer": 18.4538,
+          "source_youtube_vasaviation_wer": 19.5458,
+          "source_bilibili_all_wer": 17.5819
+        },
+        "decision": "open_atc_effective_but_all_pool_weaker_than_atcosim_prioritize_atcosim_combos"
+      }
     },
     {
       "id": "exp70_v4_3_highdose_real_aug_combo_epoch3",
-      "status": "active",
+      "status": "completed",
       "priority": 55,
       "category": "highdose_combo",
       "data_version": "v4.3",
@@ -642,16 +728,24 @@
     },
     {
       "id": "exp76_v4_3_atcosim_uwb_epoch12",
-      "status": "planned",
+      "status": "running",
       "priority": 86,
       "category": "atcosim_combo",
       "data_version": "v4.3",
       "data_dir": "qwen3_asr_20260623_exp46_v4_3_open_atc_uwb_atcosim",
       "epochs": 12,
-      "machine": "167_or_178",
+      "machine": "178",
       "purpose": "ATCOSIM 强基座加 UWB/ATCO2 open ATC 受控组合。先 materialize/sync 数据，再长训到 12 epoch + patience3，重点看英文、YouTube、open ATC supplement 和 full WER 是否优于 exp50。",
       "plan_label": "AC1",
-      "needs_data_materialize": true,
+      "needs_data_materialize": false,
+      "launched": {
+        "host": "178",
+        "gpu": 1,
+        "run_name": "exp76_v43_atcosim_uwb_e12_g1",
+        "run_dir": "train/training_checkpoints/qwen3-asr-0.6b-exp76_v43_atcosim_uwb_e12_g1",
+        "started_at": "2026-06-25",
+        "first_epoch_wer": 15.1861
+      },
       "training_policy": {
         "target_epochs": 12,
         "early_stopping_patience": 3,
@@ -660,16 +754,24 @@
     },
     {
       "id": "exp77_v4_3_atcosim_general20_epoch12",
-      "status": "planned",
+      "status": "running",
       "priority": 84,
       "category": "atcosim_combo",
       "data_version": "v4.3",
       "data_dir": "qwen3_asr_20260623_exp47_v4_3_open_atc_best_general20h",
       "epochs": 12,
-      "machine": "167_or_178",
+      "machine": "178",
       "purpose": "ATCOSIM + general20h regularizer。用于验证通用数据是否能在不伤害 ATC 的情况下改善泛化/英文；长训到 12 epoch + patience3。",
       "plan_label": "AC2",
-      "needs_data_materialize": true,
+      "needs_data_materialize": false,
+      "launched": {
+        "host": "178",
+        "gpu": 2,
+        "run_name": "exp77_v43_atcosim_general20_e12_g2",
+        "run_dir": "train/training_checkpoints/qwen3-asr-0.6b-exp77_v43_atcosim_general20_e12_g2",
+        "started_at": "2026-06-25",
+        "first_epoch_wer": 15.3995
+      },
       "training_policy": {
         "target_epochs": 12,
         "early_stopping_patience": 3,
@@ -708,19 +810,21 @@
       "data_version": "v4.3",
       "data_dir": "qwen3_asr_20260625_exp79_v4_3_orig_long_upsample_full",
       "epochs": 12,
-      "machine": "178",
-      "purpose": "机制验证：在 plain v4.3 base 上单独提高 8-12s 与 >=12s 真实片段采样权重，用于隔离“长片段比例”本身的收益。2026-06-25 因 178 GPU0 空闲且 exp80 已在 GPU3 运行，启动该非重复对照。",
+      "machine": "167",
+      "purpose": "机制验证：在 plain v4.3 base 上单独提高 8-12s 与 >=12s 真实片段采样权重，用于隔离“长片段比例”本身的收益。2026-06-25 发现 167 和 178 重复运行后，停止 178 进程，保留 167 GPU0 一份。",
       "plan_label": "L-low",
       "needs_data_materialize": false,
       "launched": {
-        "host": "178",
+        "host": "167",
         "gpu": 0,
         "run_name": "exp79_v43_origlong_e12_g0",
         "run_dir": "train/training_checkpoints/qwen3-asr-0.6b-exp79_v43_origlong_e12_g0",
         "started_at": "2026-06-25T17:56:00+08:00",
         "data_dir": "train/training_data/qwen3_asr_20260625_exp79_v4_3_orig_long_upsample_full",
         "materialized_rows": 295480,
-        "materialized_hours": 340.3685
+        "materialized_hours": 340.3685,
+        "first_epoch_wer": 15.5429,
+        "duplicate_stopped": "178 GPU0 duplicate exp79 stopped at 2026-06-25 18:45 CST before producing useful metrics"
       },
       "training_policy": {
         "target_epochs": 12,
@@ -738,16 +842,24 @@
     },
     {
       "id": "exp80_v4_3_atcosim_orig_long_upsample_epoch12",
-      "status": "planned",
+      "status": "running",
       "priority": 96,
       "category": "long_audio_atcosim_combo",
       "data_version": "v4.3",
       "data_dir": "qwen3_asr_20260625_exp80_v4_3_atcosim_orig_long_upsample",
       "epochs": 12,
-      "machine": "167_or_178",
+      "machine": "178",
       "purpose": "优先实验：在当前最强 ATCOSIM 配方上叠加原始长片段上采样，用于尽快寻找兼顾 full WER 和长音频/EOS 能力的最佳数据组合。",
       "plan_label": "L8",
-      "needs_data_materialize": true,
+      "needs_data_materialize": false,
+      "launched": {
+        "host": "178",
+        "gpu": 3,
+        "run_name": "exp80_v43_atcosim_origlong_e12_g3",
+        "run_dir": "train/training_checkpoints/qwen3-asr-0.6b-exp80_v43_atcosim_origlong_e12_g3",
+        "started_at": "2026-06-25",
+        "first_epoch_wer": 13.5443
+      },
       "blocked_on": [
         "exp73 full-derived rich eval if available; otherwise can materialize with exp73 mini policy"
       ],
@@ -815,13 +927,13 @@
       "machine": "178",
       "role": "负责 ATCOSIM、matched mini、TTS 10h，以及后续高剂量数据扩充筛选。",
       "queue_now": [
-        "exp79 base-only long upsample epoch12 on GPU0",
+        "GPU0 free after stopping duplicate exp79",
         "exp76 ATCOSIM+UWB epoch12 on GPU1",
         "exp77 ATCOSIM+general20 epoch12 on GPU2",
         "exp80 ATCOSIM+long upsample epoch12 on GPU3"
       ],
       "next_after_current": [
-        "wait for exp76/77/79/80 first epoch and full eval before starting exp81",
+        "wait for exp76/77/79/80 more epochs and exp30/32 dose-down before starting exp81",
         "do not duplicate exp50/63/70"
       ]
     },
@@ -829,14 +941,14 @@
       "machine": "167",
       "role": "负责 v4.3 baseline、高剂量筛选、长音频 full-derived rich eval；后续优先承接 exp79/80 的上采样 full-scale。",
       "queue_now": [
+        "exp79_v4_3_orig_long_upsample_full_epoch12 on GPU0",
         "exp29_v4_3_no_translation_mismatch_baseline",
-        "exp68_v4_3_highdose_vad100h_epoch3",
-        "exp69_v4_3_highdose_openatc_all_epoch3",
-        "exp73/74 long-mini rich slice full eval on free GPUs"
+        "exp30_v4_3_appdenoise15h_epoch3 on GPU2",
+        "exp32_v4_3_deepfilter15h_epoch3 on GPU3"
       ],
       "next_after_current": [
-        "exp80_v4_3_atcosim_orig_long_upsample_epoch12 after materialize if 178 busy",
-        "exp79 low priority diagnostic only"
+        "do not start exp81 until exp76/77/79/80 plus exp30/32 first results are available",
+        "do not duplicate completed exp68/69 or stopped 178 exp79"
       ]
     }
   ],
