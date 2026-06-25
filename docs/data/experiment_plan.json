@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-06-25 10:18 CST",
+  "updated_at": "2026-06-25 10:29 CST",
   "title": "Qwen3-ASR v4.3 数据扩充实验计划",
   "dashboard_note": "这个页面用于动态跟踪实验计划：区分历史 run、当前队列、后续数据配比 ablation，以及暂缓或诊断类实验。通用数据和混合数据都已纳入计划；raw exp 编号只作为运行 ID，不代表必须连续执行。",
   "current_base": {
@@ -90,7 +90,7 @@
     {
       "topic": "long_audio",
       "confidence": "medium-high",
-      "summary": "会话 019eee5a 和当前 mini/rich-slice 证据基本确认：提升原始长音频片段占比/上采样是更优先的训练修正方向；exp73 在 >=6s / >=8s duration slice 有小幅收益且 full mini 基本不伤，exp74 少量 concat 虽也改善部分长时长 slice 但 full mini 退化，因此后续优先做原始长片段上采样 full-scale，concat 只保留诊断。"
+      "summary": "会话 019eee5a 和当前 mini/rich-slice 证据基本确认：提升原始长音频片段占比/上采样是更优先的训练修正方向。由于 ATCOSIM 信号最强且当前急需找到最佳数据组合，后续优先跑 ATCOSIM + 原始长片段上采样（exp80）；base-only 上采样（exp79）降为低优先级机制验证。"
     },
     {
       "topic": "atcosim_lead",
@@ -110,7 +110,7 @@
     {
       "topic": "augmentation_direction_summary",
       "confidence": "medium-high",
-      "summary": "截至 2026-06-25：ATCOSIM 是主收益方向；原始长片段上采样是长音频/EOS 专项优先方向；DeepFilter/AppDenoise 对 full/中文/数字呼号有小幅收益，可作为轻量组合候选；general 100h 只适合作 regularizer；TTS 10h 优于 22h 倾向，小剂量候选；VAD/open_atc_all/fullmix 等待或只作为组合参考。"
+      "summary": "截至 2026-06-25：ATCOSIM 是主收益方向；后续组合实验默认基于 ATCOSIM。原始长片段上采样是长音频/EOS 专项优先方向，先跑 exp80（ATCOSIM+long upsample）寻找最佳组合，exp79 仅作低优先级机制验证；DeepFilter/AppDenoise/TTS10/general20 作为小剂量候选。"
     }
   ],
   "runs": [
@@ -676,18 +676,18 @@
     },
     {
       "id": "exp79_v4_3_orig_long_upsample_full_epoch12",
-      "status": "planned",
-      "priority": 94,
+      "status": "planned_low_priority",
+      "priority": 40,
       "category": "long_audio_upsampling",
       "data_version": "v4.3",
       "data_dir": "qwen3_asr_20260625_exp79_v4_3_orig_long_upsample_full",
       "epochs": 12,
       "machine": "167_or_178",
-      "purpose": "把 exp73 的原始长片段上采样策略扩展到 full-scale：提高原训练数据中 8-12s 与 >=12s 真实片段采样权重，不合成/拼接新语音。用于验证长音频/EOS 能力是否由训练分布中长片段比例不足导致。",
-      "plan_label": "L8",
+      "purpose": "低优先级机制验证：在 plain v4.3 base 上单独提高 8-12s 与 >=12s 真实片段采样权重，用于隔离“长片段比例”本身的收益。当前因 ATCOSIM 信号强且目标是尽快找到最佳组合，排在 exp80 之后。",
+      "plan_label": "L-low",
       "needs_data_materialize": true,
       "blocked_on": [
-        "exp73 full-derived rich eval"
+        "exp80 first epoch/full eval if mechanism still needs isolation"
       ],
       "training_policy": {
         "target_epochs": 12,
@@ -706,18 +706,17 @@
     {
       "id": "exp80_v4_3_atcosim_orig_long_upsample_epoch12",
       "status": "planned",
-      "priority": 92,
+      "priority": 96,
       "category": "long_audio_atcosim_combo",
       "data_version": "v4.3",
       "data_dir": "qwen3_asr_20260625_exp80_v4_3_atcosim_orig_long_upsample",
       "epochs": 12,
       "machine": "167_or_178",
-      "purpose": "在当前最强 ATCOSIM 配方上叠加原始长片段上采样。若 exp79 证明长音频收益真实且 full WER 不伤，则这是最可能进入最终模型的长音频修正组合。",
-      "plan_label": "L9",
+      "purpose": "优先实验：在当前最强 ATCOSIM 配方上叠加原始长片段上采样，用于尽快寻找兼顾 full WER 和长音频/EOS 能力的最佳数据组合。",
+      "plan_label": "L8",
       "needs_data_materialize": true,
       "blocked_on": [
-        "exp50 resumed-to-12 checkpoint trend",
-        "exp79 epoch/full eval"
+        "exp73 full-derived rich eval if available; otherwise can materialize with exp73 mini policy"
       ],
       "training_policy": {
         "target_epochs": 12,
@@ -789,8 +788,8 @@
         "exp61/73/74 rich eval on GPU3"
       ],
       "next_after_current": [
-        "exp79 long upsample full after exp73 rich eval",
-        "exp80 ATCOSIM+long upsample if exp79 confirms"
+        "exp80 ATCOSIM+long upsample first",
+        "exp79 base-only long upsample only if mechanism isolation still needed"
       ]
     },
     {
@@ -803,8 +802,8 @@
         "exp73/74 long-mini rich slice full eval on free GPUs"
       ],
       "next_after_current": [
-        "exp79_v4_3_orig_long_upsample_full_epoch12 after materialize",
-        "avoid duplicate ATCOSIM combo already running on 178"
+        "exp80_v4_3_atcosim_orig_long_upsample_epoch12 after materialize if 178 busy",
+        "exp79 low priority diagnostic only"
       ]
     }
   ],
@@ -819,7 +818,8 @@
     "只因为旧数据版本或不同测试/slice 定义获胜的 run 不晋级。",
     "长音频修正优先走“原始长片段上采样”，不再优先走 contiguous concat；concat 只有在 full-derived rich slice 明确补足上采样无法覆盖的问题时才恢复。",
     "同一数据、同一方向的继续训练必须优先 resume 原 output_dir 和 W&B run；只有新数据组合才新开 exp 编号。",
-    "长音频上采样进入最终配方前，必须证明 full WER 不明显退化，同时 duration_8_12s / duration_ge12s 或 early-EOS 诊断有稳定改善。"
+    "长音频上采样进入最终配方前，必须证明 full WER 不明显退化，同时 duration_8_12s / duration_ge12s 或 early-EOS 诊断有稳定改善。",
+    "ATCOSIM 信号已经足够强，后续寻找最佳数据组合时默认基于 ATCOSIM；plain v4.3 base-only 实验只保留为机制验证，优先级低于 ATCOSIM 组合。"
   ],
-  "numbering_note": "编号说明：raw run id 保留历史连续性，已启动的 run 不重命名；页面中的计划编号用于阅读执行顺序。A=当前主线，M=matched mini，L=长音频，T=TTS，H=高剂量数据扩充筛选。exp30-exp49 中很多只是早期数据配方或历史候选，不代表漏跑。 2026-06-23 更新：167 长音频计划 run 已暂停，不再作为待训练队列展示。 2026-06-25 更新：exp79/80/81 是长音频上采样和最终配方候选；exp75 被 exp50 同名续跑取代。"
+  "numbering_note": "编号说明：raw run id 保留历史连续性，已启动的 run 不重命名；页面中的计划编号用于阅读执行顺序。A=当前主线，M=matched mini，L=长音频，T=TTS，H=高剂量数据扩充筛选。exp30-exp49 中很多只是早期数据配方或历史候选，不代表漏跑。 2026-06-23 更新：167 长音频计划 run 已暂停，不再作为待训练队列展示。 2026-06-25 更新：exp79/80/81 是长音频上采样和最终配方候选；exp75 被 exp50 同名续跑取代。 2026-06-25 更新2：exp80 优先于 exp79；exp79 降为低优先级机制验证。"
 }
