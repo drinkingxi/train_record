@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-06-26 09:16 CST",
+  "updated_at": "2026-06-26 10:16 CST",
   "title": "Qwen3-ASR v4.3 数据扩充实验计划",
   "dashboard_note": "这个页面用于动态跟踪实验计划：区分历史 run、当前队列、后续数据配比 ablation，以及暂缓或诊断类实验。通用数据和混合数据都已纳入计划；raw exp 编号只作为运行 ID，不代表必须连续执行。",
   "current_base": {
@@ -85,17 +85,17 @@
     {
       "topic": "tts",
       "confidence": "medium",
-      "summary": "TTS10h exp63 到 epoch4 full WER 13.4075，优于当前 exp64 TTS22h epoch2 13.8738；TTS22h 在 167 的重复 run 已停，只保留 47 上正在跑的有效进度。TTS 是否进入最终配方需要看 exp63/64 完成后的 numbers/callsigns、mixed、英文 slice。"
+      "summary": "TTS10h exp63 epoch5 full WER 13.2777；TTS22h exp64 epoch5 best 在 epoch4，full WER 13.1655，epoch5 轻微回退到 13.1714。TTS 有一定收益，但仍弱于 ATCOSIM/ATCOSIM+long，只作为小剂量候选。"
     },
     {
       "topic": "long_audio",
       "confidence": "medium-high",
-      "summary": "会话 019eee5a 和当前 mini/rich-slice 证据基本确认：提升原始长音频片段占比/上采样是更优先的训练修正方向。由于 ATCOSIM 信号最强且当前急需找到最佳数据组合，后续优先跑 ATCOSIM + 原始长片段上采样（exp80）；base-only 上采样（exp79）只保留 167 GPU0 一份机制验证，178 上重复 exp79 已停止。"
+      "summary": "exp80 ATCOSIM + 原始长片段上采样到 epoch3 full WER 12.206，明显优于 exp79 base-only long epoch3 的 14.065，也强于 exp76/77 早期结果。后续空卡已启动 exp78/81，分别对照“ATCOSIM+轻量增强”和“ATCOSIM+long+轻量增强”。"
     },
     {
       "topic": "atcosim_lead",
       "confidence": "high",
-      "summary": "exp50 ATCOSIM 是当前最强方向：epoch4 full WER 11.1440，duration_long_audio_ge8s WER 16.5065，均显著优于 exp29 baseline 和其他增强；后续应围绕 ATCOSIM 长训与受控组合展开。"
+      "summary": "exp50 ATCOSIM 续跑已到 epoch6，best 仍是 epoch4 full WER 11.1440，epoch5/6 回退到约 11.39。单独 ATCOSIM 已到平台期，后续围绕 ATCOSIM 做受控组合。"
     },
     {
       "topic": "long_mini",
@@ -110,7 +110,7 @@
     {
       "topic": "augmentation_direction_summary",
       "confidence": "medium-high",
-      "summary": "截至 2026-06-25 19:05：ATCOSIM 是主收益方向；后续组合实验默认基于 ATCOSIM。exp69 openATC all 和 exp70 highdose combo 证明 openATC/组合方向有效但弱于 exp50；单类增强里 DeepFilter60h 较强，app denoise90h 与 baseline 接近，VAD100/general100 不单独晋级。空卡已用于 exp30 app15h 与 exp32 DeepFilter15h 递减剂量验证。"
+      "summary": "截至 2026-06-26 09:35：ATCOSIM 是主收益方向，exp80 说明 ATCOSIM+原始长片段上采样有明显早期收益；exp51/52/64 已完成，fullmix 作为综合上限较强但变量过多。178 GPU0 已启动 exp81，167 GPU1 已启动 exp78。"
     }
   ],
   "runs": [
@@ -174,7 +174,7 @@
       "data_dir": "qwen3_asr_20260623_cleaned_v4_3_verbatim_no_translation_mismatch",
       "epochs": 8,
       "machine": "167",
-      "purpose": "当前 v4.3 主基线；已在 167 续跑到 epoch6，best full WER 13.3743，仍在同一 output_dir 继续到 8 epoch。若 epoch6-8 仍改善，再继续延长同一 exp29。",
+      "purpose": "当前 v4.3 主基线；已在 167 续跑到 epoch8，best full WER 13.3011 出现在 epoch7，epoch8 回退到 13.3606。后续比较以 epoch7 best 作为当前 baseline。",
       "plan_label": "B0",
       "active_run": {
         "host": "167",
@@ -189,12 +189,11 @@
         "run_dir": "train/training_checkpoints/qwen3-asr-0.6b-exp29_v4_3_no_translation_mismatch_baseline_epoch1_remote167_maskfix_bsz8_epoch_gpu0",
         "completed_at": "2026-06-25T18:40:00",
         "best_checkpoint": "checkpoint-55404",
-        "epoch": 6,
-        "step": 55404,
+        "epoch": 7,
+        "step": 64638,
         "full": {
-          "wer": 13.3743,
-          "cer": 12.6554,
-          "ser": 64.4422
+          "wer": 13.3011,
+          "cer": 12.6245
         },
         "key_slices": {
           "zh_atc_wer": 12.0536,
@@ -210,14 +209,14 @@
     },
     {
       "id": "exp50_v4_3_atcosim_epoch5",
-      "status": "active",
+      "status": "completed",
       "priority": 95,
       "category": "promoted_single_factor",
       "data_version": "v4.3",
       "data_dir": "qwen3_asr_20260623_exp40_v4_3_open_atc_atcosim",
       "epochs": 12,
       "machine": "178",
-      "purpose": "ATCOSIM v4.3 是当前最强方向；已从 checkpoint-47360 同名续跑到 12 epoch，并启用 best-checkpoint/early-stop patience=3。后续同一数据继续训练时优先续原 run/WandB，不另开 exp75。",
+      "purpose": "ATCOSIM v4.3 是当前最强单因素方向；续跑到 epoch6 后 best 仍停在 epoch4，说明单独 ATCOSIM 已到平台期，后续转向 ATCOSIM 受控组合。",
       "plan_label": "A1",
       "result_summary": {
         "host": "178",
@@ -235,9 +234,11 @@
           "source_youtube_vasaviation_wer": 19.0334,
           "source_bilibili_all_wer": 17.0442
         },
-        "decision": "primary_candidate_resumed_to_12_same_run"
+        "last_epoch": 6,
+        "last_wer": 11.3901,
+        "decision": "primary_candidate_plateau_after_epoch4_use_for_combo_base"
       },
-      "active_run": {
+      "completed_run": {
         "host": "178",
         "gpu": 0,
         "run_name": "exp50_v4_3_atcosim_epoch5_epoch5_maskfix_bsz8_epoch_gpu3",
@@ -249,27 +250,49 @@
     },
     {
       "id": "exp51_v4_3_appdenoise45h_epoch5",
-      "status": "active",
+      "status": "completed",
       "priority": 90,
       "category": "promoted_single_factor",
       "data_version": "v4.3",
       "data_dir": "qwen3_asr_20260623_exp31_v4_3_appdenoise45h",
       "epochs": 5,
       "machine": "47",
-      "purpose": "验证 app denoise 在多 epoch 后是否延续 v3 slice 中的改善信号。",
-      "plan_label": "A2"
+      "purpose": "验证 app denoise 在多 epoch 后是否延续 v3 slice 中的改善信号。已完成：best epoch4 full WER 13.2582，优于 app90h 但仍弱于 ATCOSIM/组合方向。",
+      "plan_label": "A2",
+      "result_summary": {
+        "host": "47",
+        "run_dir": "train/training_checkpoints/qwen3-asr-0.6b-exp51_v4_3_appdenoise45h_epoch5_epoch5_maskfix_bsz16_epoch_gpu1",
+        "epoch": 4,
+        "full": {
+          "wer": 13.2582,
+          "cer": 12.5838
+        },
+        "last_epoch": 5,
+        "last_wer": 13.2641,
+        "decision": "keep_as_light_aug_candidate_not_standalone"
+      }
     },
     {
       "id": "exp52_v4_3_fullmix_balanced_epoch5",
-      "status": "active",
+      "status": "completed",
       "priority": 88,
       "category": "mixture_benchmark",
       "data_version": "v4.3",
       "data_dir": "qwen3_asr_20260623_exp48_v4_3_fullmix_balanced_v1",
       "epochs": 5,
       "machine": "47",
-      "purpose": "综合 balanced mixture 基准。它用于对照受控配比实验，不默认作为最终配方。",
-      "plan_label": "A3"
+      "purpose": "综合 balanced mixture 基准。已完成 epoch5 full WER 12.7982，是非纯 ATCOSIM 组合里较强上限，但变量过多，不直接作为最终配方。",
+      "plan_label": "A3",
+      "result_summary": {
+        "host": "47",
+        "run_dir": "train/training_checkpoints/qwen3-asr-0.6b-exp52_v4_3_fullmix_balanced_epoch5_epoch5_maskfix_bsz16_epoch_gpu0",
+        "epoch": 5,
+        "full": {
+          "wer": 12.7982,
+          "cer": 10.4995
+        },
+        "decision": "strong_mixture_reference_but_too_many_variables"
+      }
     },
     {
       "id": "exp53_v4_3_contiguous_concat30h",
@@ -460,13 +483,13 @@
     },
     {
       "id": "exp64_v4_3_ttsclone22h_epoch5",
-      "status": "active",
+      "status": "completed",
       "priority": 78,
       "category": "tts_validation",
       "data_version": "v4.3",
       "data_dir": "qwen3_asr_20260623_exp34_v4_3_ttsclone22h",
       "epochs": 5,
-      "purpose": "TTS22h 5 epoch 对照当前只保留 47 GPU1 的有效进度；167 上重复启动的 exp64 已停止。当前 epoch4 full WER 13.1655，暂优于 exp63 TTS10h，但需等 epoch5 完成后看是否回退以及 numbers/callsigns、mixed、英文 slice。",
+      "purpose": "TTS22h 5 epoch 对照已完成；best epoch4 full WER 13.1655，epoch5 轻微回退到 13.1714。优于 TTS10h，但不单独晋级，只作为小剂量候选。",
       "plan_label": "T2",
       "machine": "47",
       "result_summary": {
@@ -479,7 +502,9 @@
           "cer": 12.5242,
           "ser": 64.1417
         },
-        "decision": "continue_to_epoch5_compare_with_exp63"
+        "last_epoch": 5,
+        "last_wer": 13.1714,
+        "decision": "keep_tts_as_small_dose_candidate_not_standalone"
       }
     },
     {
@@ -780,22 +805,33 @@
     },
     {
       "id": "exp78_v4_3_atcosim_light_real_aug_epoch12",
-      "status": "planned",
+      "status": "running",
       "priority": 82,
       "category": "atcosim_combo",
       "data_version": "v4.3",
       "data_dir": "qwen3_asr_20260624_exp78_v4_3_atcosim_light_real_aug",
       "epochs": 12,
-      "machine": "167_or_178",
-      "purpose": "基于 exp50 的轻量真实增强组合：ATCOSIM + 少量 DeepFilter/AppDenoise/VAD 或 exp70 中有效子集。需要在 exp68/69/70 完成后按 slice 选择配比再 materialize。",
+      "machine": "167",
+      "purpose": "基于 ATCOSIM 的轻量真实增强组合：ATCOSIM10h + general20h + app denoise15h + DeepFilter15h + VAD10h，不含长音频上采样和 TTS，用于对照 exp80/81 的长音频与 TTS增量。",
       "plan_label": "AC3",
-      "needs_data_materialize": true,
-      "blocked_on": [
-        "exp68",
-        "exp69",
-        "exp70",
-        "exp61/73/74 rich slice"
-      ],
+      "needs_data_materialize": false,
+      "caps_hours": {
+        "open_atc_atcosim": 10,
+        "general": 20,
+        "app_denoise": 15,
+        "deepfilter": 15,
+        "vad": 10
+      },
+      "launched": {
+        "host": "167",
+        "gpu": 1,
+        "run_name": "exp78_v43_atcosim_light_real_e12_g1",
+        "run_dir": "train/training_checkpoints/qwen3-asr-0.6b-exp78_v43_atcosim_light_real_e12_g1",
+        "started_at": "2026-06-26T09:33:00+08:00",
+        "materialized_rows": 352282,
+        "materialized_hours": 375.2265,
+        "manifest_audio_check": "passed on 167"
+      },
       "training_policy": {
         "target_epochs": 12,
         "early_stopping_patience": 3,
@@ -879,22 +915,34 @@
     },
     {
       "id": "exp81_v4_3_atcosim_long_light_aug_epoch12",
-      "status": "planned",
+      "status": "running",
       "priority": 80,
       "category": "final_recipe_candidate",
       "data_version": "v4.3",
       "data_dir": "qwen3_asr_20260625_exp81_v4_3_atcosim_long_light_aug",
       "epochs": 12,
-      "machine": "167_or_178",
-      "purpose": "最终配方候选：ATCOSIM + 原始长片段上采样 + 小剂量有效真实增强。增强只从已证实有益的 DeepFilter/AppDenoise/TTS10/general20 中选择，避免 fullmix 式变量过多。",
+      "machine": "178",
+      "purpose": "最终配方候选：ATCOSIM + 原始长片段上采样 + 小剂量有效增强。配方为 exp80 底座 + general20h + app denoise15h + DeepFilter15h + VAD10h + TTS10h；保留 long upsample 的重复采样权重。",
       "plan_label": "FR1",
-      "needs_data_materialize": true,
-      "blocked_on": [
-        "exp50/76/77 first full eval",
-        "exp79/80 long-audio result",
-        "exp63/64 TTS dose comparison",
-        "exp66/67/70 direction comparison"
-      ],
+      "needs_data_materialize": false,
+      "caps_hours": {
+        "open_atc_atcosim": 10,
+        "general": 20,
+        "app_denoise": 15,
+        "deepfilter": 15,
+        "vad": 10,
+        "tts": 10
+      },
+      "launched": {
+        "host": "178",
+        "gpu": 0,
+        "run_name": "exp81_v43_atcosim_long_light_e12_g0",
+        "run_dir": "train/training_checkpoints/qwen3-asr-0.6b-exp81_v43_atcosim_long_light_e12_g0",
+        "started_at": "2026-06-26T09:26:00+08:00",
+        "materialized_rows": 359932,
+        "materialized_hours": 418.2601,
+        "manifest_audio_check": "passed on 178"
+      },
       "training_policy": {
         "target_epochs": 12,
         "early_stopping_patience": 3,
@@ -927,14 +975,14 @@
       "machine": "178",
       "role": "负责 ATCOSIM、matched mini、TTS 10h，以及后续高剂量数据扩充筛选。",
       "queue_now": [
-        "GPU0 free after stopping duplicate exp79",
+        "exp81_v4_3_atcosim_long_light_aug_epoch12 on GPU0",
         "exp76 ATCOSIM+UWB epoch12 on GPU1",
         "exp77 ATCOSIM+general20 epoch12 on GPU2",
         "exp80 ATCOSIM+long upsample epoch12 on GPU3"
       ],
       "next_after_current": [
-        "wait for exp76/77/79/80 more epochs and exp30/32 dose-down before starting exp81",
-        "do not duplicate exp50/63/70"
+        "wait for exp76/77/78/79/80/81 first full eval before starting any new combo",
+        "do not duplicate exp50/63/70/78/81"
       ]
     },
     {
@@ -942,13 +990,13 @@
       "role": "负责 v4.3 baseline、高剂量筛选、长音频 full-derived rich eval；后续优先承接 exp79/80 的上采样 full-scale。",
       "queue_now": [
         "exp79_v4_3_orig_long_upsample_full_epoch12 on GPU0",
-        "exp29_v4_3_no_translation_mismatch_baseline",
+        "exp78_v4_3_atcosim_light_real_aug_epoch12 on GPU1",
         "exp30_v4_3_appdenoise15h_epoch3 on GPU2",
         "exp32_v4_3_deepfilter15h_epoch3 on GPU3"
       ],
       "next_after_current": [
-        "do not start exp81 until exp76/77/79/80 plus exp30/32 first results are available",
-        "do not duplicate completed exp68/69 or stopped 178 exp79"
+        "wait for exp78/81 first full eval before launching more final-recipe variants",
+        "do not duplicate completed exp29/50/51/52/63/64/68/69/70 or stopped 178 exp79"
       ]
     }
   ],
