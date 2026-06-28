@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-06-28 16:12 CST",
+  "updated_at": "2026-06-28 17:12 CST",
   "title": "Qwen3-ASR v4.3 数据扩充实验计划",
   "dashboard_note": "这个页面用于动态跟踪实验计划：区分历史 run、当前队列、后续数据配比 ablation，以及暂缓或诊断类实验。通用数据和混合数据都已纳入计划；raw exp 编号只作为运行 ID，不代表必须连续执行。",
   "current_base": {
@@ -1122,6 +1122,68 @@
         "full_wer",
         "synthetic_high_overlap_test",
         "checklist_real",
+        "early_eos_like_candidates",
+        "mixed_atc"
+      ]
+    },
+    {
+      "id": "exp85_1p7b_v43_lightreal_ckreal12_cktts6_same_source_overlap15h",
+      "status": "running",
+      "priority": 120,
+      "category": "1p7b_overlap_multi_speaker_finetune",
+      "data_version": "v4.3_plus_same_source_overlap15h",
+      "data_dir": "qwen3_asr_20260628_1p7b_v43_lightreal_ckreal12_cktts6_same_source_overlap15h",
+      "epochs": 20,
+      "machine": "178",
+      "purpose": "从原始 qwen3-asr-1.7b base 开始训练，在 1.7B v4.3/lightreal/checklist 配方基础上追加 15h 同源多说话人 overlap 合成数据，验证 overlap 数据是否应进入正式 1.7B recipe，并优先观察深航/检查单/ATC 场景下同时说话、打断和高重叠音频的鲁棒性。",
+      "plan_label": "OL-1P7B",
+      "needs_data_materialize": false,
+      "caps_hours": {
+        "same_source_overlap_hours": 15.0056,
+        "checklist_30min_hours": 5.0014,
+        "youtube_vasaviation_hours": 2.5005,
+        "youtube_non_vasa_hours": 2.3006,
+        "bilibili_zh_hours": 2.0006,
+        "0330_zh_hours": 2.0004,
+        "bilibili_en_hours": 1.2023,
+        "min_pair_overlap_ratio": 0.2
+      },
+      "launched": {
+        "host": "178",
+        "gpu": 1,
+        "run_name": "1p7b_v43_lightreal_ckreal12_cktts6_overlap15h_frombase_g4",
+        "run_dir": "train/training_checkpoints/qwen3-asr-1.7b-1p7b_v43_lightreal_ckreal12_cktts6_overlap15h_frombase_g4",
+        "materialized_at": "2026-06-28T16:20:00+08:00",
+        "started_at": "2026-06-28T16:53:43+08:00",
+        "overlap_train_rows": 10184,
+        "overlap_train_hours": 15.0056,
+        "train_rows_total": 377494,
+        "test_rows_total": 9888,
+        "source_policy": "each synthetic row is sampled within one source family/subdataset; max source timeline gap 60s; no cross-dataset mixing",
+        "mix_policy": "active RMS normalization; secondary SNR in [-2,0,2,4] dB; strong/near-full overlap majority",
+        "report": "train/training_data/qwen3_asr_20260628_1p7b_v43_lightreal_ckreal12_cktts6_same_source_overlap15h/REPORT.md",
+        "wandb": "https://wandb.ai/drinking/whisper-atc-finetune/runs/qwen3-asr-1.7b-1p7b_v43_lightreal_ckreal12_cktts6_overlap15h_frombase_g4"
+      },
+      "training_policy": {
+        "init_from": "qwen3-asr-1.7b base; no prior LoRA checkpoint",
+        "target_epochs": 20,
+        "batch_size": 4,
+        "eval_batch_size": 1,
+        "grad_acc": 8,
+        "lr": 9.27224079825782e-05,
+        "warmup_ratio": 0.03322752141644549,
+        "lora_r": 32,
+        "lora_alpha": 128,
+        "lora_dropout": 0.1944929933612504,
+        "early_stopping_patience": 3,
+        "load_best_model_at_end": true,
+        "eval_strategy": "full_eval_each_epoch_plus_derived_slices"
+      },
+      "selection_focus": [
+        "full_wer",
+        "slice_overlap_supplement",
+        "checklist_real",
+        "duration_long_audio_ge8s",
         "early_eos_like_candidates",
         "mixed_atc"
       ]
