@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-06-28 14:12 CST",
+  "updated_at": "2026-06-28 15:12 CST",
   "title": "Qwen3-ASR v4.3 数据扩充实验计划",
   "dashboard_note": "这个页面用于动态跟踪实验计划：区分历史 run、当前队列、后续数据配比 ablation，以及暂缓或诊断类实验。通用数据和混合数据都已纳入计划；raw exp 编号只作为运行 ID，不代表必须连续执行。",
   "current_base": {
@@ -1023,6 +1023,54 @@
         "mixed_atc",
         "zh_atc",
         "error_profile_token_categories"
+      ]
+    },
+    {
+      "id": "exp83_v4_3_atcosim_erroraware_overlap15h_epoch12",
+      "status": "running",
+      "priority": 97,
+      "category": "overlap_long_audio_upsampling",
+      "data_version": "v4.3",
+      "data_dir": "qwen3_asr_20260628_exp83_v4_3_atcosim_erroraware_overlap15h",
+      "epochs": 12,
+      "machine": "178",
+      "purpose": "第一优先级重叠/较长音频 ablation：在 exp82 error-aware + ATCOSIM 基础数据上，追加 15h 由 v4.3 训练音频和 30min checklist 真实复核音频构造的双说话人 overlap 样本；不随机拼无关长段，来源限定为现有真实片段与 checklist 片段，先验证重叠语音和较长上下文能否改善长音频提前 EOS/转录不完整问题。",
+      "plan_label": "OL1",
+      "needs_data_materialize": false,
+      "caps_hours": {
+        "synthetic_overlap_hours": 15.0,
+        "checklist_real_pool_hours": 0.5243
+      },
+      "launched": {
+        "host": "178",
+        "gpu": 1,
+        "run_name": "exp83_v43_atcosim_erroraware_overlap15h_e12_g1",
+        "run_dir": "train/training_checkpoints/qwen3-asr-0.6b-exp83_v43_atcosim_erroraware_overlap15h_e12_g1",
+        "started_at": "2026-06-28T15:00:00+08:00",
+        "overlap_train_hours_target": 15.0,
+        "materialized_rows": 338053,
+        "materialized_hours": 358.1571,
+        "overlap_train_rows": 10714,
+        "overlap_train_hours": 15.001,
+        "overlap_test_rows": 500,
+        "overlap_test_hours": 0.7155,
+        "materialize_failures": 0,
+        "overlap_test_samples_target": 500,
+        "replaced_eval": "exp76 checkpoint-98250 rich eval on 178 GPU1 paused and recorded for requeue"
+      },
+      "training_policy": {
+        "target_epochs": 12,
+        "early_stopping_patience": 3,
+        "load_best_model_at_end": false,
+        "eval_strategy": "full_eval_each_epoch_plus_derived_slices; overlap test supplement backfill separately until integrated"
+      },
+      "selection_focus": [
+        "full_wer",
+        "duration_long_audio_ge8s",
+        "synthetic_overlap_test",
+        "checklist_real",
+        "early_eos_like_candidates",
+        "mixed_atc"
       ]
     }
   ],
