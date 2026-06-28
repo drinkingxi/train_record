@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-06-28 10:12 CST",
+  "updated_at": "2026-06-28 11:04 CST",
   "title": "Qwen3-ASR v4.3 数据扩充实验计划",
   "dashboard_note": "这个页面用于动态跟踪实验计划：区分历史 run、当前队列、后续数据配比 ablation，以及暂缓或诊断类实验。通用数据和混合数据都已纳入计划；raw exp 编号只作为运行 ID，不代表必须连续执行。",
   "current_base": {
@@ -820,7 +820,7 @@
       "data_dir": "qwen3_asr_20260624_exp78_v4_3_atcosim_light_real_aug",
       "epochs": 12,
       "machine": "167",
-      "purpose": "当前 0.6B 主候选：基于 ATCOSIM 的轻量真实增强组合，ATCOSIM10h + general20h + app denoise15h + DeepFilter15h + VAD10h，不含长音频上采样和 TTS。当前 best epoch5 full WER 11.2799，整体优于 exp50/exp80/exp81；继续跑完并以 best checkpoint 作为后续 0.6B/1.7B 配方依据。",
+      "purpose": "当前 0.6B 轻量组合主候选：基于 ATCOSIM 的轻量真实增强组合，ATCOSIM10h + general20h + app denoise15h + DeepFilter15h + VAD10h，不含长音频上采样和 TTS。当前 best epoch5 full WER 11.2799，弱于 exp50 epoch4 的全局最低 full WER 11.1440，但优于 exp80/exp81；继续跑完并以 best checkpoint 作为组合配方依据。",
       "plan_label": "AC3",
       "needs_data_materialize": false,
       "caps_hours": {
@@ -982,6 +982,48 @@
         "numbers_callsigns",
         "mixed_atc"
       ]
+    },
+    {
+      "id": "exp82_v4_3_atcosim_erroraware08_epoch12",
+      "status": "running",
+      "priority": 96,
+      "category": "error_aware_upsampling",
+      "data_version": "v4.3",
+      "data_dir": "qwen3_asr_20260628_exp82_v4_3_atcosim_erroraware08",
+      "epochs": 12,
+      "machine": "178",
+      "purpose": "基于当前 full WER 最低的 exp50/ATCOSIM 配方做 error-aware hard-row upsampling：保留 exp40 ATCOSIM 全量训练集，并从 v4.3 train 内部按 exp50 error profile 权重额外重复采样 8% hard rows；重点验证英文普通词、YouTube/VASA、mixed、中文方向/高度/航司高错 token 是否能改善，同时观察 full WER 是否保持不退化。",
+      "plan_label": "EA1",
+      "needs_data_materialize": false,
+      "caps_hours": {
+        "error_aware_hard_rows_ratio": 0.08
+      },
+      "launched": {
+        "host": "178",
+        "gpu": 0,
+        "run_name": "exp82_v43_atcosim_erroraware08_e12_g0",
+        "run_dir": "train/training_checkpoints/qwen3-asr-0.6b-exp82_v43_atcosim_erroraware08_e12_g0",
+        "started_at": "2026-06-28T10:51:00+08:00",
+        "materialized_rows": 327339,
+        "materialized_hours": 343.1561,
+        "base_train_rows": 303092,
+        "extra_hard_rows": 24247,
+        "replaced_eval": "exp81 checkpoint-67488 full eval on 178 GPU0 paused and recorded for requeue"
+      },
+      "training_policy": {
+        "target_epochs": 12,
+        "early_stopping_patience": 3,
+        "load_best_model_at_end": false,
+        "eval_strategy": "full_eval_each_epoch_plus_derived_slices"
+      },
+      "selection_focus": [
+        "full_wer",
+        "source_youtube_vasaviation",
+        "english_atc",
+        "mixed_atc",
+        "zh_atc",
+        "error_profile_token_categories"
+      ]
     }
   ],
   "machine_policy": [
@@ -996,15 +1038,16 @@
     },
     {
       "machine": "178",
-      "role": "后续 0.6B 主机器之一；只继续观察当前 exp76/81，不再扩展 UWB/general/长音频新分支。",
+      "role": "后续 0.6B 主机器之一；当前运行 exp82 error-aware controlled ablation，并继续观察 exp76/81 结果。",
       "queue_now": [
-        "exp81_v4_3_atcosim_long_light_aug_epoch12 on GPU0",
+        "exp82_v4_3_atcosim_erroraware08_epoch12 on GPU0",
         "exp76 ATCOSIM+UWB epoch12 on GPU1"
       ],
       "next_after_current": [
+        "requeue paused exp81 checkpoint-67488 full eval when a GPU is free",
         "do not resume exp77/80 unless manually requested for diagnostics",
-        "do not launch new broad 0.6B expansions before exp78 final decision",
-        "use free GPUs for slice/full-eval backfill only unless a new controlled confirm run is explicitly approved"
+        "do not launch new broad 0.6B expansions before exp82/exp78 first eval comparison",
+        "use free GPUs for slice/full-eval backfill unless a new controlled run is explicitly approved"
       ]
     },
     {
@@ -1032,7 +1075,7 @@
     "长音频修正暂不作为主线；contiguous concat 舍弃，原始长片段上采样只有在新的 long-slice/early-EOS 诊断明确反转时才恢复。",
     "同一数据、同一方向的继续训练必须优先 resume 原 output_dir 和 W&B run；只有新数据组合才新开 exp 编号。",
     "长音频上采样进入最终配方前，必须证明 full WER 不明显退化，同时 duration_8_12s / duration_ge12s 或 early-EOS 诊断有稳定改善；当前 exp80/81 未满足。",
-    "ATCOSIM 信号已经足够强，后续寻找最佳数据组合时默认基于 ATCOSIM；当前 0.6B 主候选是 ATCOSIM + light real aug，即 exp78。",
+    "ATCOSIM 信号已经足够强，后续寻找最佳数据组合时默认基于 ATCOSIM；当前 full WER 最低 checkpoint 是 exp50 epoch4，当前组合主候选是 exp78，当前新增 controlled run 是 exp82 error-aware hard-row upsampling。",
     "后续 0.6B 自动训练主要使用 167 和 178；47 不排自动 0.6B 队列。"
   ],
   "numbering_note": "编号说明：raw run id 保留历史连续性，已启动的 run 不重命名；页面中的计划编号用于阅读执行顺序。A=当前主线，M=matched mini，L=长音频，T=TTS，H=高剂量数据扩充筛选。exp30-exp49 中很多只是早期数据配方或历史候选，不代表漏跑。 2026-06-23 更新：167 长音频计划 run 已暂停，不再作为待训练队列展示。 2026-06-25 更新：exp79/80/81 是长音频上采样和最终配方候选；exp75 被 exp50 同名续跑取代。 2026-06-25 更新2：exp80 优先于 exp79；exp79 降为低优先级机制验证。 2026-06-28 更新：exp78 ATCOSIM + light real aug 成为 0.6B 主候选；exp79/80/81 长音频方向降级为诊断，exp76/77 不扩展；后续 0.6B 自动队列主要放在 167/178，47 清空。"
