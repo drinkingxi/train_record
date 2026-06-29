@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-06-29 13:12 CST",
+  "updated_at": "2026-06-29 14:10 CST",
   "title": "Qwen3-ASR v4.3 数据扩充实验计划",
   "dashboard_note": "这个页面用于动态跟踪实验计划：区分历史 run、当前队列、后续数据配比 ablation，以及暂缓或诊断类实验。通用数据和混合数据都已纳入计划；raw exp 编号只作为运行 ID，不代表必须连续执行。",
   "current_base": {
@@ -55,7 +55,7 @@
     {
       "topic": "baseline",
       "confidence": "high",
-      "summary": "exp29 v4.3 baseline 已评估到 5 epoch：full WER 13.6621 / CER 13.0874 / SER 65.6943；现沿用同一 exp29 output_dir 从 checkpoint-23085 续跑到 8 epoch，用于确认 baseline 是否仍继续收益。"
+      "summary": "exp29 v4.3 baseline 已完成 8 epoch；训练期 best full WER 13.3011 @ epoch7，epoch8 回退到 13.3606。固定 generate full/rich eval 下 exp29 fixed full WER 10.3151，是当前已补评估 run 里最稳的基线之一。"
     },
     {
       "topic": "open_atc_atcosim",
@@ -90,12 +90,12 @@
     {
       "topic": "long_audio",
       "confidence": "medium-high",
-      "summary": "exp79/80/81 的 full eval 和 duration_long_audio_ge8s slice 未证明长音频上采样是主收益方向：exp79 best WER 14.065，exp80 best WER 12.0006，exp81 best WER 11.8624，均弱于 exp78/exp50 主线；后续不再扩大原长音频/长音频混合，只保留诊断观察。"
+      "summary": "exp79/80/81 的训练期 full eval 和 fixed generate slice 均未证明长音频上采样是主收益方向：exp79 fixed full WER 11.3111，exp80/81 fixed full WER 21.0145/20.6282 且英文、mixed、numbers/callsigns 不稳；后续不再扩大原长音频/长音频混合，只保留诊断观察。"
     },
     {
       "topic": "atcosim_lead",
       "confidence": "high",
-      "summary": "exp50 ATCOSIM 续跑已到 epoch6，best 仍是 epoch4 full WER 11.1440，epoch5/6 回退到约 11.39。单独 ATCOSIM 已到平台期，后续围绕 ATCOSIM 做受控组合。"
+      "summary": "exp50 ATCOSIM 训练期 best 仍是 epoch4 full WER 11.1440，epoch5/6 回退到约 11.39；但固定 generate full/rich eval 下 exp50 fixed full WER 19.8995，暴露插入/重复/EOS 风险。ATCOSIM 仍是训练期强信号，但必须和 generate 诊断分开看。"
     },
     {
       "topic": "long_mini",
@@ -110,7 +110,7 @@
     {
       "topic": "augmentation_direction_summary",
       "confidence": "medium-high",
-      "summary": "截至 2026-06-28 20:45：ATCOSIM 仍是主收益方向，当前最佳新组合是 exp78 ATCOSIM + light real aug，best full WER 11.2799；exp80/81 长音频组合未形成全面优势，exp76 UWB 和 exp77 general20 均降级为观察/不扩展。后续 0.6B 主要由 167/178 跟踪，47 不再排 0.6B 新训练。"
+      "summary": "截至 2026-06-29 15:20：训练期 full WER 与固定 generate full/rich eval 已分开记录。ATCOSIM 训练期收益仍强，但 fixed generate 暴露重复/EOS 风险；exp29/70/68/65 在 fixed generate 口径更稳。后续 0.6B 主要补评估和诊断，不再扩大长音频上采样或 concat。"
     }
   ],
   "runs": [
