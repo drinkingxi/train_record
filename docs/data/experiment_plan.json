@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-06-29 16:12 CST",
+  "updated_at": "2026-06-29 17:12 CST",
   "title": "Qwen3-ASR v4.3 数据扩充实验计划",
   "dashboard_note": "这个页面用于动态跟踪实验计划：区分历史 run、当前队列、后续数据配比 ablation，以及暂缓或诊断类实验。通用数据和混合数据都已纳入计划；raw exp 编号只作为运行 ID，不代表必须连续执行。",
   "current_base": {
@@ -110,7 +110,7 @@
     {
       "topic": "augmentation_direction_summary",
       "confidence": "medium-high",
-      "summary": "截至 2026-06-29 14:11：训练期 full WER 与固定 generate full/rich eval 已分开记录。ATCOSIM 训练期收益仍强，但 fixed generate 暴露重复/EOS 风险；exp29/70/68/65 在 fixed generate 口径更稳。后续 0.6B 主要补评估和诊断，不再扩大长音频上采样或 concat。"
+      "summary": "截至 2026-06-29 17:06：基础 v4.3 已原地更新到 16:34 版本；后续新增/待启动 run 必须带 latest v4.3 fingerprint，派生数据需从该版本重新 materialize。训练期 full WER 与固定 generate full/rich eval 分开记录；ATCOSIM 训练期收益仍强，但 fixed generate 暴露重复/EOS 风险。"
     }
   ],
   "runs": [
@@ -1193,15 +1193,23 @@
       "status": "waiting_for_free_gpu",
       "priority": 118,
       "category": "short_streaming_draft_upsampling",
-      "data_version": "v4.3_plus_atcosim_lightreal_shortdraft",
-      "data_dir": "qwen3_asr_20260629_exp87_v4_3_atcosim_lightreal_shortdraft10h",
+      "data_version": "latest_v4.3_plus_atcosim_lightreal_shortdraft",
+      "data_dir": "qwen3_asr_20260629_exp87_v4_3_atcosim_lightreal_shortdraft10h_latestv43",
       "epochs": 12,
       "machine": "167_or_178",
-      "purpose": "受实际流式部署反馈驱动：极短音频草稿识别较差。以当前 0.6B 主候选基础组合 v4.3 + ATCOSIM + light real 为 base，只追加真实短音频 <3s 上采样 10h，验证 0-1s/1-2s/2-3s 和真实 streaming draft slice 是否改善，同时确认 full WER 与 3s+ slice 不明显退化。",
+      "purpose": "受实际流式部署反馈驱动：极短音频草稿识别较差。以 2026-06-29 16:34 最新 v4.3 重新 materialize 的 ATCOSIM + light real 为 base，只追加真实短音频 <3s 上采样 10h，验证 0-1s/1-2s/2-3s 和真实 streaming draft slice 是否改善，同时确认 full WER 与 3s+ slice 不明显退化。",
       "plan_label": "SD-0.6B",
       "needs_data_materialize": true,
+      "materialize_automation": {
+        "enabled": true,
+        "scheduler_config": "train/training_scripts/ablation_queue_default.json",
+        "script": "train/training_scripts/materialize_shortdraft_upsample.py",
+        "command": "scheduler builds qwen3_asr_20260629_exp78_v4_3_atcosim_light_real_aug_latestv43 from latest v4.3, then materializes qwen3_asr_20260629_exp87_v4_3_atcosim_lightreal_shortdraft10h_latestv43",
+        "ready_file": ".sync_complete",
+        "require_latest_v4_3": true
+      },
       "caps_hours": {
-        "base_recipe": "v4.3 + ATCOSIM + light real",
+        "base_recipe": "latest v4.3 + ATCOSIM + light real",
         "shortdraft_total_hours": 10.0,
         "duration_0_1s_hours": 1.5,
         "duration_1_2s_hours": 4.5,
@@ -1248,6 +1256,70 @@
         "launch_when": "167 or 178 has a free training GPU after current higher-priority running jobs/eval backfill are stable",
         "notes": "Do not add 3s+ upsampling; this run is intentionally narrow to isolate ultra-short streaming draft behavior."
       }
+    },
+    {
+      "id": "exp88_v4_3_atcosim_no_bilibili_zh_epoch12",
+      "status": "waiting_for_free_gpu",
+      "priority": 117,
+      "category": "source_ablation",
+      "data_version": "latest_v4.3_plus_atcosim_without_bilibili_zh_train",
+      "data_dir": "qwen3_asr_20260629_exp88_v4_3_atcosim_no_bilibili_zh_latestv43",
+      "epochs": 12,
+      "machine": "178",
+      "purpose": "针对 bilibili_zh 发现较多问题数据的风险，基于 2026-06-29 16:34 最新 v4.3 重新 materialize 的 ATCOSIM 数据做受控消融：训练集删除 source_dataset 包含 bilibili_zh 的样本，测试集保持同一最新 v4.3+ATCOSIM 测试口径，用来判断 bilibili_zh 是否拉低 full/rich/slice 指标，尤其关注中文 ATC、混合语种、冒号/翻译/重复类错误是否改善，以及 bili_zh holdout 是否明显退化。",
+      "plan_label": "SRC-0.6B",
+      "needs_data_materialize": true,
+      "materialize_automation": {
+        "enabled": true,
+        "scheduler_config": "train/training_scripts/ablation_queue_default.json",
+        "script": "train/training_scripts/materialize_drop_source_dataset.py",
+        "command": "scheduler builds qwen3_asr_20260629_exp40_v4_3_open_atc_atcosim_latestv43 from latest v4.3, then materializes qwen3_asr_20260629_exp88_v4_3_atcosim_no_bilibili_zh_latestv43",
+        "ready_file": ".sync_complete",
+        "require_latest_v4_3": true
+      },
+      "caps_hours": {
+        "base_recipe": "latest v4.3 + ATCOSIM",
+        "base_train_hours": 315.726888,
+        "dropped_train_hours": 56.699837,
+        "kept_train_hours": 259.027051,
+        "dropped_train_rows": 56790,
+        "kept_train_rows": 246302,
+        "drop_source_contains": [
+          "bilibili_zh"
+        ],
+        "test_policy": "keep the newly materialized latest v4.3 + ATCOSIM test set unchanged inside this ablation",
+        "base_test_hours": 8.967532
+      },
+      "training_policy": {
+        "target_epochs": 12,
+        "model_size": "0.6B",
+        "init_from": "qwen3-asr-0.6b base",
+        "batch_size": "follow current 0.6B ablation default on 178",
+        "eval_strategy": "full_eval_each_epoch_plus_rich_slices_plus_source_holdout",
+        "early_stopping_patience": 3,
+        "load_best_model_at_end": false
+      },
+      "selection_focus": [
+        "full_wer",
+        "zh_atc",
+        "mixed_atc",
+        "translation_like_errors",
+        "speaker_colon_prefix_errors",
+        "repetition_or_eos_errors",
+        "bilibili_zh_holdout_regression_guard",
+        "duration_0_2s",
+        "numbers_callsigns"
+      ],
+      "launch_policy": {
+        "allowed_hosts": [
+          "178"
+        ],
+        "do_not_launch_on": [
+          "47"
+        ],
+        "launch_when": "178 has a free training GPU after higher-priority running jobs/eval backfill are stable",
+        "notes": "Scheduler requires latest v4.3 fingerprint before launch; stale derived manifests will stay blocked as stale_v4_3_base."
+      }
     }
   ],
   "machine_policy": [
@@ -1270,6 +1342,7 @@
       "next_after_current": [
         "requeue paused exp81 checkpoint-67488 full eval when a GPU is free",
         "launch exp87 shortdraft10h only when a training GPU is free and eval backfill is not blocked",
+        "launch exp88 no-bilibili_zh source ablation on 178 to compare directly against exp50",
         "do not resume exp77/80 unless manually requested for diagnostics",
         "do not launch new broad 0.6B expansions before exp82/exp78 first eval comparison",
         "use free GPUs for slice/full-eval backfill unless a new controlled run is explicitly approved"
