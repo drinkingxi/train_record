@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-06-29 14:11 CST",
+  "updated_at": "2026-06-29 14:12 CST",
   "title": "Qwen3-ASR v4.3 数据扩充实验计划",
   "dashboard_note": "这个页面用于动态跟踪实验计划：区分历史 run、当前队列、后续数据配比 ablation，以及暂缓或诊断类实验。通用数据和混合数据都已纳入计划；raw exp 编号只作为运行 ID，不代表必须连续执行。",
   "current_base": {
@@ -110,7 +110,7 @@
     {
       "topic": "augmentation_direction_summary",
       "confidence": "medium-high",
-      "summary": "截至 2026-06-29 15:20：训练期 full WER 与固定 generate full/rich eval 已分开记录。ATCOSIM 训练期收益仍强，但 fixed generate 暴露重复/EOS 风险；exp29/70/68/65 在 fixed generate 口径更稳。后续 0.6B 主要补评估和诊断，不再扩大长音频上采样或 concat。"
+      "summary": "截至 2026-06-29 14:11：训练期 full WER 与固定 generate full/rich eval 已分开记录。ATCOSIM 训练期收益仍强，但 fixed generate 暴露重复/EOS 风险；exp29/70/68/65 在 fixed generate 口径更稳。后续 0.6B 主要补评估和诊断，不再扩大长音频上采样或 concat。"
     }
   ],
   "runs": [
