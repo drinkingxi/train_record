@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-06-29 16:07 CST",
+  "updated_at": "2026-06-29 16:12 CST",
   "title": "Qwen3-ASR v4.3 数据扩充实验计划",
   "dashboard_note": "这个页面用于动态跟踪实验计划：区分历史 run、当前队列、后续数据配比 ablation，以及暂缓或诊断类实验。通用数据和混合数据都已纳入计划；raw exp 编号只作为运行 ID，不代表必须连续执行。",
   "current_base": {
@@ -1187,6 +1187,67 @@
         "early_eos_like_candidates",
         "mixed_atc"
       ]
+    },
+    {
+      "id": "exp87_v4_3_atcosim_lightreal_shortdraft10h_epoch12",
+      "status": "waiting_for_free_gpu",
+      "priority": 118,
+      "category": "short_streaming_draft_upsampling",
+      "data_version": "v4.3_plus_atcosim_lightreal_shortdraft",
+      "data_dir": "qwen3_asr_20260629_exp87_v4_3_atcosim_lightreal_shortdraft10h",
+      "epochs": 12,
+      "machine": "167_or_178",
+      "purpose": "受实际流式部署反馈驱动：极短音频草稿识别较差。以当前 0.6B 主候选基础组合 v4.3 + ATCOSIM + light real 为 base，只追加真实短音频 <3s 上采样 10h，验证 0-1s/1-2s/2-3s 和真实 streaming draft slice 是否改善，同时确认 full WER 与 3s+ slice 不明显退化。",
+      "plan_label": "SD-0.6B",
+      "needs_data_materialize": true,
+      "caps_hours": {
+        "base_recipe": "v4.3 + ATCOSIM + light real",
+        "shortdraft_total_hours": 10.0,
+        "duration_0_1s_hours": 1.5,
+        "duration_1_2s_hours": 4.5,
+        "duration_2_3s_hours": 4.0,
+        "max_duration_seconds": 3.0,
+        "max_duplicate_per_row": 5,
+        "exclude_checklist": true,
+        "prefer_sources": [
+          "0330_zh",
+          "v4.3_real_atc",
+          "ATCOSIM"
+        ],
+        "deprioritize_sources": [
+          "bilibili_zh_vendor_release_61h_20260609"
+        ]
+      },
+      "training_policy": {
+        "target_epochs": 12,
+        "model_size": "0.6B",
+        "init_from": "qwen3-asr-0.6b base",
+        "batch_size": "follow current 0.6B ablation default on target host",
+        "eval_strategy": "full_eval_each_epoch_plus_duration_slices_plus_streaming_draft_slice",
+        "early_stopping_patience": 3,
+        "load_best_model_at_end": false
+      },
+      "selection_focus": [
+        "full_wer",
+        "duration_0_1s",
+        "duration_1_2s",
+        "duration_2_3s",
+        "duration_3_4s_regression_guard",
+        "duration_6_8s_regression_guard",
+        "streaming_draft_slice",
+        "empty_or_first_token_error_rate"
+      ],
+      "launch_policy": {
+        "allowed_hosts": [
+          "167",
+          "178"
+        ],
+        "do_not_launch_on": [
+          "47"
+        ],
+        "launch_when": "167 or 178 has a free training GPU after current higher-priority running jobs/eval backfill are stable",
+        "notes": "Do not add 3s+ upsampling; this run is intentionally narrow to isolate ultra-short streaming draft behavior."
+      }
     }
   ],
   "machine_policy": [
@@ -1208,6 +1269,7 @@
       ],
       "next_after_current": [
         "requeue paused exp81 checkpoint-67488 full eval when a GPU is free",
+        "launch exp87 shortdraft10h only when a training GPU is free and eval backfill is not blocked",
         "do not resume exp77/80 unless manually requested for diagnostics",
         "do not launch new broad 0.6B expansions before exp82/exp78 first eval comparison",
         "use free GPUs for slice/full-eval backfill unless a new controlled run is explicitly approved"
@@ -1221,6 +1283,7 @@
       ],
       "next_after_current": [
         "treat exp78 as current main 0.6B recipe candidate",
+        "launch exp87 shortdraft10h on a free GPU if 178 is unavailable",
         "do not resume exp79; do not duplicate completed exp30/32/66/67/68/69",
         "use free GPUs for slice/full-eval backfill or a single controlled exp78 stability check only after approval"
       ]
