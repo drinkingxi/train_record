@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-06-30 14:12 CST",
+  "updated_at": "2026-06-30 15:12 CST",
   "title": "Qwen3-ASR v4.3 数据扩充实验计划",
   "dashboard_note": "这个页面用于动态跟踪实验计划：区分历史 run、当前队列、后续数据配比 ablation，以及暂缓或诊断类实验。通用数据和混合数据都已纳入计划；raw exp 编号只作为运行 ID，不代表必须连续执行。",
   "current_base": {
@@ -1186,6 +1186,54 @@
         "duration_long_audio_ge8s",
         "early_eos_like_candidates",
         "mixed_atc"
+      ]
+    },
+    {
+      "id": "exp89_1p7b_ckreal12_e3_same_source_overlap15h_cont",
+      "status": "planned_high_priority",
+      "priority": 121,
+      "category": "1p7b_overlap_multi_speaker_finetune",
+      "data_version": "v4.3_plus_same_source_overlap15h",
+      "data_dir": "qwen3_asr_20260628_1p7b_v43_lightreal_ckreal12_cktts6_same_source_overlap15h",
+      "epochs": 8,
+      "machine": "167",
+      "purpose": "基于 6min 深航 checklist 主观对比：overlap15h from-base 版本效果一般，ckreal12/cktts6 的 e3 观感优于 e5。该实验改为从 ckreal12_cktts6_zmev_g3 epoch3 merged checkpoint 出发，用同源 overlap15h 数据继续低学习率微调，验证 overlap 数据作为 e3 后续专项微调是否能提升同时说话/打断鲁棒性，同时尽量保留 checklist 与 full 泛化。",
+      "plan_label": "OL-E3-CONT",
+      "needs_data_materialize": false,
+      "caps_hours": {
+        "same_source_overlap_hours": 15.0056,
+        "base_recipe": "qwen3_asr_20260626_1p7b_v43_atcosim_lightreal_ckreal12_cktts6",
+        "train_rows_total": 377494,
+        "test_rows_total": 9888
+      },
+      "training_policy": {
+        "init_from": "merged qwen3-asr-1.7b-checklist-ckreal12_cktts6_zmev_g3-step34437",
+        "run_name": "1p7b_ckreal12e3_overlap15h_cont_g0",
+        "target_epochs": 8,
+        "batch_size": 4,
+        "eval_batch_size": 1,
+        "grad_acc": 8,
+        "lr": 3e-05,
+        "warmup_ratio": 0.02,
+        "lora_r": 32,
+        "lora_alpha": 128,
+        "lora_dropout": 0.12,
+        "early_stopping_patience": 3,
+        "load_best_model_at_end": false,
+        "eval_strategy": "full_eval_each_epoch_plus_derived_slices; post-train 30min checklist and 6min Shenhang compare"
+      },
+      "selection_focus": [
+        "shenhang_checklist_6min_subjective_compare",
+        "real_checklist_reviewed_30min",
+        "slice_overlap_supplement",
+        "full_wer",
+        "duration_long_audio_ge8s",
+        "mixed_atc"
+      ],
+      "notes": [
+        "2026-06-30 6min rerun used shared router preprocessing with fixed 95 segments for e2/e3/e4/e5/overlap_e3.",
+        "Current subjective signal: overlap-from-base is not better than ckreal12 e3; e3 appears better than e5 on the inspected 6min checklist sample.",
+        "Run on 167 GPU0 when dependencies are synced; do not replace the serving default until 6min and 30min checklist eval confirm improvement."
       ]
     },
     {
