@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-07-01 09:12 CST",
+  "updated_at": "2026-07-01 10:12 CST",
   "title": "Qwen3-ASR v4.3 数据扩充实验计划",
   "dashboard_note": "这个页面用于动态跟踪实验计划：区分历史 run、当前队列、后续数据配比 ablation，以及暂缓或诊断类实验。通用数据和混合数据都已纳入计划；raw exp 编号只作为运行 ID，不代表必须连续执行。",
   "current_base": {
@@ -1190,14 +1190,14 @@
     },
     {
       "id": "exp89_1p7b_ckreal12_e3_same_source_overlap15h_cont",
-      "status": "planned_high_priority",
-      "priority": 121,
+      "status": "cancelled",
+      "priority": 0,
       "category": "1p7b_overlap_multi_speaker_finetune",
       "data_version": "v4.3_plus_same_source_overlap15h",
       "data_dir": "qwen3_asr_20260628_1p7b_v43_lightreal_ckreal12_cktts6_same_source_overlap15h",
       "epochs": 8,
       "machine": "167",
-      "purpose": "基于 6min 深航 checklist 主观对比：overlap15h from-base 版本效果一般，ckreal12/cktts6 的 e3 观感优于 e5。该实验改为从 ckreal12_cktts6_zmev_g3 epoch3 merged checkpoint 出发，用同源 overlap15h 数据继续低学习率微调，验证 overlap 数据作为 e3 后续专项微调是否能提升同时说话/打断鲁棒性，同时尽量保留 checklist 与 full 泛化。",
+      "purpose": "已撤销：此前误把 TTS/overlap 后续安排到 1.7B 路线；用户已明确该方向不需要再跑，保留记录防止重复启动。",
       "plan_label": "OL-E3-CONT",
       "needs_data_materialize": false,
       "caps_hours": {
@@ -1233,8 +1233,10 @@
       "notes": [
         "2026-06-30 6min rerun used shared router preprocessing with fixed 95 segments for e2/e3/e4/e5/overlap_e3.",
         "Current subjective signal: overlap-from-base is not better than ckreal12 e3; e3 appears better than e5 on the inspected 6min checklist sample.",
-        "Run on 167 GPU0 when dependencies are synced; do not replace the serving default until 6min and 30min checklist eval confirm improvement."
-      ]
+        "Run on 167 GPU0 when dependencies are synced; do not replace the serving default until 6min and 30min checklist eval confirm improvement.",
+        "2026-07-01 cancelled by user: do not schedule or launch this 1.7B continuation."
+      ],
+      "queue_policy": "do_not_launch_cancelled_by_user"
     },
     {
       "id": "exp87_v4_3_atcosim_lightreal_shortdraft10h_epoch12",
@@ -1368,6 +1370,280 @@
         "launch_when": "178 has a free training GPU after higher-priority running jobs/eval backfill are stable",
         "notes": "Scheduler requires latest v4.3 fingerprint before launch; stale derived manifests will stay blocked as stale_v4_3_base."
       }
+    },
+    {
+      "id": "exp90_v4_3_atcosim_lightreal_ttsv2_20h_epoch12",
+      "status": "queued",
+      "priority": 116,
+      "category": "tts_v2_controlled_ablation",
+      "data_version": "latest_v4.3_plus_atcosim_lightreal_plus_ttsv2_20h",
+      "data_dir": "qwen3_asr_20260701_exp90_v4_3_atcosim_lightreal_ttsv2_20h",
+      "epochs": 12,
+      "machine": "178",
+      "purpose": "新版 TTS v2 生成完成后做受控验证：以当前 0.6B 主候选 exp78 的 latest-v4.3 ATCOSIM + light real 数据为 base，只追加 TTS v2 radio 版本约 20h，判断新版 TTS 是否能改善 numbers/callsigns、mixed、英文 ATC 和极短/短句，同时确认 full WER、重复/EOS、bilibili/youtube source slice 不退化。",
+      "plan_label": "TTSv2-0.6B",
+      "needs_data_materialize": false,
+      "caps_hours": {
+        "base_recipe": "latest v4.3 + ATCOSIM + light real",
+        "tts_v2_total_hours": 20.0,
+        "tts_v2_chinese_hours": 9.611,
+        "tts_v2_english_hours": 10.389,
+        "tts_v2_rows": 8212,
+        "synthetic_audio_variant": "radio",
+        "train_rows_total": 360354,
+        "train_hours_total": 394.732035,
+        "test_rows_total": 9888
+      },
+      "training_policy": {
+        "target_epochs": 12,
+        "model_size": "0.6B",
+        "init_from": "qwen3-asr-0.6b base",
+        "batch_size": "follow 178 0.6B default bs8 grad_acc4",
+        "eval_strategy": "training full eval each epoch plus derived core slices; post-train best checkpoint rich/supplement eval",
+        "early_stopping_patience": 3,
+        "load_best_model_at_end": false
+      },
+      "selection_focus": [
+        "full_wer",
+        "numbers_callsigns",
+        "mixed_atc",
+        "english_atc",
+        "duration_0_2s",
+        "source_youtube_vasaviation",
+        "repetition_or_eos_errors",
+        "tts_v2_keyinfo_slice"
+      ],
+      "launch_policy": {
+        "allowed_hosts": [
+          "178"
+        ],
+        "do_not_launch_on": [
+          "47",
+          "167"
+        ],
+        "launch_when": "178 GPU3 is free after TTS generation",
+        "notes": "Keep exp90 id unchanged; TTS v2 is a 0.6B ablation only, not 1.7B continuation."
+      },
+      "notes": [
+        "exp89 was later cancelled; exp90 id is kept unchanged to avoid renumbering existing records."
+      ]
+    },
+    {
+      "id": "exp91_v4_3_atcosim_lightreal_noise_empty1h_epoch12",
+      "status": "designed_waiting_materialization",
+      "priority": 119,
+      "category": "hallucination_empty_negative_noise",
+      "data_version": "latest_v4.3_plus_atcosim_lightreal_plus_ms_snsd_noise_empty1h",
+      "data_dir": "qwen3_asr_20260701_exp91_v4_3_atcosim_lightreal_noise_empty1h",
+      "epochs": 12,
+      "machine": "167_or_178",
+      "purpose": "针对工位/无人声/环境声触发 ATC 幻觉：以 latest v4.3 + ATCOSIM + light real 为 base，只追加 1h MS-SNSD 纯噪声 empty transcript 负样本，验证 no-speech/non-speech 时输出空文本的能力，同时守住 full WER、短句和中文/英文 ATC slice。",
+      "plan_label": "NH-N1",
+      "needs_data_materialize": true,
+      "materialize_automation": {
+        "enabled": false,
+        "script": "train/training_scripts/materialize_noise_empty_negative.py",
+        "source_review_manifest": "train/analysis/noise_dataset_review_20260701/samples.json",
+        "data_root": "/data/xijunting/atc_asr/noise_empty_negative_20260701",
+        "ready_file": ".sync_complete",
+        "require_latest_v4_3": true
+      },
+      "caps_hours": {
+        "base_recipe": "latest v4.3 + ATCOSIM + light real",
+        "noise_empty_hours": 1.0,
+        "allowed_training_status": [
+          "train_candidate"
+        ],
+        "exclude_groups": [
+          "non_target_speech_candidate"
+        ],
+        "duration_bucket_hours": {
+          "0.2_0.5s": 0.2,
+          "0.5_1.0s": 0.25,
+          "1.0_2.0s": 0.25,
+          "2.0_4.0s": 0.2,
+          "4.0_8.0s": 0.1
+        },
+        "text_policy": "text/raw_text/normalized_text/verbatim_text are empty strings; prompt is empty so language_prefix None does not add Chinese/English bias"
+      },
+      "training_policy": {
+        "target_epochs": 12,
+        "model_size": "0.6B",
+        "init_from": "qwen3-asr-0.6b base",
+        "batch_size": "follow 0.6B ablation default on target host",
+        "eval_strategy": "regular full/rich slices plus separate noise_hallucination_test; do not add empty rows to regular test.jsonl",
+        "early_stopping_patience": 3,
+        "load_best_model_at_end": false
+      },
+      "selection_focus": [
+        "noise_hallucination_nonempty_rate",
+        "noise_atc_keyword_rate",
+        "noise_repeat_rate",
+        "short_noise_nonempty_rate",
+        "full_wer",
+        "duration_0_2s",
+        "zh_atc",
+        "english_atc",
+        "numbers_callsigns"
+      ],
+      "launch_policy": {
+        "allowed_hosts": [
+          "167",
+          "178"
+        ],
+        "do_not_launch_on": [
+          "47"
+        ],
+        "launch_when": "after materialization and manifest checks; first wave single-variable run",
+        "notes": "Do not mix with non-target speech in this run."
+      }
+    },
+    {
+      "id": "exp92_v4_3_atcosim_lightreal_nontarget_empty1h_epoch12",
+      "status": "designed_waiting_materialization",
+      "priority": 118,
+      "category": "hallucination_empty_negative_non_target_speech",
+      "data_version": "latest_v4.3_plus_atcosim_lightreal_plus_ms_snsd_nontarget_empty1h",
+      "data_dir": "qwen3_asr_20260701_exp92_v4_3_atcosim_lightreal_nontarget_empty1h",
+      "epochs": 12,
+      "machine": "167_or_178",
+      "purpose": "针对工位上其他人说话被识别成 ATC 的问题：以 latest v4.3 + ATCOSIM + light real 为 base，只追加 1h 经人工听检通过的 MS-SNSD 非目标人声/人群/广播 empty transcript 负样本，验证非 ATC 人声是否能被压成空输出。",
+      "plan_label": "NH-S1",
+      "needs_data_materialize": true,
+      "materialize_automation": {
+        "enabled": false,
+        "script": "train/training_scripts/materialize_noise_empty_negative.py",
+        "source_review_manifest": "train/analysis/noise_dataset_review_20260701/samples.json",
+        "data_root": "/data/xijunting/atc_asr/noise_empty_negative_20260701",
+        "ready_file": ".sync_complete",
+        "require_latest_v4_3": true
+      },
+      "caps_hours": {
+        "base_recipe": "latest v4.3 + ATCOSIM + light real",
+        "non_target_speech_empty_hours": 1.0,
+        "allowed_training_status": [
+          "train_candidate_review"
+        ],
+        "include_groups": [
+          "non_target_speech_candidate"
+        ],
+        "primary_dataset": "MS-SNSD only unless explicit license approval",
+        "duration_bucket_hours": {
+          "0.2_0.5s": 0.2,
+          "0.5_1.0s": 0.25,
+          "1.0_2.0s": 0.25,
+          "2.0_4.0s": 0.2,
+          "4.0_8.0s": 0.1
+        },
+        "text_policy": "empty transcript; no ESC-50 production rows without license clearance"
+      },
+      "training_policy": {
+        "target_epochs": 12,
+        "model_size": "0.6B",
+        "init_from": "qwen3-asr-0.6b base",
+        "batch_size": "follow 0.6B ablation default on target host",
+        "eval_strategy": "regular full/rich slices plus separate non_target_speech_hallucination_test",
+        "early_stopping_patience": 3,
+        "load_best_model_at_end": false
+      },
+      "selection_focus": [
+        "non_target_speech_nonempty_rate",
+        "non_target_speech_atc_keyword_rate",
+        "non_target_speech_repeat_rate",
+        "full_wer",
+        "mixed_atc_regression_guard",
+        "english_atc",
+        "zh_atc",
+        "numbers_callsigns"
+      ],
+      "launch_policy": {
+        "allowed_hosts": [
+          "167",
+          "178"
+        ],
+        "do_not_launch_on": [
+          "47"
+        ],
+        "launch_when": "after listening review approves the non-target speech candidates; first wave single-variable run",
+        "notes": "Keep separate from pure noise to isolate office speech hallucination."
+      }
+    },
+    {
+      "id": "exp93_v4_3_atcosim_lightreal_noise_empty3h_epoch12",
+      "status": "designed_followup_do_not_queue_yet",
+      "priority": 80,
+      "category": "hallucination_empty_negative_noise_dose",
+      "data_version": "latest_v4.3_plus_atcosim_lightreal_plus_ms_snsd_noise_empty3h",
+      "data_dir": "qwen3_asr_20260701_exp93_v4_3_atcosim_lightreal_noise_empty3h",
+      "epochs": 12,
+      "machine": "167_or_178",
+      "purpose": "剂量 follow-up：仅在 exp91 明显降低噪声非空/ATC 关键词率且 full WER 不退化时，将纯噪声 empty transcript 从 1h 提到 3h，验证剂量曲线。",
+      "plan_label": "NH-N3",
+      "needs_data_materialize": true,
+      "caps_hours": {
+        "noise_empty_hours": 3.0,
+        "same_bucket_distribution_as_exp91": true
+      },
+      "training_policy": {
+        "target_epochs": 12,
+        "model_size": "0.6B",
+        "eval_strategy": "same as exp91"
+      },
+      "selection_focus": [
+        "noise_hallucination_nonempty_rate_delta_vs_exp91",
+        "full_wer_regression_guard",
+        "short_noise_nonempty_rate"
+      ],
+      "launch_policy": {
+        "allowed_hosts": [
+          "167",
+          "178"
+        ],
+        "do_not_launch_on": [
+          "47"
+        ],
+        "launch_when": "only after exp91 early metrics pass promotion gate",
+        "notes": "Not in automatic queue yet."
+      }
+    },
+    {
+      "id": "exp94_v4_3_atcosim_lightreal_noise1h_nontarget1h_epoch12",
+      "status": "designed_followup_do_not_queue_yet",
+      "priority": 79,
+      "category": "hallucination_empty_negative_combo",
+      "data_version": "latest_v4.3_plus_atcosim_lightreal_plus_noise1h_nontarget1h",
+      "data_dir": "qwen3_asr_20260701_exp94_v4_3_atcosim_lightreal_noise1h_nontarget1h",
+      "epochs": 12,
+      "machine": "167_or_178",
+      "purpose": "组合 follow-up：仅在 exp91/exp92 至少一个单变量有效且常规 WER 不退化时，把 1h 纯噪声 empty + 1h 非目标人声 empty 合并，验证是否能同时压低无人声和他人说话场景幻觉。",
+      "plan_label": "NH-C2",
+      "needs_data_materialize": true,
+      "caps_hours": {
+        "noise_empty_hours": 1.0,
+        "non_target_speech_empty_hours": 1.0
+      },
+      "training_policy": {
+        "target_epochs": 12,
+        "model_size": "0.6B",
+        "eval_strategy": "regular full/rich plus both hallucination tests"
+      },
+      "selection_focus": [
+        "noise_hallucination_nonempty_rate",
+        "non_target_speech_nonempty_rate",
+        "full_wer_regression_guard",
+        "repeat_rate"
+      ],
+      "launch_policy": {
+        "allowed_hosts": [
+          "167",
+          "178"
+        ],
+        "do_not_launch_on": [
+          "47"
+        ],
+        "launch_when": "only after exp91/exp92 evidence; not automatic first wave",
+        "notes": "Use only if single-variable result justifies combination."
+      }
     }
   ],
   "machine_policy": [
@@ -1425,5 +1701,5 @@
     "ATCOSIM 信号已经足够强，后续寻找最佳数据组合时默认基于 ATCOSIM；当前 full WER 最低 checkpoint 是 exp50 epoch4，当前组合主候选是 exp78，当前新增 controlled run 是 exp82 error-aware hard-row upsampling。",
     "后续 0.6B 自动训练主要使用 167 和 178；47 不排自动 0.6B 队列。"
   ],
-  "numbering_note": "编号说明：raw run id 保留历史连续性，已启动的 run 不重命名；页面中的计划编号用于阅读执行顺序。A=当前主线，M=matched mini，L=长音频，T=TTS，H=高剂量数据扩充筛选。exp30-exp49 中很多只是早期数据配方或历史候选，不代表漏跑。 2026-06-23 更新：167 长音频计划 run 已暂停，不再作为待训练队列展示。 2026-06-25 更新：exp79/80/81 是长音频上采样和最终配方候选；exp75 被 exp50 同名续跑取代。 2026-06-25 更新2：exp80 优先于 exp79；exp79 降为低优先级机制验证。 2026-06-28 更新：exp78 ATCOSIM + light real aug 成为 0.6B 主候选；exp79/80/81 长音频方向降级为诊断，exp76/77 不扩展；后续 0.6B 自动队列主要放在 167/178，47 清空。"
+  "numbering_note": "编号说明：raw run id 保留历史连续性，已启动的 run 不重命名；页面中的计划编号用于阅读执行顺序。A=当前主线，M=matched mini，L=长音频，T=TTS，H=高剂量数据扩充筛选。exp30-exp49 中很多只是早期数据配方或历史候选，不代表漏跑。 2026-06-23 更新：167 长音频计划 run 已暂停，不再作为待训练队列展示。 2026-06-25 更新：exp79/80/81 是长音频上采样和最终配方候选；exp75 被 exp50 同名续跑取代。 2026-06-25 更新2：exp80 优先于 exp79；exp79 降为低优先级机制验证。 2026-06-28 更新：exp78 ATCOSIM + light real aug 成为 0.6B 主候选；exp79/80/81 长音频方向降级为诊断，exp76/77 不扩展；后续 0.6B 自动队列主要放在 167/178，47 清空。 2026-07-01 更新：噪声/非目标人声幻觉问题新增 exp91-exp94 0.6B ablation 设计；第一波只启动 exp91/exp92 单变量，exp93/exp94 作为剂量/组合 follow-up；exp89 1.7B overlap continuation 已按用户要求撤销，不再作为待跑计划。"
 }
