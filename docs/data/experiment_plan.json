@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-07-01 10:12 CST",
+  "updated_at": "2026-07-01 11:12 CST",
   "title": "Qwen3-ASR v4.3 数据扩充实验计划",
   "dashboard_note": "这个页面用于动态跟踪实验计划：区分历史 run、当前队列、后续数据配比 ablation，以及暂缓或诊断类实验。通用数据和混合数据都已纳入计划；raw exp 编号只作为运行 ID，不代表必须连续执行。",
   "current_base": {
@@ -1429,34 +1429,45 @@
       ]
     },
     {
-      "id": "exp91_v4_3_atcosim_lightreal_noise_empty1h_epoch12",
-      "status": "designed_waiting_materialization",
+      "id": "exp91_v4_3_atcosim_lightreal_allnoise_empty3h_epoch12",
+      "status": "materialized_waiting_queue",
       "priority": 119,
-      "category": "hallucination_empty_negative_noise",
-      "data_version": "latest_v4.3_plus_atcosim_lightreal_plus_ms_snsd_noise_empty1h",
-      "data_dir": "qwen3_asr_20260701_exp91_v4_3_atcosim_lightreal_noise_empty1h",
+      "category": "hallucination_empty_negative_all_types",
+      "data_version": "latest_v4.3_plus_atcosim_lightreal_plus_ms_snsd_allnoise_empty3h",
+      "data_dir": "qwen3_asr_20260701_exp91_v4_3_atcosim_lightreal_allnoise_empty3h",
       "epochs": 12,
       "machine": "167_or_178",
-      "purpose": "针对工位/无人声/环境声触发 ATC 幻觉：以 latest v4.3 + ATCOSIM + light real 为 base，只追加 1h MS-SNSD 纯噪声 empty transcript 负样本，验证 no-speech/non-speech 时输出空文本的能力，同时守住 full WER、短句和中文/英文 ATC slice。",
-      "plan_label": "NH-N1",
-      "needs_data_materialize": true,
-      "materialize_automation": {
-        "enabled": false,
-        "script": "train/training_scripts/materialize_noise_empty_negative.py",
-        "source_review_manifest": "train/analysis/noise_dataset_review_20260701/samples.json",
+      "purpose": "简化版噪声幻觉 ablation：以 latest v4.3 + ATCOSIM + light real 为 base，一次性追加 3h MS-SNSD empty transcript 负样本，覆盖办公机器/键鼠/室内外环境/交通公共环境/非目标人声/人群/机场广播等所有已收集可训练候选类型，验证工位背景声和他人说话是否不再输出 ATC 或重复文本。",
+      "plan_label": "NH-ALL3",
+      "needs_data_materialize": false,
+      "materialized": {
+        "host": "47",
+        "data_dir": "train/training_data/qwen3_asr_20260701_exp91_v4_3_atcosim_lightreal_allnoise_empty3h",
         "data_root": "/data/xijunting/atc_asr/noise_empty_negative_20260701",
-        "ready_file": ".sync_complete",
-        "require_latest_v4_3": true
+        "materialized_at": "2026-07-01T10:31:00+08:00",
+        "source_pool_size": 30,
+        "train_empty_rows": 12466,
+        "train_empty_hours": 2.999396,
+        "eval_empty_rows": 2079,
+        "eval_empty_hours": 0.499455,
+        "train_rows_total": 364748,
+        "test_rows_total": 9888,
+        "empty_train_breakdown": {
+          "noise_empty_negative": 8692,
+          "non_target_speech_empty_negative": 3774
+        },
+        "hallucination_eval_manifest": "all_hallucination_eval.jsonl"
       },
       "caps_hours": {
         "base_recipe": "latest v4.3 + ATCOSIM + light real",
-        "noise_empty_hours": 1.0,
-        "allowed_training_status": [
-          "train_candidate"
+        "all_empty_negative_hours": 3.0,
+        "hallucination_eval_hours": 0.5,
+        "included_training_status": [
+          "train_candidate",
+          "train_candidate_review"
         ],
-        "exclude_groups": [
-          "non_target_speech_candidate"
-        ],
+        "included_dataset": "MS-SNSD only",
+        "excluded_dataset_policy": "ESC-50 remains internal-only unless licensing is cleared",
         "duration_bucket_hours": {
           "0.2_0.5s": 0.2,
           "0.5_1.0s": 0.25,
@@ -1464,26 +1475,27 @@
           "2.0_4.0s": 0.2,
           "4.0_8.0s": 0.1
         },
-        "text_policy": "text/raw_text/normalized_text/verbatim_text are empty strings; prompt is empty so language_prefix None does not add Chinese/English bias"
+        "text_policy": "text/raw_text/normalized_text/verbatim_text/prompt are empty strings"
       },
       "training_policy": {
         "target_epochs": 12,
         "model_size": "0.6B",
         "init_from": "qwen3-asr-0.6b base",
         "batch_size": "follow 0.6B ablation default on target host",
-        "eval_strategy": "regular full/rich slices plus separate noise_hallucination_test; do not add empty rows to regular test.jsonl",
+        "eval_strategy": "regular full/rich slices plus all_hallucination_eval.jsonl; empty-reference rows are not added to regular test.jsonl",
         "early_stopping_patience": 3,
         "load_best_model_at_end": false
       },
       "selection_focus": [
-        "noise_hallucination_nonempty_rate",
-        "noise_atc_keyword_rate",
-        "noise_repeat_rate",
+        "all_hallucination_nonempty_rate",
+        "all_hallucination_atc_keyword_rate",
+        "all_hallucination_repeat_rate",
         "short_noise_nonempty_rate",
         "full_wer",
         "duration_0_2s",
         "zh_atc",
         "english_atc",
+        "mixed_atc",
         "numbers_callsigns"
       ],
       "launch_policy": {
@@ -1494,14 +1506,14 @@
         "do_not_launch_on": [
           "47"
         ],
-        "launch_when": "after materialization and manifest checks; first wave single-variable run",
-        "notes": "Do not mix with non-target speech in this run."
+        "launch_when": "after data/audio path sync to target host and explicit queue decision",
+        "notes": "Single simplified run replaces exp91/92/93/94 split design."
       }
     },
     {
       "id": "exp92_v4_3_atcosim_lightreal_nontarget_empty1h_epoch12",
-      "status": "designed_waiting_materialization",
-      "priority": 118,
+      "status": "superseded_by_exp91_allnoise_empty3h",
+      "priority": 0,
       "category": "hallucination_empty_negative_non_target_speech",
       "data_version": "latest_v4.3_plus_atcosim_lightreal_plus_ms_snsd_nontarget_empty1h",
       "data_dir": "qwen3_asr_20260701_exp92_v4_3_atcosim_lightreal_nontarget_empty1h",
@@ -1566,12 +1578,16 @@
         ],
         "launch_when": "after listening review approves the non-target speech candidates; first wave single-variable run",
         "notes": "Keep separate from pure noise to isolate office speech hallucination."
-      }
+      },
+      "queue_policy": "do_not_launch_simplified_by_user",
+      "notes": [
+        "2026-07-01 user requested simpler single higher-dose all-types run; replaced by exp91 allnoise_empty3h."
+      ]
     },
     {
       "id": "exp93_v4_3_atcosim_lightreal_noise_empty3h_epoch12",
-      "status": "designed_followup_do_not_queue_yet",
-      "priority": 80,
+      "status": "superseded_by_exp91_allnoise_empty3h",
+      "priority": 0,
       "category": "hallucination_empty_negative_noise_dose",
       "data_version": "latest_v4.3_plus_atcosim_lightreal_plus_ms_snsd_noise_empty3h",
       "data_dir": "qwen3_asr_20260701_exp93_v4_3_atcosim_lightreal_noise_empty3h",
@@ -1604,12 +1620,16 @@
         ],
         "launch_when": "only after exp91 early metrics pass promotion gate",
         "notes": "Not in automatic queue yet."
-      }
+      },
+      "queue_policy": "do_not_launch_simplified_by_user",
+      "notes": [
+        "2026-07-01 user requested simpler single higher-dose all-types run; replaced by exp91 allnoise_empty3h."
+      ]
     },
     {
       "id": "exp94_v4_3_atcosim_lightreal_noise1h_nontarget1h_epoch12",
-      "status": "designed_followup_do_not_queue_yet",
-      "priority": 79,
+      "status": "superseded_by_exp91_allnoise_empty3h",
+      "priority": 0,
       "category": "hallucination_empty_negative_combo",
       "data_version": "latest_v4.3_plus_atcosim_lightreal_plus_noise1h_nontarget1h",
       "data_dir": "qwen3_asr_20260701_exp94_v4_3_atcosim_lightreal_noise1h_nontarget1h",
@@ -1643,7 +1663,11 @@
         ],
         "launch_when": "only after exp91/exp92 evidence; not automatic first wave",
         "notes": "Use only if single-variable result justifies combination."
-      }
+      },
+      "queue_policy": "do_not_launch_simplified_by_user",
+      "notes": [
+        "2026-07-01 user requested simpler single higher-dose all-types run; replaced by exp91 allnoise_empty3h."
+      ]
     }
   ],
   "machine_policy": [
@@ -1701,5 +1725,5 @@
     "ATCOSIM 信号已经足够强，后续寻找最佳数据组合时默认基于 ATCOSIM；当前 full WER 最低 checkpoint 是 exp50 epoch4，当前组合主候选是 exp78，当前新增 controlled run 是 exp82 error-aware hard-row upsampling。",
     "后续 0.6B 自动训练主要使用 167 和 178；47 不排自动 0.6B 队列。"
   ],
-  "numbering_note": "编号说明：raw run id 保留历史连续性，已启动的 run 不重命名；页面中的计划编号用于阅读执行顺序。A=当前主线，M=matched mini，L=长音频，T=TTS，H=高剂量数据扩充筛选。exp30-exp49 中很多只是早期数据配方或历史候选，不代表漏跑。 2026-06-23 更新：167 长音频计划 run 已暂停，不再作为待训练队列展示。 2026-06-25 更新：exp79/80/81 是长音频上采样和最终配方候选；exp75 被 exp50 同名续跑取代。 2026-06-25 更新2：exp80 优先于 exp79；exp79 降为低优先级机制验证。 2026-06-28 更新：exp78 ATCOSIM + light real aug 成为 0.6B 主候选；exp79/80/81 长音频方向降级为诊断，exp76/77 不扩展；后续 0.6B 自动队列主要放在 167/178，47 清空。 2026-07-01 更新：噪声/非目标人声幻觉问题新增 exp91-exp94 0.6B ablation 设计；第一波只启动 exp91/exp92 单变量，exp93/exp94 作为剂量/组合 follow-up；exp89 1.7B overlap continuation 已按用户要求撤销，不再作为待跑计划。"
+  "numbering_note": "编号说明：raw run id 保留历史连续性，已启动的 run 不重命名；页面中的计划编号用于阅读执行顺序。A=当前主线，M=matched mini，L=长音频，T=TTS，H=高剂量数据扩充筛选。exp30-exp49 中很多只是早期数据配方或历史候选，不代表漏跑。 2026-06-23 更新：167 长音频计划 run 已暂停，不再作为待训练队列展示。 2026-06-25 更新：exp79/80/81 是长音频上采样和最终配方候选；exp75 被 exp50 同名续跑取代。 2026-06-25 更新2：exp80 优先于 exp79；exp79 降为低优先级机制验证。 2026-06-28 更新：exp78 ATCOSIM + light real aug 成为 0.6B 主候选；exp79/80/81 长音频方向降级为诊断，exp76/77 不扩展；后续 0.6B 自动队列主要放在 167/178，47 清空。 2026-07-01 更新：噪声/非目标人声幻觉问题新增 exp91-exp94 0.6B ablation 设计；第一波只启动 exp91/exp92 单变量，exp93/exp94 作为剂量/组合 follow-up；exp89 1.7B overlap continuation 已按用户要求撤销，不再作为待跑计划。 2026-07-01 更新2：按用户要求，噪声幻觉 ablation 从多单变量计划收敛为一个稍高剂量、包含所有 MS-SNSD 可训练候选类型的 combined run：exp91 allnoise_empty3h；exp92-exp94 不再作为待跑项。"
 }
