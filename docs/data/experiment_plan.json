@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-07-02 15:12 CST",
+  "updated_at": "2026-07-02 16:12 CST",
   "title": "Qwen3-ASR v4.3 数据扩充实验计划",
   "dashboard_note": "这个页面用于动态跟踪实验计划：区分历史 run、当前队列、后续数据配比 ablation，以及暂缓或诊断类实验。通用数据和混合数据都已纳入计划；raw exp 编号只作为运行 ID，不代表必须连续执行。",
   "current_base": {
@@ -38,6 +38,12 @@
       "status": "current",
       "data_dir": "qwen3_asr_20260623_cleaned_v4_3_verbatim_no_translation_mismatch",
       "notes": "当前所有新全量 ablation 的基础数据。"
+    },
+    {
+      "version": "v4.3_manual_smallsets_20260702",
+      "status": "materialized",
+      "data_dir": "qwen3_asr_20260702_v4_3_manual_chuanhang_shenhang_checklist",
+      "notes": "latest v4.3 + 两个独立人工小数据集：川航 A-captain 1.7b-anchor 人工标注 130 条 / 7.159 分钟，以及深航 checklist reviewed 30min 包 550 条 / 31.455 分钟。独立 smallset 位于 train/training_data/manual_smallsets_20260702/。"
     },
     {
       "version": "v4.4",
