@@ -1,12 +1,12 @@
 {
-  "updated_at": "2026-07-02 14:12 CST",
+  "updated_at": "2026-07-02 15:12 CST",
   "title": "Qwen3-ASR v4.3 数据扩充实验计划",
   "dashboard_note": "这个页面用于动态跟踪实验计划：区分历史 run、当前队列、后续数据配比 ablation，以及暂缓或诊断类实验。通用数据和混合数据都已纳入计划；raw exp 编号只作为运行 ID，不代表必须连续执行。",
   "current_base": {
     "id": "exp29_v4_3_no_translation_mismatch_baseline",
     "data_dir": "qwen3_asr_20260623_cleaned_v4_3_verbatim_no_translation_mismatch",
     "status": "active",
-    "reason": "v4.3 基于 v4.1 的 verbatim/no-colon 数据，并进一步剔除了翻译/跨语种不匹配样本。除非 v4.4 matched mini 明显胜出，后续全量 ablation 都以 v4.3 为 base。 2026-07-01 已在 v4.3 原地剥离句尾质检标签“正确复诵”，后续组合继续以该最新 v4.3 为准。 2026-07-02 已在 v4.3 原地规范逗号/句号标点：含中文文本使用中文逗号/句号，非中文文本使用英文逗号/句号，保留数字小数点；后续组合继续以该最新 v4.3 为准。"
+    "reason": "v4.3 基于 v4.1 的 verbatim/no-colon 数据，并进一步剔除了翻译/跨语种不匹配样本。除非 v4.4 matched mini 明显胜出，后续全量 ablation 都以 v4.3 为 base。 2026-07-01 已在 v4.3 原地剥离句尾质检标签“正确复诵”，后续组合继续以该最新 v4.3 为准。 2026-07-02 已在 v4.3 原地规范逗号/句号标点：含中文文本使用中文逗号/句号，非中文文本使用英文逗号/句号，保留数字小数点；后续组合继续以该最新 v4.3 为准。 2026-07-02 已把确认的中文句子英文航司呼号前缀映射为中文呼号，例如 CCA/CA->国航、MU/CES->东方、CSN/CZ->南方；程序/航路点候选不做自动替换，后续组合继续以该最新 v4.3 为准。"
   },
   "data_versions": [
     {
@@ -1511,6 +1511,165 @@
       }
     },
     {
+      "id": "exp95_v4_3_fullcombo_a_balanced_epoch12",
+      "status": "planned_blocked_on_tts60_materialization",
+      "priority": 122,
+      "category": "fullcombo_candidate",
+      "data_version": "latest_v4.3_fullcombo_a_balanced",
+      "data_dir": "qwen3_asr_20260702_exp95_v4_3_fullcombo_a_balanced",
+      "epochs": 12,
+      "machine": "167_or_178",
+      "purpose": "完备候选 A：尽可能纳入当前 0618 app-test 和 full/rich eval 中表现为正向的数据，同时控制分布不过量。以最新 canonical v4.3 为 base，叠加 ATCOSIM、VAD-style 100h、新版 TTS 60h、origlong 20h、fullmix 英文/短切片有效子集 30h、general 20h；noise-empty 只允许 0-3h，可选且必须单独记录，用作幻觉鲁棒性，不作为 WER 主收益来源。",
+      "plan_label": "FullCombo-A",
+      "needs_data_materialize": true,
+      "blocked_by": [
+        "tts_v2_expand_to_60h",
+        "latest_v4_3_fingerprint_check",
+        "fullmix_effective_subset_materialization"
+      ],
+      "caps_hours": {
+        "base_recipe": "latest canonical v4.3",
+        "open_atc_atcosim": "all",
+        "vad_style": 100,
+        "tts_v2_target": 60,
+        "tts_v2_existing": 20,
+        "tts_v2_extra_needed": 40,
+        "origlong_light": 20,
+        "fullmix_effective_english_short": 30,
+        "general_asr": 20,
+        "noise_empty_negative": "0-3 optional; do not exceed existing exp91 3h without separate approval"
+      },
+      "evidence_basis": {
+        "avg_0618": "exp68 vad100h best avg WER 42.20",
+        "zh_0618": "exp80 origlong best zh WER 38.72",
+        "en_and_short_0618": "exp52 fullmix best English WER 40.57 and <=4s WER 62.57",
+        "tts_signal": "exp63 TTS10h avg WER 42.26; TTS v2 currently only 20h and needs expansion",
+        "noise_signal": "exp91 noise-empty is for hallucination suppression; current regular 0618 WER is not positive, so keep small in A"
+      },
+      "training_policy": {
+        "target_epochs": 12,
+        "model_size": "0.6B",
+        "init_from": "qwen3-asr-0.6b base",
+        "batch_size": "follow 0.6B ablation default on target host",
+        "eval_strategy": "full eval each epoch plus rich/slice eval; 0618 app-test must be run for every meaningful checkpoint",
+        "early_stopping_patience": 3,
+        "load_best_model_at_end": false,
+        "checkpoint_selection": "do not default to latest; choose by full eval plus 0618 app-test and target slices"
+      },
+      "selection_focus": [
+        "0618_avg_wer",
+        "0618_zh_wer",
+        "0618_en_wer",
+        "0618_duration_le4s_wer",
+        "full_wer",
+        "rich_mixed_atc",
+        "numbers_callsigns",
+        "repetition_or_eos_errors"
+      ],
+      "launch_policy": {
+        "allowed_hosts": [
+          "167",
+          "178"
+        ],
+        "do_not_launch_on": [
+          "47"
+        ],
+        "launch_when": "after TTS v2 60h and effective fullmix subset are materialized from latest v4.3; explicit queue decision required",
+        "notes": "Use as balanced candidate. If exp96 is also ready, run exp95 and exp96 in parallel on different hosts if GPUs are free."
+      }
+    },
+    {
+      "id": "exp96_v4_3_fullcombo_b_highcoverage_epoch12",
+      "status": "planned_blocked_on_tts100_and_noise30",
+      "priority": 121,
+      "category": "fullcombo_candidate_highcoverage",
+      "data_version": "latest_v4.3_fullcombo_b_highcoverage",
+      "data_dir": "qwen3_asr_20260702_exp96_v4_3_fullcombo_b_highcoverage",
+      "epochs": 12,
+      "machine": "167_or_178",
+      "purpose": "完备候选 B：在 A 的基础上尽量吃满已显示正向信号的数据，看更高覆盖上限。以最新 canonical v4.3 为 base，叠加 ATCOSIM、VAD-style 100h、新版 TTS 100h、origlong 30h、fullmix 英文/短切片有效子集 50h、general 40h、noise-empty 30h。该 run 主要验证高覆盖组合上限和分布冲突，必须同时看 0618、中文/英文、短切片和 hallucination eval。",
+      "plan_label": "FullCombo-B",
+      "needs_data_materialize": true,
+      "blocked_by": [
+        "tts_v2_expand_to_100h",
+        "noise_empty_expand_to_30h",
+        "latest_v4_3_fingerprint_check",
+        "fullmix_effective_subset_materialization"
+      ],
+      "caps_hours": {
+        "base_recipe": "latest canonical v4.3",
+        "open_atc_atcosim": "all",
+        "vad_style": 100,
+        "tts_v2_target": 100,
+        "tts_v2_existing": 20,
+        "tts_v2_extra_needed": 80,
+        "origlong_light": 30,
+        "fullmix_effective_english_short": 50,
+        "general_asr": 40,
+        "noise_empty_negative": 30,
+        "noise_empty_existing": 3,
+        "noise_empty_extra_needed": 27
+      },
+      "evidence_basis": {
+        "avg_0618": "exp68 vad100h best avg WER 42.20",
+        "zh_0618": "exp80 origlong best zh WER 38.72",
+        "en_and_short_0618": "exp52 fullmix best English WER 40.57 and <=4s WER 62.57",
+        "tts_signal": "TTS10h is very strong on 0618; scale to 100h only with the newer balanced short/key-info synthesis recipe",
+        "noise_signal": "noise-empty regular WER signal is not positive; include 30h only to test hallucination robustness tradeoff"
+      },
+      "data_generation_plan": {
+        "tts": {
+          "target_hours": 100,
+          "current_hours": 20,
+          "extra_hours_needed": 80,
+          "hosts": [
+            "167 GPU0",
+            "178 GPU0"
+          ],
+          "parallelism": "up to 3 TTS synthesis instances per free GPU, if memory allows",
+          "recipe": "reuse TTS v2 balanced short/key-info design: Chinese/English balanced, mostly short <=15s with more mass below 10s, diverse speed/noise/accent, source balanced, minimal bilibili_zh"
+        },
+        "noise": {
+          "target_hours": 30,
+          "current_hours": 3,
+          "extra_hours_needed": 27,
+          "source_policy": "MS-SNSD is already used; download or materialize more only if licensing/storage are acceptable. ESC-50 remains internal-only unless licensing is cleared.",
+          "eval_policy": "keep empty-reference eval separate; do not add noise rows to regular test set"
+        }
+      },
+      "training_policy": {
+        "target_epochs": 12,
+        "model_size": "0.6B",
+        "init_from": "qwen3-asr-0.6b base",
+        "batch_size": "follow 0.6B ablation default on target host",
+        "eval_strategy": "full eval each epoch plus rich/slice eval; 0618 app-test and hallucination eval are mandatory for best checkpoint",
+        "early_stopping_patience": 3,
+        "load_best_model_at_end": false,
+        "checkpoint_selection": "do not default to latest; choose by full eval plus 0618 app-test, target slices, and hallucination metrics"
+      },
+      "selection_focus": [
+        "0618_avg_wer",
+        "0618_en_wer",
+        "0618_duration_le4s_wer",
+        "0618_zh_wer",
+        "full_wer",
+        "all_hallucination_nonempty_rate",
+        "all_hallucination_atc_keyword_rate",
+        "repetition_or_eos_errors"
+      ],
+      "launch_policy": {
+        "allowed_hosts": [
+          "167",
+          "178"
+        ],
+        "do_not_launch_on": [
+          "47"
+        ],
+        "launch_when": "after TTS v2 100h, noise-empty 30h, and effective fullmix subset are materialized from latest v4.3; explicit queue decision required",
+        "notes": "High-coverage candidate. If it hurts Chinese or 0618 avg while improving hallucination, keep as diagnostic rather than final recipe."
+      }
+    },
+    {
       "id": "exp92_v4_3_atcosim_lightreal_nontarget_empty1h_epoch12",
       "status": "superseded_by_exp91_allnoise_empty3h",
       "priority": 0,
@@ -1725,5 +1884,5 @@
     "ATCOSIM 信号已经足够强，后续寻找最佳数据组合时默认基于 ATCOSIM；当前 full WER 最低 checkpoint 是 exp50 epoch4，当前组合主候选是 exp78，当前新增 controlled run 是 exp82 error-aware hard-row upsampling。",
     "后续 0.6B 自动训练主要使用 167 和 178；47 不排自动 0.6B 队列。"
   ],
-  "numbering_note": "编号说明：raw run id 保留历史连续性，已启动的 run 不重命名；页面中的计划编号用于阅读执行顺序。A=当前主线，M=matched mini，L=长音频，T=TTS，H=高剂量数据扩充筛选。exp30-exp49 中很多只是早期数据配方或历史候选，不代表漏跑。 2026-06-23 更新：167 长音频计划 run 已暂停，不再作为待训练队列展示。 2026-06-25 更新：exp79/80/81 是长音频上采样和最终配方候选；exp75 被 exp50 同名续跑取代。 2026-06-25 更新2：exp80 优先于 exp79；exp79 降为低优先级机制验证。 2026-06-28 更新：exp78 ATCOSIM + light real aug 成为 0.6B 主候选；exp79/80/81 长音频方向降级为诊断，exp76/77 不扩展；后续 0.6B 自动队列主要放在 167/178，47 清空。 2026-07-01 更新：噪声/非目标人声幻觉问题新增 exp91-exp94 0.6B ablation 设计；第一波只启动 exp91/exp92 单变量，exp93/exp94 作为剂量/组合 follow-up；exp89 1.7B overlap continuation 已按用户要求撤销，不再作为待跑计划。 2026-07-01 更新2：按用户要求，噪声幻觉 ablation 从多单变量计划收敛为一个稍高剂量、包含所有 MS-SNSD 可训练候选类型的 combined run：exp91 allnoise_empty3h；exp92-exp94 不再作为待跑项。"
+  "numbering_note": "编号说明：raw run id 保留历史连续性，已启动的 run 不重命名；页面中的计划编号用于阅读执行顺序。A=当前主线，M=matched mini，L=长音频，T=TTS，H=高剂量数据扩充筛选。exp30-exp49 中很多只是早期数据配方或历史候选，不代表漏跑。 2026-06-23 更新：167 长音频计划 run 已暂停，不再作为待训练队列展示。 2026-06-25 更新：exp79/80/81 是长音频上采样和最终配方候选；exp75 被 exp50 同名续跑取代。 2026-06-25 更新2：exp80 优先于 exp79；exp79 降为低优先级机制验证。 2026-06-28 更新：exp78 ATCOSIM + light real aug 成为 0.6B 主候选；exp79/80/81 长音频方向降级为诊断，exp76/77 不扩展；后续 0.6B 自动队列主要放在 167/178，47 清空。 2026-07-01 更新：噪声/非目标人声幻觉问题新增 exp91-exp94 0.6B ablation 设计；第一波只启动 exp91/exp92 单变量，exp93/exp94 作为剂量/组合 follow-up；exp89 1.7B overlap continuation 已按用户要求撤销，不再作为待跑计划。 2026-07-01 更新2：按用户要求，噪声幻觉 ablation 从多单变量计划收敛为一个稍高剂量、包含所有 MS-SNSD 可训练候选类型的 combined run：exp91 allnoise_empty3h；exp92-exp94 不再作为待跑项。 2026-07-02 更新：新增 exp95/exp96 FullCombo 完备候选；两者都基于 latest v4.3，分别等待 TTS60h 和 TTS100h/noise30h 数据 materialize 后再启动。"
 }
