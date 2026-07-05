@@ -94,7 +94,7 @@
       <h1>ATC ASR 训练监控面板</h1>
       <p>47 / 178 / 167 三台机器的 ablation 训练状态、full WER 与 slice 结果统一查看。0.6B 与 1.7B 的 WER 统计分开展示，避免不同模型规模混在一起比较。</p>
       <div class="meta">
-        <div class="meta-item"><span class="meta-label">更新时间</span><span class="meta-value">2026-07-05 19:12 CST</span></div>
+        <div class="meta-item"><span class="meta-label">更新时间</span><span class="meta-value">2026-07-05 20:12 CST</span></div>
         <div class="meta-item"><span class="meta-label">0.6B run</span><span class="meta-value">79</span></div>
         <div class="meta-item"><span class="meta-label">1.7B run</span><span class="meta-value">11</span></div>
         <div class="meta-item"><span class="meta-label">训练中 run</span><span class="meta-value">3</span></div>
@@ -108,7 +108,7 @@
     <section class="section">
       <h2>全局训练中</h2>
       <ul>
-        <li>167 · exp1p7b01_pure17b_msreview_x8_replay60h · running (01:55:25)</li><li>167 · exp91_v43_lightreal_allnoise3h_e12_g2 · 102591/136788 steps (75.0%, epoch 9.00)</li><li>47 · 1p7b_v43_lightreal_ckreal20_cktts15_zmev_g1 · running (8-23:50:13)</li>
+        <li>167 · exp1p7b01_pure17b_msreview_x8_replay60h · running (02:55:25)</li><li>167 · exp91_v43_lightreal_allnoise3h_e12_g2 · 102591/136788 steps (75.0%, epoch 9.00)</li><li>47 · 1p7b_v43_lightreal_ckreal20_cktts15_zmev_g1 · running (9-00:50:14)</li>
       </ul>
     </section>
     
@@ -552,7 +552,7 @@
         <div class="meta-item"><span class="meta-label">主 slice / 补充 slice</span><span class="meta-value">6 / 4</span></div>
       </div>
     
-            <ul><li>167 · exp1p7b01_pure17b_msreview_x8_replay60h · running (01:55:25)</li><li>47 · 1p7b_v43_lightreal_ckreal20_cktts15_zmev_g1 · running (8-23:50:13)</li></ul>
+            <ul><li>167 · exp1p7b01_pure17b_msreview_x8_replay60h · running (02:55:25)</li><li>47 · 1p7b_v43_lightreal_ckreal20_cktts15_zmev_g1 · running (9-00:50:14)</li></ul>
           </section>
           
     <section id="wer17b" class="section">
@@ -897,7 +897,7 @@
       <div class="table-wrap">
         <table>
           <thead><tr><th>机器</th><th>Run</th><th>Epoch</th><th>Full WER</th><th>Full CER</th><th>Full SER</th><th>30min checklist WER</th><th>关键 slice WER</th><th>进度</th></tr></thead>
-          <tbody><tr><td>167</td><td><code>1p7b_ckreal12e3_overlap15h_cont_g0</code></td><td class='num'>1.0</td><td class='num'>10.62</td><td class='num'>7.75</td><td class='num'>53.48</td><td class='num' title='CER - · SER -'>-</td><td>zh 11.63 · en 15.86 · mixed 16.52 · num/call 12.72 · &gt;=8s 14.96 · 8-12s 14.90</td><td>11797/94376 steps (12.5%, epoch 1.00)</td></tr><tr><td>178</td><td><code>1p7b_v43_lightreal_ckreal12_cktts6_overlap15h_frombase_g4</code></td><td class='num'>11.0</td><td class='num'>10.69</td><td class='num'>7.74</td><td class='num'>53.57</td><td class='num' title='CER - · SER -'>-</td><td>zh 11.81 · en 15.71 · mixed 16.88 · num/call 12.72 · &gt;=8s 15.15 · 8-12s 15.12</td><td>129767/235940 steps (55.0%, epoch 11.00)</td></tr><tr><td>47</td><td><code>1p7b_v43_lightreal_ckreal6_cktts4_zmev_g1b</code></td><td class='num'>10.0</td><td class='num'>10.72</td><td class='num'>7.81</td><td class='num'>53.68</td><td class='num' title='CER 1.65 · SER 5.82'>1.67</td><td>zh 11.75 · en 15.82 · mixed 16.37 · num/call 12.77 · &gt;=8s 14.65 · 8-12s 14.87</td><td>112560/225120 steps (50.0%, epoch 10.00)</td></tr><tr><td>167</td><td><code>1p7b_v43_atcosim_lightreal_zmev_g2</code></td><td class='num'>8.0</td><td class='num'>10.75</td><td class='num'>7.84</td><td class='num'>53.57</td><td class='num' title='CER 40.10 · SER 73.27'>41.32</td><td>zh 11.79 · en 16.02 · mixed 16.98 · num/call 12.86 · &gt;=8s 15.51 · 8-12s 15.39</td><td>88072/220180 steps (40.0%, epoch 8.00)</td></tr><tr><td>167</td><td><code>1p7b_v43_lightreal_ckreal12_cktts6_zmev_g3</code></td><td class='num'>11.0</td><td class='num'>10.77</td><td class='num'>7.83</td><td class='num'>53.78</td><td class='num' title='CER 0.00 · SER 0.00'>0.00</td><td>zh 11.84 · en 15.79 · mixed 16.83 · num/call 12.86 · &gt;=8s 15.49 · 8-12s 15.61</td><td>126269/229580 steps (55.0%, epoch 11.00)</td></tr><tr><td>47</td><td><code>1p7b_v43_lightreal_ckreal20_cktts15_zmev_g1</code></td><td class='num'>10.0</td><td class='num'>10.79</td><td class='num'>7.75</td><td class='num'>53.50</td><td class='num' title='CER 0.01 · SER 0.18'>0.02</td><td>zh 11.92 · en 15.65 · mixed 16.92 · num/call 12.80 · &gt;=8s 15.00 · 8-12s 15.02</td><td>running (8-23:50:13)</td></tr></tbody>
+          <tbody><tr><td>167</td><td><code>1p7b_ckreal12e3_overlap15h_cont_g0</code></td><td class='num'>1.0</td><td class='num'>10.62</td><td class='num'>7.75</td><td class='num'>53.48</td><td class='num' title='CER - · SER -'>-</td><td>zh 11.63 · en 15.86 · mixed 16.52 · num/call 12.72 · &gt;=8s 14.96 · 8-12s 14.90</td><td>11797/94376 steps (12.5%, epoch 1.00)</td></tr><tr><td>178</td><td><code>1p7b_v43_lightreal_ckreal12_cktts6_overlap15h_frombase_g4</code></td><td class='num'>11.0</td><td class='num'>10.69</td><td class='num'>7.74</td><td class='num'>53.57</td><td class='num' title='CER - · SER -'>-</td><td>zh 11.81 · en 15.71 · mixed 16.88 · num/call 12.72 · &gt;=8s 15.15 · 8-12s 15.12</td><td>129767/235940 steps (55.0%, epoch 11.00)</td></tr><tr><td>47</td><td><code>1p7b_v43_lightreal_ckreal6_cktts4_zmev_g1b</code></td><td class='num'>10.0</td><td class='num'>10.72</td><td class='num'>7.81</td><td class='num'>53.68</td><td class='num' title='CER 1.65 · SER 5.82'>1.67</td><td>zh 11.75 · en 15.82 · mixed 16.37 · num/call 12.77 · &gt;=8s 14.65 · 8-12s 14.87</td><td>112560/225120 steps (50.0%, epoch 10.00)</td></tr><tr><td>167</td><td><code>1p7b_v43_atcosim_lightreal_zmev_g2</code></td><td class='num'>8.0</td><td class='num'>10.75</td><td class='num'>7.84</td><td class='num'>53.57</td><td class='num' title='CER 40.10 · SER 73.27'>41.32</td><td>zh 11.79 · en 16.02 · mixed 16.98 · num/call 12.86 · &gt;=8s 15.51 · 8-12s 15.39</td><td>88072/220180 steps (40.0%, epoch 8.00)</td></tr><tr><td>167</td><td><code>1p7b_v43_lightreal_ckreal12_cktts6_zmev_g3</code></td><td class='num'>11.0</td><td class='num'>10.77</td><td class='num'>7.83</td><td class='num'>53.78</td><td class='num' title='CER 0.00 · SER 0.00'>0.00</td><td>zh 11.84 · en 15.79 · mixed 16.83 · num/call 12.86 · &gt;=8s 15.49 · 8-12s 15.61</td><td>126269/229580 steps (55.0%, epoch 11.00)</td></tr><tr><td>47</td><td><code>1p7b_v43_lightreal_ckreal20_cktts15_zmev_g1</code></td><td class='num'>10.0</td><td class='num'>10.79</td><td class='num'>7.75</td><td class='num'>53.50</td><td class='num' title='CER 0.01 · SER 0.18'>0.02</td><td>zh 11.92 · en 15.65 · mixed 16.92 · num/call 12.80 · &gt;=8s 15.00 · 8-12s 15.02</td><td>running (9-00:50:14)</td></tr></tbody>
         </table>
       </div>
     </section>
