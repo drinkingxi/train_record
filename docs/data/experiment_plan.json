@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-07-05 09:12 CST",
+  "updated_at": "2026-07-05 10:12 CST",
   "title": "Qwen3-ASR v4.3 数据扩充实验计划",
   "dashboard_note": "这个页面用于动态跟踪实验计划：区分历史 run、当前队列、后续数据配比 ablation，以及暂缓或诊断类实验。通用数据和混合数据都已纳入计划；raw exp 编号只作为运行 ID，不代表必须连续执行。",
   "current_base": {
@@ -1518,21 +1518,35 @@
     },
     {
       "id": "exp95_v4_3_fullcombo_a_balanced_epoch12",
-      "status": "planned_blocked_on_tts60_materialization",
+      "status": "running",
       "priority": 122,
       "category": "fullcombo_candidate",
       "data_version": "latest_v4.3_fullcombo_a_balanced",
       "data_dir": "qwen3_asr_20260702_exp95_v4_3_fullcombo_a_balanced",
       "epochs": 12,
-      "machine": "167_or_178",
+      "machine": "178",
       "purpose": "完备候选 A：尽可能纳入当前 0618 app-test 和 full/rich eval 中表现为正向的数据，同时控制分布不过量。以最新 canonical v4.3 为 base，叠加 ATCOSIM、VAD-style 100h、新版 TTS 60h、origlong 20h、fullmix 英文/短切片有效子集 30h、general 20h；noise-empty 只允许 0-3h，可选且必须单独记录，用作幻觉鲁棒性，不作为 WER 主收益来源。",
       "plan_label": "FullCombo-A",
-      "needs_data_materialize": true,
-      "blocked_by": [
-        "tts_v2_expand_to_60h",
-        "latest_v4_3_fingerprint_check",
-        "fullmix_effective_subset_materialization"
-      ],
+      "needs_data_materialize": false,
+      "blocked_by": [],
+      "materialized": {
+        "host": "178",
+        "data_dir": "train/training_data/qwen3_asr_20260702_exp95_v4_3_fullcombo_a_balanced",
+        "materialized_at": "2026-07-05T09:16:00+08:00",
+        "script": "train/training_scripts/materialize_fullcombo_exp95.py",
+        "base_dir": "train/training_data/qwen3_asr_20260629_exp78_v4_3_atcosim_light_real_aug_latestv43",
+        "train_rows_total": 485438,
+        "train_hours_total": 564.507168,
+        "test_rows_total": 9888,
+        "selected_hours": {
+          "vad100_incremental": 96.76624,
+          "origlong_base_upweight": 19.999954,
+          "fullmix_incremental": 29.999984,
+          "general_incremental": 0.494583,
+          "tts_v2_keyinfo": 59.999707
+        },
+        "notes": "general20 is already included in the exp78 latest-v4.3 light-real base; origlong20 is implemented as duration>=8s base-row upweight because exp80 materialized almost no usable incremental rows."
+      },
       "caps_hours": {
         "base_recipe": "latest canonical v4.3",
         "open_atc_atcosim": "all",
@@ -1561,6 +1575,17 @@
         "early_stopping_patience": 3,
         "load_best_model_at_end": false,
         "checkpoint_selection": "do not default to latest; choose by full eval plus 0618 app-test and target slices"
+      },
+      "run": {
+        "host": "178",
+        "gpu": 1,
+        "run_name": "exp95_v43_fullcombo_a_e12_178g1",
+        "run_dir": "train/training_checkpoints/qwen3-asr-0.6b-exp95_v43_fullcombo_a_e12_178g1",
+        "log": "train/training_checkpoints/logs/exp95_v43_fullcombo_a_e12_178g1.log",
+        "started_at": "2026-07-05T09:17:00+08:00",
+        "batch_size": 8,
+        "grad_acc": 4,
+        "lr": 8.277712338510594e-05
       },
       "selection_focus": [
         "0618_avg_wer",
