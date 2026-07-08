@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-07-07 09:00 CST",
+  "updated_at": "2026-07-08 09:00 CST",
   "title": "Qwen3-ASR v4.3 数据扩充实验计划",
   "dashboard_note": "这个页面用于动态跟踪实验计划：区分历史 run、当前队列、后续数据配比 ablation，以及暂缓或诊断类实验。通用数据和混合数据都已纳入计划；raw exp 编号只作为运行 ID，不代表必须连续执行。",
   "current_base": {
@@ -1019,7 +1019,7 @@
       "training_policy": {
         "target_epochs": 12,
         "early_stopping_patience": 3,
-        "load_best_model_at_end": false,
+        "load_best_model_at_end": true,
         "eval_strategy": "full_eval_each_epoch_plus_derived_slices"
       },
       "selection_focus": [
@@ -1069,7 +1069,7 @@
       "training_policy": {
         "target_epochs": 12,
         "early_stopping_patience": 3,
-        "load_best_model_at_end": false,
+        "load_best_model_at_end": true,
         "eval_strategy": "full_eval_each_epoch_plus_derived_slices; overlap test supplement backfill separately until integrated"
       },
       "selection_focus": [
@@ -1121,7 +1121,7 @@
       "training_policy": {
         "target_epochs": 12,
         "early_stopping_patience": 3,
-        "load_best_model_at_end": false,
+        "load_best_model_at_end": true,
         "eval_strategy": "full_eval_each_epoch_plus_derived_slices; high-overlap test supplement backfill separately until integrated"
       },
       "selection_focus": [
@@ -1225,7 +1225,7 @@
         "lora_alpha": 128,
         "lora_dropout": 0.12,
         "early_stopping_patience": 3,
-        "load_best_model_at_end": false,
+        "load_best_model_at_end": true,
         "eval_strategy": "full_eval_each_epoch_plus_derived_slices; post-train 30min checklist and 6min Shenhang compare"
       },
       "selection_focus": [
@@ -1289,7 +1289,7 @@
         "batch_size": "follow current 0.6B ablation default on target host",
         "eval_strategy": "full_eval_each_epoch_plus_duration_slices_plus_streaming_draft_slice",
         "early_stopping_patience": 3,
-        "load_best_model_at_end": false
+        "load_best_model_at_end": true
       },
       "selection_focus": [
         "full_wer",
@@ -1353,7 +1353,7 @@
         "batch_size": "follow current 0.6B ablation default on 178",
         "eval_strategy": "full_eval_each_epoch_plus_rich_slices_plus_source_holdout",
         "early_stopping_patience": 3,
-        "load_best_model_at_end": false
+        "load_best_model_at_end": true
       },
       "selection_focus": [
         "full_wer",
@@ -1407,7 +1407,7 @@
         "batch_size": "follow 178 0.6B default bs8 grad_acc4",
         "eval_strategy": "training full eval each epoch plus derived core slices; post-train best checkpoint rich/supplement eval",
         "early_stopping_patience": 3,
-        "load_best_model_at_end": false
+        "load_best_model_at_end": true
       },
       "selection_focus": [
         "full_wer",
@@ -1490,7 +1490,7 @@
         "batch_size": "follow 0.6B ablation default on target host",
         "eval_strategy": "regular full/rich slices plus all_hallucination_eval.jsonl; empty-reference rows are not added to regular test.jsonl",
         "early_stopping_patience": 3,
-        "load_best_model_at_end": false
+        "load_best_model_at_end": true
       },
       "selection_focus": [
         "all_hallucination_nonempty_rate",
@@ -1573,7 +1573,7 @@
         "batch_size": "follow 0.6B ablation default on target host",
         "eval_strategy": "full eval each epoch plus rich/slice eval; 0618 app-test must be run for every meaningful checkpoint",
         "early_stopping_patience": 3,
-        "load_best_model_at_end": false,
+        "load_best_model_at_end": true,
         "checkpoint_selection": "do not default to latest; choose by full eval plus 0618 app-test and target slices"
       },
       "run": {
@@ -1675,7 +1675,7 @@
         "batch_size": "follow 0.6B ablation default on target host",
         "eval_strategy": "full eval each epoch plus rich/slice eval; 0618 app-test and hallucination eval are mandatory for best checkpoint",
         "early_stopping_patience": 3,
-        "load_best_model_at_end": false,
+        "load_best_model_at_end": true,
         "checkpoint_selection": "do not default to latest; choose by full eval plus 0618 app-test, target slices, and hallucination metrics"
       },
       "selection_focus": [
@@ -1746,7 +1746,7 @@
         "batch_size": "follow 0.6B ablation default on target host",
         "eval_strategy": "regular full/rich slices plus separate non_target_speech_hallucination_test",
         "early_stopping_patience": 3,
-        "load_best_model_at_end": false
+        "load_best_model_at_end": true
       },
       "selection_focus": [
         "non_target_speech_nonempty_rate",
