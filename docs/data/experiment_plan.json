@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-07-09 09:00 CST",
+  "updated_at": "2026-07-10 09:00 CST",
   "title": "Qwen3-ASR v4.3 数据扩充实验计划",
   "dashboard_note": "这个页面用于动态跟踪实验计划：区分历史 run、当前队列、后续数据配比 ablation，以及暂缓或诊断类实验。通用数据和混合数据都已纳入计划；raw exp 编号只作为运行 ID，不代表必须连续执行。",
   "current_base": {
@@ -1133,7 +1133,8 @@
       ]
     },
     {
-      "id": "exp85_1p7b_v43_lightreal_ckreal12_cktts6_same_source_overlap15h",
+      "id": "exp09_1p7b_v43_lightreal_ckreal12_cktts6_same_source_overlap15h",
+      "legacy_global_id": "exp85_1p7b_v43_lightreal_ckreal12_cktts6_same_source_overlap15h",
       "status": "running",
       "priority": 120,
       "category": "1p7b_overlap_multi_speaker_finetune",
@@ -1142,7 +1143,7 @@
       "epochs": 20,
       "machine": "178",
       "purpose": "从原始 qwen3-asr-1.7b base 开始训练，在 1.7B v4.3/lightreal/checklist 配方基础上追加 15h 同源多说话人 overlap 合成数据，验证 overlap 数据是否应进入正式 1.7B recipe，并优先观察深航/检查单/ATC 场景下同时说话、打断和高重叠音频的鲁棒性。",
-      "plan_label": "OL-1P7B",
+      "plan_label": "1.7B exp09",
       "needs_data_materialize": false,
       "caps_hours": {
         "same_source_overlap_hours": 15.0056,
@@ -1157,7 +1158,8 @@
       "launched": {
         "host": "178",
         "gpu": 1,
-        "run_name": "1p7b_v43_lightreal_ckreal12_cktts6_overlap15h_frombase_g4",
+        "run_name": "1p7b_exp09_v43_lightreal_ckreal12_cktts6_overlap15h_frombase_g4",
+        "legacy_run_name": "1p7b_v43_lightreal_ckreal12_cktts6_overlap15h_frombase_g4",
         "run_dir": "train/training_checkpoints/qwen3-asr-1.7b-1p7b_v43_lightreal_ckreal12_cktts6_overlap15h_frombase_g4",
         "materialized_at": "2026-06-28T16:20:00+08:00",
         "started_at": "2026-06-28T16:53:43+08:00",
@@ -1195,7 +1197,8 @@
       ]
     },
     {
-      "id": "exp89_1p7b_ckreal12_e3_same_source_overlap15h_cont",
+      "id": "exp10_1p7b_ckreal12_e3_same_source_overlap15h_cont",
+      "legacy_global_id": "exp89_1p7b_ckreal12_e3_same_source_overlap15h_cont",
       "status": "cancelled",
       "priority": 0,
       "category": "1p7b_overlap_multi_speaker_finetune",
@@ -1204,7 +1207,7 @@
       "epochs": 8,
       "machine": "167",
       "purpose": "已撤销：此前误把 TTS/overlap 后续安排到 1.7B 路线；用户已明确该方向不需要再跑，保留记录防止重复启动。",
-      "plan_label": "OL-E3-CONT",
+      "plan_label": "1.7B exp10",
       "needs_data_materialize": false,
       "caps_hours": {
         "same_source_overlap_hours": 15.0056,
@@ -1214,7 +1217,8 @@
       },
       "training_policy": {
         "init_from": "merged qwen3-asr-1.7b-checklist-ckreal12_cktts6_zmev_g3-step34437",
-        "run_name": "1p7b_ckreal12e3_overlap15h_cont_g0",
+        "run_name": "1p7b_exp10_ckreal12e3_overlap15h_cont_g0",
+        "legacy_run_name": "1p7b_ckreal12e3_overlap15h_cont_g0",
         "target_epochs": 8,
         "batch_size": 4,
         "eval_batch_size": 1,
@@ -1915,5 +1919,5 @@
     "ATCOSIM 信号已经足够强，后续寻找最佳数据组合时默认基于 ATCOSIM；当前 full WER 最低 checkpoint 是 exp50 epoch4，当前组合主候选是 exp78，当前新增 controlled run 是 exp82 error-aware hard-row upsampling。",
     "后续 0.6B 自动训练主要使用 167 和 178；47 不排自动 0.6B 队列。"
   ],
-  "numbering_note": "编号说明：raw run id 保留历史连续性，已启动的 run 不重命名；页面中的计划编号用于阅读执行顺序。A=当前主线，M=matched mini，L=长音频，T=TTS，H=高剂量数据扩充筛选。exp30-exp49 中很多只是早期数据配方或历史候选，不代表漏跑。 2026-06-23 更新：167 长音频计划 run 已暂停，不再作为待训练队列展示。 2026-06-25 更新：exp79/80/81 是长音频上采样和最终配方候选；exp75 被 exp50 同名续跑取代。 2026-06-25 更新2：exp80 优先于 exp79；exp79 降为低优先级机制验证。 2026-06-28 更新：exp78 ATCOSIM + light real aug 成为 0.6B 主候选；exp79/80/81 长音频方向降级为诊断，exp76/77 不扩展；后续 0.6B 自动队列主要放在 167/178，47 清空。 2026-07-01 更新：噪声/非目标人声幻觉问题新增 exp91-exp94 0.6B ablation 设计；第一波只启动 exp91/exp92 单变量，exp93/exp94 作为剂量/组合 follow-up；exp89 1.7B overlap continuation 已按用户要求撤销，不再作为待跑计划。 2026-07-01 更新2：按用户要求，噪声幻觉 ablation 从多单变量计划收敛为一个稍高剂量、包含所有 MS-SNSD 可训练候选类型的 combined run：exp91 allnoise_empty3h；exp92-exp94 不再作为待跑项。 2026-07-02 更新：新增 exp95/exp96 FullCombo 完备候选；两者都基于 latest v4.3，分别等待 TTS60h 和 TTS100h/noise30h 数据 materialize 后再启动。"
+  "numbering_note": "编号说明：raw run id 保留历史连续性，已启动的 run 不重命名；页面中的计划编号用于阅读执行顺序。A=当前主线，M=matched mini，L=长音频，T=TTS，H=高剂量数据扩充筛选。exp30-exp49 中很多只是早期数据配方或历史候选，不代表漏跑。 2026-06-23 更新：167 长音频计划 run 已暂停，不再作为待训练队列展示。 2026-06-25 更新：exp79/80/81 是长音频上采样和最终配方候选；exp75 被 exp50 同名续跑取代。 2026-06-25 更新2：exp80 优先于 exp79；exp79 降为低优先级机制验证。 2026-06-28 更新：exp78 ATCOSIM + light real aug 成为 0.6B 主候选；exp79/80/81 长音频方向降级为诊断，exp76/77 不扩展；后续 0.6B 自动队列主要放在 167/178，47 清空。 2026-07-01 更新：噪声/非目标人声幻觉问题新增 exp91-exp94 0.6B ablation 设计；第一波只启动 exp91/exp92 单变量，exp93/exp94 作为剂量/组合 follow-up；exp89 1.7B overlap continuation 已按用户要求撤销，不再作为待跑计划。 2026-07-01 更新2：按用户要求，噪声幻觉 ablation 从多单变量计划收敛为一个稍高剂量、包含所有 MS-SNSD 可训练候选类型的 combined run：exp91 allnoise_empty3h；exp92-exp94 不再作为待跑项。 2026-07-02 更新：新增 exp95/exp96 FullCombo 完备候选；两者都基于 latest v4.3，分别等待 TTS60h 和 TTS100h/noise30h 数据 materialize 后再启动。 2026-07-09 更新：历史 1.7B 无编号展示统一补入 1.7B exp00/05/06/07/08/09/10；模型规模和 exp 序号分开展示，磁盘 checkpoint 和 wandb raw run 名不重命名，用 legacy_run_name/legacy_global_id 保留追溯。"
 }
