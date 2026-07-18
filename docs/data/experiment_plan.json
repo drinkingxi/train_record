@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-07-17 09:00 CST",
+  "updated_at": "2026-07-18 09:00 CST",
   "title": "Qwen3-ASR v4.3 数据扩充实验计划",
   "dashboard_note": "这个页面用于动态跟踪实验计划：区分历史 run、当前队列、后续数据配比 ablation，以及暂缓或诊断类实验。通用数据和混合数据都已纳入计划；raw exp 编号只作为运行 ID，不代表必须连续执行。",
   "current_base": {
@@ -131,7 +131,7 @@
     },
     {
       "id": "exp30_v4_3_appdenoise15h_epoch3",
-      "status": "running",
+      "status": "stopped",
       "priority": 73,
       "category": "dose_down_validation",
       "data_version": "v4.3",
@@ -1862,6 +1862,53 @@
       "notes": [
         "2026-07-01 user requested simpler single higher-dose all-types run; replaced by exp91 allnoise_empty3h."
       ]
+    },
+    {
+      "id": "exp101_v5_avia_init_general30_replay",
+      "status": "running",
+      "priority": 100,
+      "category": "general_capability_retention",
+      "data_version": "v5_atc_plus_unique_general_replay_v2",
+      "data_dir": "qwen3_asr_20260717_exp101_v5_avia_init_general30_replay",
+      "epochs": 3,
+      "machine": "178_gpu0_gpu1",
+      "purpose": "以 Avia ATC 0.6B 初始化，在保留当前高质量 ATC 主配方的同时，以实际 batch 行曝光 70/30 混入去重 general ASR，修复 LibriSpeech/FLEURS 等通用场景遗忘。",
+      "needs_data_materialize": true,
+      "training_policy": {
+        "model_size": "0.6B",
+        "init_from": "Avia ATC 0.6B",
+        "target_epochs": 3,
+        "batch_size": 4,
+        "grad_acc": 8,
+        "lr": 1e-05,
+        "checkpoint_selection_policy": "external fixed Full plus general dev Pareto",
+        "oom_fallback": "batch 2/1 with grad_acc 16/32, resume latest complete checkpoint"
+      },
+      "data_policy": {
+        "atc": "EXP100 audited 128.23h recipe rows",
+        "general_sources": [
+          "LibriSpeech train-clean-100",
+          "AISHELL-1 speaker-disjoint train speakers",
+          "FLEURS en_us train",
+          "FLEURS cmn_hans_cn train"
+        ],
+        "general_ratio": "30% by manifest rows",
+        "general_dev": "LibriSpeech validation + FLEURS dev + AISHELL held-out speakers",
+        "public_test": "final reporting only"
+      },
+      "selection_focus": [
+        "official_full_wer",
+        "realflight_wer",
+        "general_dev_macro_wer",
+        "LibriSpeech_clean_other_wer",
+        "FLEURS_zh_en_wer",
+        "AISHELL_wer"
+      ],
+      "promotion_gate": "prefer Pareto improvement; reject if official Full regresses more than 0.3 absolute without a material general gain",
+      "notes": [
+        "2026-07-17 stopped at step 41 before epoch 1 by user-requested strategy correction; no checkpoint is eligible for comparison.",
+        "Retain the audited data package only as a recipe reference. Complete EXP100/Avia weight-fusion evaluation and obtain user approval for the revised data mix and training policy before launching a replacement run."
+      ]
     }
   ],
   "machine_policy": [
@@ -1876,18 +1923,12 @@
     },
     {
       "machine": "178",
-      "role": "后续 0.6B 主机器之一；当前运行 exp82 error-aware controlled ablation，并继续观察 exp76/81 结果。",
-      "queue_now": [
-        "exp82_v4_3_atcosim_erroraware08_epoch12 on GPU0",
-        "exp76 ATCOSIM+UWB epoch12 on GPU1"
-      ],
+      "role": "0.6B 主训练机器；GPU0+1 当前用于 EXP100/Avia 权重融合筛选，新的 0.6B 训练需先经用户确认数据组合与训练策略。",
+      "queue_now": [],
       "next_after_current": [
-        "requeue paused exp81 checkpoint-67488 full eval when a GPU is free",
-        "launch exp87 shortdraft10h only when a training GPU is free and eval backfill is not blocked",
-        "launch exp88 no-bilibili_zh source ablation on 178 to compare directly against exp50",
-        "do not resume exp77/80 unless manually requested for diagnostics",
-        "do not launch new broad 0.6B expansions before exp82/exp78 first eval comparison",
-        "use free GPUs for slice/full-eval backfill unless a new controlled run is explicitly approved"
+        "finish EXP100/Avia fusion screening on ATC Full subset and public general benchmarks",
+        "propose a revised general-plus-ATC data recipe and training policy for user approval",
+        "launch no replacement 0.6B run before explicit user approval"
       ]
     },
     {
