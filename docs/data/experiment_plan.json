@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-07-21 09:00 CST",
+  "updated_at": "2026-07-22 09:00 CST",
   "title": "Qwen3-ASR v4.3 数据扩充实验计划",
   "dashboard_note": "这个页面用于动态跟踪实验计划：区分历史 run、当前队列、后续数据配比 ablation，以及暂缓或诊断类实验。通用数据和混合数据都已纳入计划；raw exp 编号只作为运行 ID，不代表必须连续执行。",
   "current_base": {
@@ -50,6 +50,12 @@
       "status": "diagnostic",
       "data_dir": "qwen3_asr_20260623_cleaned_v4_4_reading_pairs_no_translation_mismatch",
       "notes": "在 v4.3 清理基础上改用 reading-pair 标签。只有 matched mini 明显优于 v4.3 且无输出格式退化时才升级。"
+    },
+    {
+      "version": "negative_corpus_v3_20260721",
+      "status": "available_not_automatically_enabled",
+      "data_dir": "/data/xijunting/atc_asr/data_preparation/asr_research_20260714/components/negative_corpus_v3_20260721",
+      "notes": "负样本已按原始录音/采集会话先切 train/test，再生成片段，并通过 parent、路径和音频内容三重零重叠审计。训练只能按 train_presets 中 1h/3h/5h 剂量取样；negative_external_monitor_v2、negative_external_full_v2、research_only_train 和 pending_review 均禁止进入训练。"
     }
   ],
   "findings": [
@@ -117,6 +123,11 @@
       "topic": "augmentation_direction_summary",
       "confidence": "medium-high",
       "summary": "截至 2026-06-29 17:06：基础 v4.3 已原地更新到 16:34 版本；后续新增/待启动 run 必须带 latest v4.3 fingerprint，派生数据需从该版本重新 materialize。训练期 full WER 与固定 generate full/rich eval 分开记录；ATCOSIM 训练期收益仍强，但 fixed generate 暴露重复/EOS 风险。"
+    },
+    {
+      "topic": "negative_data_split_v3",
+      "confidence": "high",
+      "summary": "2026-07-21 已完成独立负样本 v3：生产可用训练侧新增 MUSAN 5.18h，并生成 1h/3h/5h 平衡剂量预设；独立测试 full 4.31h、monitor 1.00h，与训练侧 parent/path/content overlap 均为 0。旧 negative_generic 评估因历史训练重叠退出 18187；后续仅在误触发问题明确时按剂量加入训练，不能整批默认混入。"
     }
   ],
   "runs": [
@@ -1958,7 +1969,9 @@
     "同一数据、同一方向的继续训练必须优先 resume 原 output_dir 和 W&B run；只有新数据组合才新开 exp 编号。",
     "长音频上采样进入最终配方前，必须证明 full WER 不明显退化，同时 duration_8_12s / duration_ge12s 或 early-EOS 诊断有稳定改善；当前 exp80/81 未满足。",
     "ATCOSIM 信号已经足够强，后续寻找最佳数据组合时默认基于 ATCOSIM；当前 full WER 最低 checkpoint 是 exp50 epoch4，当前组合主候选是 exp78，当前新增 controlled run 是 exp82 error-aware hard-row upsampling。",
-    "后续 0.6B 自动训练主要使用 167 和 178；47 不排自动 0.6B 队列。"
+    "后续 0.6B 自动训练主要使用 167 和 178；47 不排自动 0.6B 队列。",
+    "负样本训练只允许引用 negative_corpus_v3_20260721/train_presets：普通候选先用 1h，明确误触发专项用 3h，5h 仅作剂量上限；若 monitor/full 误触发无实质改善或 Full/RealFlight 明显退化则不晋级。",
+    "negative_external_monitor_v2 和 negative_external_full_v2 是永久测试侧，research_only_train 与 pending_review 也不得进入生产训练；任何新负样本来源必须先按 parent/session 分组，再切 train/test 并通过零重叠审计。"
   ],
   "numbering_note": "编号说明：raw run id 保留历史连续性，已启动的 run 不重命名；页面中的计划编号用于阅读执行顺序。A=当前主线，M=matched mini，L=长音频，T=TTS，H=高剂量数据扩充筛选。exp30-exp49 中很多只是早期数据配方或历史候选，不代表漏跑。 2026-06-23 更新：167 长音频计划 run 已暂停，不再作为待训练队列展示。 2026-06-25 更新：exp79/80/81 是长音频上采样和最终配方候选；exp75 被 exp50 同名续跑取代。 2026-06-25 更新2：exp80 优先于 exp79；exp79 降为低优先级机制验证。 2026-06-28 更新：exp78 ATCOSIM + light real aug 成为 0.6B 主候选；exp79/80/81 长音频方向降级为诊断，exp76/77 不扩展；后续 0.6B 自动队列主要放在 167/178，47 清空。 2026-07-01 更新：噪声/非目标人声幻觉问题新增 exp91-exp94 0.6B ablation 设计；第一波只启动 exp91/exp92 单变量，exp93/exp94 作为剂量/组合 follow-up；exp89 1.7B overlap continuation 已按用户要求撤销，不再作为待跑计划。 2026-07-01 更新2：按用户要求，噪声幻觉 ablation 从多单变量计划收敛为一个稍高剂量、包含所有 MS-SNSD 可训练候选类型的 combined run：exp91 allnoise_empty3h；exp92-exp94 不再作为待跑项。 2026-07-02 更新：新增 exp95/exp96 FullCombo 完备候选；两者都基于 latest v4.3，分别等待 TTS60h 和 TTS100h/noise30h 数据 materialize 后再启动。 2026-07-09 更新：历史 1.7B 无编号展示统一补入 1.7B exp00/05/06/07/08/09/10；模型规模和 exp 序号分开展示，磁盘 checkpoint 和 wandb raw run 名不重命名，用 legacy_run_name/legacy_global_id 保留追溯。"
 }
