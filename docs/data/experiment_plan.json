@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-07-24 09:00 CST",
+  "updated_at": "2026-07-25 09:00 CST",
   "title": "Qwen3-ASR v4.3 数据扩充实验计划",
   "dashboard_note": "这个页面用于动态跟踪实验计划：区分历史 run、当前队列、后续数据配比 ablation，以及暂缓或诊断类实验。通用数据和混合数据都已纳入计划；raw exp 编号只作为运行 ID，不代表必须连续执行。",
   "current_base": {
@@ -1919,6 +1919,54 @@
       "notes": [
         "2026-07-17 stopped at step 41 before epoch 1 by user-requested strategy correction; no checkpoint is eligible for comparison.",
         "Retain the audited data package only as a recipe reference. Complete EXP100/Avia weight-fusion evaluation and obtain user approval for the revised data mix and training policy before launching a replacement run."
+      ]
+    },
+    {
+      "id": "exp105_v5_exp103e1_eos_suffixloss",
+      "status": "running",
+      "priority": 105,
+      "category": "early_eos_suffix_loss_repair",
+      "data_version": "v5_exp103e1_stable_replay_without_bilibili_zh",
+      "data_dir": "qwen3_asr_20260724_exp105_v5_exp103e1_eos_suffixloss",
+      "epochs": 1,
+      "machine": "178_gpu0_gpu1_gpu2_gpu3",
+      "purpose": "验证只提高截断点之后非 EOS 目标 token 的损失，能否降低 clean early-EOS 和 deletion，同时保持 EXP103 的 Full、0618、RealFlight、长音频和负样本能力。",
+      "needs_data_materialize": false,
+      "training_policy": {
+        "model_size": "0.6B",
+        "init_from": "EXP98 epoch 4 merged plus EXP103 epoch 1 adapter",
+        "target_epochs": 1,
+        "batch_size": 4,
+        "grad_acc": 4,
+        "lr": 1e-06,
+        "checkpoint_selection_policy": "external fixed direct-generation evaluation"
+      },
+      "data_policy": {
+        "stable_replay_hours": 126.999777,
+        "eos_weighted_hours": 3.111236,
+        "train_rows": 116386,
+        "train_hours": 130.111014,
+        "bilibili_zh_rows": 0,
+        "duplicate_rows": 0,
+        "failure_suffix_weight": 2.0,
+        "tail_guard_suffix_weight": 1.5,
+        "matched_guard_suffix_weight": 1.25,
+        "final_eos_weight": 1.0
+      },
+      "selection_focus": [
+        "official_full_wer",
+        "clean_early_eos_count",
+        "deletion_rate",
+        "app0618_wer",
+        "realflight_e2e_v2_wer",
+        "raw_long_0618_wer",
+        "negative_external_ser"
+      ],
+      "promotion_gate": "Full <=9.55, clean EOS <=36 (target <=32), deletion <=2.40%, 0618 <=29.5, raw-long <=42, RealFlight <=28.6, negative SER <=4%",
+      "notes": [
+        "Started 2026-07-24 09:41 CST as atc-exp105-train.service on 178 GPU0-3.",
+        "Manifest quality rejections 0, fixed-eval overlap annotations 0, remote missing audio 0.",
+        "Complete evaluation watcher is atc-exp105-eval-watch.service and writes to the same W&B run."
       ]
     }
   ],
