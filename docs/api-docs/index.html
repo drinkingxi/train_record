@@ -1,0 +1,590 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>ATC ASR 接口文档</title>
+  <style>
+    :root { --bg:#f4f6f8; --surface:#fff; --text:#17202d; --muted:#667085; --line:#d9dee7; --soft:#eef2f6; --blue:#1769e0; --blue-soft:#eaf2ff; --green:#18794e; }
+    * { box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body { margin:0; color:var(--text); background:var(--bg); font-family:Inter,"SF Pro Text","PingFang SC","Microsoft YaHei",Arial,sans-serif; letter-spacing:0; }
+    button { font:inherit; }
+    .topbar { position:sticky; top:0; z-index:20; border-bottom:1px solid var(--line); background:rgba(255,255,255,.96); backdrop-filter:blur(10px); }
+    .topbar-inner { max-width:1440px; margin:auto; min-height:68px; padding:10px 24px; display:flex; align-items:center; gap:24px; }
+    .brand { min-width:210px; }
+    .brand strong { display:block; font-size:16px; }
+    .brand span { color:var(--muted); font-size:12px; }
+    .tabs { display:inline-grid; grid-template-columns:1fr 1fr; gap:3px; padding:3px; border:1px solid var(--line); border-radius:7px; background:var(--soft); }
+    .tab { min-width:120px; padding:8px 14px; border:0; border-radius:5px; color:var(--muted); background:transparent; cursor:pointer; font-weight:650; }
+    .tab.active { color:var(--blue); background:var(--surface); box-shadow:0 1px 3px rgba(16,24,40,.12); }
+    .layout { max-width:1440px; margin:auto; display:grid; grid-template-columns:240px minmax(0,900px); gap:44px; padding:32px 24px 72px; }
+    aside { position:sticky; top:100px; align-self:start; max-height:calc(100vh - 120px); overflow:auto; padding-right:12px; }
+    .toc-title { margin-bottom:10px; color:var(--muted); font-size:12px; font-weight:700; text-transform:uppercase; }
+    .toc { display:none; } .toc.active { display:flex; flex-direction:column; }
+    .toc a { padding:6px 8px; border-left:2px solid transparent; color:var(--muted); text-decoration:none; font-size:13px; line-height:1.35; }
+    .toc a:hover { color:var(--blue); border-left-color:var(--blue); }
+    .toc .toc-level-3 { padding-left:20px; font-size:12px; }
+    .doc { display:none; min-width:0; } .doc.active { display:block; }
+    .doc > h1:first-child { margin-top:0; }
+    h1 { margin:0 0 28px; font-size:32px; line-height:1.25; }
+    h2 { margin:48px 0 18px; padding-top:10px; border-top:1px solid var(--line); font-size:23px; line-height:1.35; }
+    h3 { margin:30px 0 14px; font-size:18px; }
+    h4 { margin:24px 0 12px; font-size:15px; }
+    p, li { font-size:15px; line-height:1.75; }
+    p { margin:0 0 16px; } ul { margin:0 0 18px; padding-left:24px; }
+    a { color:var(--blue); }
+    code { padding:2px 5px; border-radius:4px; color:#1252a2; background:var(--blue-soft); font-family:"SFMono-Regular",Consolas,monospace; font-size:.9em; overflow-wrap:anywhere; }
+    .code-block { margin:14px 0 22px; overflow:hidden; border:1px solid #28364a; border-radius:7px; background:#111827; }
+    .code-head { height:38px; padding:0 10px 0 14px; display:flex; align-items:center; justify-content:space-between; color:#9facbd; border-bottom:1px solid #28364a; font:12px "SFMono-Regular",Consolas,monospace; }
+    .copy-code { padding:5px 9px; border:1px solid #3c4a5f; border-radius:5px; color:#d8e0eb; background:#1d2939; cursor:pointer; }
+    pre { margin:0; padding:16px; overflow:auto; } pre code { padding:0; color:#e7edf5; background:transparent; white-space:pre; overflow-wrap:normal; font-size:13px; line-height:1.6; }
+    .table-wrap { margin:14px 0 24px; overflow:auto; border:1px solid var(--line); border-radius:7px; background:var(--surface); }
+    table { width:100%; border-collapse:collapse; font-size:14px; } th, td { padding:11px 13px; border-bottom:1px solid var(--line); text-align:left; vertical-align:top; line-height:1.55; }
+    th { white-space:nowrap; color:#475467; background:#f8fafc; } tr:last-child td { border-bottom:0; }
+    .footer { margin-top:52px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:12px; }
+    @media (max-width:800px) {
+      .topbar-inner { padding:10px 14px; flex-wrap:wrap; gap:8px 14px; } .brand { flex:1; min-width:180px; } .tabs { width:100%; } .tab { min-width:0; }
+      .layout { display:block; padding:24px 14px 56px; } aside { display:none; } h1 { font-size:27px; } h2 { margin-top:38px; font-size:21px; }
+      p, li { font-size:14px; } th, td { min-width:140px; font-size:13px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar"><div class="topbar-inner">
+    <div class="brand"><strong>ATC ASR 接口文档</strong><span>生产调用说明 · 2026-08-07 14:39 CST</span></div>
+    <div class="tabs" role="tablist" aria-label="接口类型">
+      <button class="tab active" data-doc="single" role="tab">单模型 ASR</button>
+      <button class="tab" data-doc="multitrack" role="tab">多轨 ASR</button>
+    </div>
+  </div></header>
+  <div class="layout">
+    <aside><div class="toc-title">本页目录</div><nav class="toc active" data-toc="single"><a class="toc-level-2" href="#single-服务地址">服务地址</a><a class="toc-level-2" href="#single-可用模型">可用模型</a><a class="toc-level-3" href="#single-模型能力与选择建议">模型能力与选择建议</a><a class="toc-level-2" href="#single-健康检查">健康检查</a><a class="toc-level-2" href="#single-提交转录任务">提交转录任务</a><a class="toc-level-3" href="#single-通过-url-提交">通过 URL 提交</a><a class="toc-level-2" href="#single-查询任务">查询任务</a><a class="toc-level-2" href="#single-获取结果">获取结果</a><a class="toc-level-2" href="#single-常用参数">常用参数</a><a class="toc-level-2" href="#single-并发调用">并发调用</a><a class="toc-level-2" href="#single-python-示例">Python 示例</a></nav><nav class="toc" data-toc="multitrack"><a class="toc-level-2" href="#multitrack-服务地址">服务地址</a><a class="toc-level-2" href="#multitrack-默认模型">默认模型</a><a class="toc-level-3" href="#multitrack-模型能力与选择建议">模型能力与选择建议</a><a class="toc-level-2" href="#multitrack-健康检查">健康检查</a><a class="toc-level-2" href="#multitrack-上传双立体声音频">上传双立体声音频</a><a class="toc-level-2" href="#multitrack-上传四个独立轨道">上传四个独立轨道</a><a class="toc-level-2" href="#multitrack-使用四个网络文件地址">使用四个网络文件地址</a><a class="toc-level-2" href="#multitrack-使用服务器已有路径">使用服务器已有路径</a><a class="toc-level-2" href="#multitrack-查询任务">查询任务</a><a class="toc-level-2" href="#multitrack-取消-恢复与重试">取消、恢复与重试</a><a class="toc-level-2" href="#multitrack-容量与归档">容量与归档</a><a class="toc-level-2" href="#multitrack-查看结果页面">查看结果页面</a><a class="toc-level-2" href="#multitrack-下载结果">下载结果</a><a class="toc-level-2" href="#multitrack-常用参数">常用参数</a></nav></aside>
+    <main>
+      <article class="doc active" data-doc-panel="single"><h1 id="single-单模型-asr-接口调用文档">单模型 ASR 接口调用文档</h1>
+<h2 id="single-服务地址">服务地址</h2>
+<p>优先使用 178：</p>
+<div class="code-block"><div class="code-head"><span>text</span><button type="button" class="copy-code">复制</button></div><pre><code>http://192.168.125.178:28080</code></pre></div>
+<p>以下三个地址调用同一套服务，接口和任务 ID 完全兼容：</p>
+<div class="code-block"><div class="code-head"><span>text</span><button type="button" class="copy-code">复制</button></div><pre><code>http://192.168.125.178:28080  # 主地址
+http://192.168.125.167:28080  # 备用入口
+http://192.168.125.47:18080   # 备用入口</code></pre></div>
+<p>下文使用：</p>
+<div class="code-block"><div class="code-head"><span>bash</span><button type="button" class="copy-code">复制</button></div><pre><code>ASR_BASE=http://192.168.125.178:28080</code></pre></div>
+<h2 id="single-可用模型">可用模型</h2>
+<p>调用时只使用下面三个名称：</p>
+<div class="table-wrap"><table><thead><tr>
+<th><code>model</code></th>
+<th>模型说明</th>
+</tr></thead><tbody>
+<tr>
+<td><code>1.7b</code></td>
+<td>我们训练的 1.7B 模型</td>
+</tr>
+<tr>
+<td><code>0.6b</code></td>
+<td>我们训练的 0.6B 模型</td>
+</tr>
+<tr>
+<td><code>avia2</code></td>
+<td>面壁提供的第二代 0.6B 模型</td>
+</tr>
+</tbody></table></div>
+<h3 id="single-模型能力与选择建议">模型能力与选择建议</h3>
+<div class="table-wrap"><table><thead><tr>
+<th>模型</th>
+<th>训练数据与舱音适配</th>
+<th>主要能力</th>
+<th>推荐用途</th>
+</tr></thead><tbody>
+<tr>
+<td><code>1.7b</code></td>
+<td>使用约 428 小时训练数据，主体为中英文真实、公开、人工复核和伪标签 ATC，并包含长音频、呼号数字、降噪数据、通用中英文语音、TTS 关键字段及负样本。没有使用成规模的连续舱音数据专项微调。</td>
+<td>三个模型中综合 ATC 识别能力最好，尤其适合复杂中英文通话、呼号、数字、频率和较难无线电音频；推理资源需求最高。</td>
+<td>默认首选；重视最终识别质量时使用。</td>
+</tr>
+<tr>
+<td><code>0.6b</code></td>
+<td>数据包括约 385 小时 ATC 核心数据、15 小时降噪数据、约 89 小时伪标签、30 小时连续长片段、结构化 ATC 数据和约 156 小时通用中英文语音。使用了约 10 小时人工标注的川航、Donica、山航连续舱音片段，另有同来源人工复核片段，但不是直接使用完整数小时舱音做端到端训练。</td>
+<td>参数量小、推理开销较低，具备直接舱音适配经验，通用语音覆盖较广；复杂 ATC、英文和强噪声下的总体准确率通常不如 <code>1.7b</code>。</td>
+<td>资源受限、希望提高吞吐量，或需要具有舱音训练经验的候选时使用。</td>
+</tr>
+<tr>
+<td><code>avia2</code></td>
+<td>面壁提供的第二代 0.6B 中英双语航空模型。交付资料未披露完整训练数据配比，目前不能确认是否使用过舱音数据专项微调，也没有使用我们的舱音数据继续训练。</td>
+<td>通用英文识别和无语音拒识相对有优势，模型来源及训练路线与我们的模型不同；在当前复杂 ATC、真实航班和噪声测试上的整体准确率弱于我们的模型。</td>
+<td>适合作为独立第三方基线、低误触发补充或多模型融合候选，不建议单独作为复杂 ATC 场景的默认模型。</td>
+</tr>
+</tbody></table></div>
+<p>快速选择：</p>
+<ul>
+<li>不确定选哪个：使用 <code>1.7b</code>。</li>
+<li>更关注速度、资源占用或舱音适配：使用 <code>0.6b</code>。</li>
+<li>更关注独立模型对照、通用英文或低误触发：使用 <code>avia2</code>。</li>
+</ul>
+<h2 id="single-健康检查">健康检查</h2>
+<div class="code-block"><div class="code-head"><span>bash</span><button type="button" class="copy-code">复制</button></div><pre><code>curl &quot;$ASR_BASE/health&quot;</code></pre></div>
+<h2 id="single-提交转录任务">提交转录任务</h2>
+<p>音频和视频使用同一个接口。视频会自动抽取音频。</p>
+<div class="code-block"><div class="code-head"><span>bash</span><button type="button" class="copy-code">复制</button></div><pre><code>JOB_ID=$(curl -fsS -X POST &quot;$ASR_BASE/v1/asr/transcriptions&quot; \
+  -F &#x27;file=@/path/to/audio_or_video&#x27; \
+  -F &#x27;model=1.7b&#x27; \
+  | python -c &quot;import json,sys; print(json.load(sys.stdin)[&#x27;job_id&#x27;])&quot;)
+
+echo &quot;$JOB_ID&quot;</code></pre></div>
+<p>切换模型只需修改 <code>model</code>：</p>
+<div class="code-block"><div class="code-head"><span>bash</span><button type="button" class="copy-code">复制</button></div><pre><code>-F &#x27;model=0.6b&#x27;
+-F &#x27;model=avia2&#x27;</code></pre></div>
+<p>默认自动识别中英文。已知语言时可以强制指定：</p>
+<div class="code-block"><div class="code-head"><span>bash</span><button type="button" class="copy-code">复制</button></div><pre><code>-F &#x27;language=Chinese&#x27;
+# 或
+-F &#x27;language=English&#x27;</code></pre></div>
+<h3 id="single-通过-url-提交">通过 URL 提交</h3>
+<p>当音视频已经位于可访问的 HTTP/HTTPS 地址时，可直接提交 URL，无需调用方先下载再上传：</p>
+<div class="code-block"><div class="code-head"><span>bash</span><button type="button" class="copy-code">复制</button></div><pre><code>JOB_ID=$(curl -fsS -X POST &quot;$ASR_BASE/v1/asr/transcriptions/url&quot; \
+  -H &#x27;Content-Type: application/json&#x27; \
+  -d &#x27;{
+    &quot;url&quot;: &quot;https://example.com/path/audio_or_video.mp4?temporary_token=...&quot;,
+    &quot;model&quot;: &quot;1.7b&quot;,
+    &quot;use_vad&quot;: true,
+    &quot;denoise&quot;: false
+  }&#x27; \
+  | python -c &quot;import json,sys; print(json.load(sys.stdin)[&#x27;job_id&#x27;])&quot;)
+
+echo &quot;$JOB_ID&quot;</code></pre></div>
+<p>接口会立即返回 Router 任务 ID，随后在后台下载、预处理并进入模型队列。查询状态、日志和结果仍使用下文相同的 <code>$JOB_ID</code>；临时 URL 的 query 参数不会写入任务记录或日志。</p>
+<p>URL 必须使用 <code>http</code> 或 <code>https</code>，指向常见音频/视频格式，单文件大小上限默认 20 GiB。下载超时、空文件、格式不支持或空间不足时，任务会变为 <code>failed</code>，具体原因可从状态或日志接口查看。</p>
+<h2 id="single-查询任务">查询任务</h2>
+<div class="code-block"><div class="code-head"><span>bash</span><button type="button" class="copy-code">复制</button></div><pre><code>curl &quot;$ASR_BASE/v1/asr/jobs/$JOB_ID&quot;</code></pre></div>
+<p>任务成功时 <code>status</code> 为 <code>succeeded</code>；失败时为 <code>failed</code>。</p>
+<p>查看日志：</p>
+<div class="code-block"><div class="code-head"><span>bash</span><button type="button" class="copy-code">复制</button></div><pre><code>curl &quot;$ASR_BASE/v1/asr/jobs/$JOB_ID/log&quot;</code></pre></div>
+<h2 id="single-获取结果">获取结果</h2>
+<div class="code-block"><div class="code-head"><span>bash</span><button type="button" class="copy-code">复制</button></div><pre><code>curl &quot;$ASR_BASE/v1/asr/jobs/$JOB_ID/result.txt&quot;
+curl &quot;$ASR_BASE/v1/asr/jobs/$JOB_ID/result.json&quot;</code></pre></div>
+<p>保存到文件：</p>
+<div class="code-block"><div class="code-head"><span>bash</span><button type="button" class="copy-code">复制</button></div><pre><code>curl -fSLo result.txt &quot;$ASR_BASE/v1/asr/jobs/$JOB_ID/result.txt&quot;
+curl -fSLo result.json &quot;$ASR_BASE/v1/asr/jobs/$JOB_ID/result.json&quot;</code></pre></div>
+<p><code>result.json</code> 的主要内容：</p>
+<div class="code-block"><div class="code-head"><span>json</span><button type="button" class="copy-code">复制</button></div><pre><code>{
+  &quot;model&quot;: &quot;1.7b-exp32-e5&quot;,
+  &quot;segments&quot;: [
+    {
+      &quot;start&quot;: 0.0,
+      &quot;end&quot;: 3.2,
+      &quot;text&quot;: &quot;转录文本&quot;,
+      &quot;language&quot;: &quot;Chinese&quot;,
+      &quot;confidence&quot;: 0.91,
+      &quot;repetition_guard_triggered&quot;: false
+    }
+  ]
+}</code></pre></div>
+<p>接口默认只压缩连续至少 5 次且长度明显异常的机械循环，正常复诵一两次会保留。触发时 <code>text</code> 为保护后的线上结果，同时增加 <code>raw_text</code> 保存模型原始输出，便于审计；该保护不用于模型直推评估。</p>
+<h2 id="single-常用参数">常用参数</h2>
+<div class="code-block"><div class="code-head"><span>bash</span><button type="button" class="copy-code">复制</button></div><pre><code>JOB_ID=$(curl -fsS -X POST &quot;$ASR_BASE/v1/asr/transcriptions&quot; \
+  -F &#x27;file=@/path/to/audio_or_video&#x27; \
+  -F &#x27;model=1.7b&#x27; \
+  -F &#x27;denoise=true&#x27; \
+  -F &#x27;denoise_profile=df6&#x27; \
+  -F &#x27;use_vad=true&#x27; \
+  -F &#x27;max_seg_sec=8.0&#x27; \
+  -F &#x27;hotwords=塔台,地面,跑道&#x27; \
+  -F &#x27;llm_correct=false&#x27; \
+  | python -c &quot;import json,sys; print(json.load(sys.stdin)[&#x27;job_id&#x27;])&quot;)</code></pre></div>
+<div class="table-wrap"><table><thead><tr>
+<th>参数</th>
+<th>默认值</th>
+<th>说明</th>
+</tr></thead><tbody>
+<tr>
+<td><code>file</code></td>
+<td>必填</td>
+<td>调用方机器上的音频或视频文件；<code>@</code> 不能省略</td>
+</tr>
+<tr>
+<td><code>url</code></td>
+<td>URL 接口必填</td>
+<td>可临时访问的 HTTP/HTTPS 音频或视频地址；与 <code>file</code> 二选一</td>
+</tr>
+<tr>
+<td><code>model</code></td>
+<td><code>1.7b</code></td>
+<td><code>1.7b</code>、<code>0.6b</code> 或 <code>avia2</code></td>
+</tr>
+<tr>
+<td><code>language</code></td>
+<td>不传</td>
+<td>自动识别；也可传 <code>Chinese</code> 或 <code>English</code></td>
+</tr>
+<tr>
+<td><code>denoise</code></td>
+<td><code>false</code></td>
+<td>是否启用降噪</td>
+</tr>
+<tr>
+<td><code>denoise_profile</code></td>
+<td><code>df6</code></td>
+<td>启用降噪时可选 <code>df6</code> 或 <code>df9</code>，通常使用 <code>df6</code></td>
+</tr>
+<tr>
+<td><code>use_vad</code></td>
+<td><code>true</code></td>
+<td>是否使用 VAD 分段</td>
+</tr>
+<tr>
+<td><code>max_seg_sec</code></td>
+<td><code>8.0</code></td>
+<td>VAD 后单段最长秒数</td>
+</tr>
+<tr>
+<td><code>batch_size</code></td>
+<td><code>16</code></td>
+<td>分段推理批量大小</td>
+</tr>
+<tr>
+<td><code>hotwords</code></td>
+<td>不传</td>
+<td>逗号分隔的提示词</td>
+</tr>
+<tr>
+<td><code>max_new_tokens</code></td>
+<td><code>440</code></td>
+<td>最大生成 token 数；AVIA2 后端会应用自身上限</td>
+</tr>
+<tr>
+<td><code>repetition_penalty</code></td>
+<td><code>1.0</code></td>
+<td>重复惩罚</td>
+</tr>
+<tr>
+<td><code>llm_correct</code></td>
+<td><code>false</code></td>
+<td>是否启用 LLM 文本修正</td>
+</tr>
+<tr>
+<td><code>llm_model</code></td>
+<td><code>flash</code></td>
+<td>LLM 修正模型，可选 <code>flash</code> 或 <code>pro</code></td>
+</tr>
+<tr>
+<td><code>llm_api_key</code></td>
+<td>不传</td>
+<td>可选的本次请求临时 key</td>
+</tr>
+</tbody></table></div>
+<h2 id="single-并发调用">并发调用</h2>
+<p>文件上传和 URL 提交均支持多个请求并发，三个模型也可同时被调用。服务端处理链路包括：</p>
+<ul>
+<li>URL 下载：每个 Router 默认最多 8 个下载任务并行，超出的任务自动排队。</li>
+<li>共享预处理：当前生产配置每个 Router 有 4 个降噪 worker 和 4 个 VAD worker。</li>
+<li>模型推理：三个 Router 共同分担请求；各模型后端使用动态 batch，当前上限 64、聚合窗口 10 ms。</li>
+<li>任务队列：每个 Router 配置 64 个 job worker；提交成功后通过 job ID 异步查询，不需要保持长连接。</li>
+</ul>
+<p>调用方可直接并发提交，不应等待前一个任务转录完成后再发下一个。并发上限仍受音频长度、是否降噪、模型选择及 GPU 显存影响；大批量调用建议先从 16 至 32 个并发逐步压测。</p>
+<h2 id="single-python-示例">Python 示例</h2>
+<div class="code-block"><div class="code-head"><span>python</span><button type="button" class="copy-code">复制</button></div><pre><code>import time
+import requests
+
+base = &quot;http://192.168.125.178:28080&quot;
+
+with open(&quot;audio.wav&quot;, &quot;rb&quot;) as audio:
+    response = requests.post(
+        f&quot;{base}/v1/asr/transcriptions&quot;,
+        files={&quot;file&quot;: (&quot;audio.wav&quot;, audio, &quot;audio/wav&quot;)},
+        data={&quot;model&quot;: &quot;0.6b&quot;, &quot;use_vad&quot;: &quot;true&quot;},
+        timeout=120,
+    )
+response.raise_for_status()
+job_id = response.json()[&quot;job_id&quot;]
+
+while True:
+    status = requests.get(f&quot;{base}/v1/asr/jobs/{job_id}&quot;, timeout=30).json()
+    if status[&quot;status&quot;] in {&quot;succeeded&quot;, &quot;failed&quot;}:
+        break
+    time.sleep(1)
+
+if status[&quot;status&quot;] != &quot;succeeded&quot;:
+    raise RuntimeError(status)
+
+result = requests.get(
+    f&quot;{base}/v1/asr/jobs/{job_id}/result.json&quot;,
+    timeout=30,
+).json()
+print(result)</code></pre></div></article>
+      <article class="doc" data-doc-panel="multitrack"><h1 id="multitrack-多轨-asr-接口调用文档">多轨 ASR 接口调用文档</h1>
+<h2 id="multitrack-服务地址">服务地址</h2>
+<p>优先使用 178：</p>
+<div class="code-block"><div class="code-head"><span>text</span><button type="button" class="copy-code">复制</button></div><pre><code>http://192.168.125.178:18190</code></pre></div>
+<p>以下三个地址调用同一套多轨任务服务：</p>
+<div class="code-block"><div class="code-head"><span>text</span><button type="button" class="copy-code">复制</button></div><pre><code>http://192.168.125.178:18190  # 主地址
+http://192.168.125.167:18190  # 备用入口
+http://192.168.125.47:18190   # 备用入口</code></pre></div>
+<p>下文使用：</p>
+<div class="code-block"><div class="code-head"><span>bash</span><button type="button" class="copy-code">复制</button></div><pre><code>MULTITRACK_BASE=http://192.168.125.178:18190</code></pre></div>
+<h2 id="multitrack-默认模型">默认模型</h2>
+<p>多轨任务默认同时调用：</p>
+<div class="code-block"><div class="code-head"><span>text</span><button type="button" class="copy-code">复制</button></div><pre><code>1.7b:df,0.6b:df,avia2:df</code></pre></div>
+<div class="table-wrap"><table><thead><tr>
+<th>名称</th>
+<th>模型说明</th>
+</tr></thead><tbody>
+<tr>
+<td><code>1.7b</code></td>
+<td>我们训练的 1.7B 模型</td>
+</tr>
+<tr>
+<td><code>0.6b</code></td>
+<td>我们训练的 0.6B 模型</td>
+</tr>
+<tr>
+<td><code>avia2</code></td>
+<td>面壁提供的第二代 0.6B 模型</td>
+</tr>
+</tbody></table></div>
+<h3 id="multitrack-模型能力与选择建议">模型能力与选择建议</h3>
+<div class="table-wrap"><table><thead><tr>
+<th>模型</th>
+<th>训练数据与舱音适配</th>
+<th>主要能力</th>
+<th>在多轨流程中的作用</th>
+</tr></thead><tbody>
+<tr>
+<td><code>1.7b</code></td>
+<td>使用约 428 小时训练数据，主体为中英文真实、公开、人工复核和伪标签 ATC，并包含长音频、呼号数字、降噪数据、通用中英文语音、TTS 关键字段及负样本。没有使用成规模的连续舱音数据专项微调。</td>
+<td>三个模型中综合 ATC 识别能力最好，尤其适合复杂中英文通话、呼号、数字、频率和较难无线电音频；推理资源需求最高。</td>
+<td>主要质量候选。</td>
+</tr>
+<tr>
+<td><code>0.6b</code></td>
+<td>数据包括约 385 小时 ATC 核心数据、15 小时降噪数据、约 89 小时伪标签、30 小时连续长片段、结构化 ATC 数据和约 156 小时通用中英文语音。使用了约 10 小时人工标注的川航、Donica、山航连续舱音片段，另有同来源人工复核片段，但不是直接使用完整数小时舱音做端到端训练。</td>
+<td>参数量小、推理开销较低，具备直接舱音适配经验，通用语音覆盖较广；复杂 ATC、英文和强噪声下的总体准确率通常不如 <code>1.7b</code>。</td>
+<td>舱音适配和轻量模型互补候选。</td>
+</tr>
+<tr>
+<td><code>avia2</code></td>
+<td>面壁提供的第二代 0.6B 中英双语航空模型。交付资料未披露完整训练数据配比，目前不能确认是否使用过舱音数据专项微调，也没有使用我们的舱音数据继续训练。</td>
+<td>通用英文识别和无语音拒识相对有优势，模型来源及训练路线与我们的模型不同；在当前复杂 ATC、真实航班和噪声测试上的整体准确率弱于我们的模型。</td>
+<td>独立第三方候选，用于降低三模型同源错误风险。</td>
+</tr>
+</tbody></table></div>
+<p>多轨接口默认同时使用三个模型，通过候选互补和后续融合生成结果。若单独调用模型，优先级建议为：最终质量优先使用 <code>1.7b</code>，资源或舱音适配优先使用 <code>0.6b</code>，独立对照、通用英文或低误触发补充使用 <code>avia2</code>。</p>
+<p><code>:df</code> 表示先使用默认 DeepFilter 配置处理音频。一般不需要显式传 <code>variants</code>。</p>
+<h2 id="multitrack-健康检查">健康检查</h2>
+<div class="code-block"><div class="code-head"><span>bash</span><button type="button" class="copy-code">复制</button></div><pre><code>curl &quot;$MULTITRACK_BASE/health&quot;</code></pre></div>
+<p>提交完整任务前可以检查三模型预检：</p>
+<div class="code-block"><div class="code-head"><span>bash</span><button type="button" class="copy-code">复制</button></div><pre><code>curl &quot;$MULTITRACK_BASE/preflight&quot;</code></pre></div>
+<p>默认预检同时确认 LLM key 已配置，但不会产生外部 LLM 请求。部署排障时可显式做一次真实 LLM 可用性检查（会产生一次极小请求）：</p>
+<div class="code-block"><div class="code-head"><span>bash</span><button type="button" class="copy-code">复制</button></div><pre><code>curl &quot;$MULTITRACK_BASE/preflight?check_llm=true&quot;</code></pre></div>
+<h2 id="multitrack-上传双立体声音频">上传双立体声音频</h2>
+<p>输入约定：</p>
+<ul>
+<li><code>file_a</code>：左声道为机长，右声道为副驾。</li>
+<li><code>file_b</code>：左声道为 ATC/观察员，右声道为环境声。</li>
+</ul>
+<div class="code-block"><div class="code-head"><span>bash</span><button type="button" class="copy-code">复制</button></div><pre><code>JOB_ID=$(curl -fsS -X POST &quot;$MULTITRACK_BASE/jobs/upload&quot; \
+  -F &#x27;file_a=@/path/to/flight-A.mp3&#x27; \
+  -F &#x27;file_b=@/path/to/flight-B.mp3&#x27; \
+  -F &#x27;run_name=my_flight&#x27; \
+  -F &#x27;stages=all&#x27; \
+  | python -c &quot;import json,sys; print(json.load(sys.stdin)[&#x27;job_id&#x27;])&quot;)
+
+echo &quot;$JOB_ID&quot;</code></pre></div>
+<h2 id="multitrack-上传四个独立轨道">上传四个独立轨道</h2>
+<div class="code-block"><div class="code-head"><span>bash</span><button type="button" class="copy-code">复制</button></div><pre><code>JOB_ID=$(curl -fsS -X POST &quot;$MULTITRACK_BASE/jobs/upload_tracks&quot; \
+  -F &#x27;captain=@/path/to/captain.wav&#x27; \
+  -F &#x27;copilot=@/path/to/copilot.wav&#x27; \
+  -F &#x27;atc=@/path/to/atc.wav&#x27; \
+  -F &#x27;cam=@/path/to/cam.wav&#x27; \
+  -F &#x27;scene_id=TV9831&#x27; \
+  -F &#x27;run_name=tv9831_full&#x27; \
+  -F &#x27;stages=all&#x27; \
+  | python -c &quot;import json,sys; print(json.load(sys.stdin)[&#x27;job_id&#x27;])&quot;)
+
+echo &quot;$JOB_ID&quot;</code></pre></div>
+<h2 id="multitrack-使用四个网络文件地址">使用四个网络文件地址</h2>
+<p>四个 URL 必须能够从 178 访问。任务会先完整下载四个文件，再开始处理。</p>
+<div class="code-block"><div class="code-head"><span>bash</span><button type="button" class="copy-code">复制</button></div><pre><code>JOB_ID=$(curl -fsS -X POST &quot;$MULTITRACK_BASE/jobs&quot; \
+  -H &#x27;Content-Type: application/json&#x27; \
+  -d &#x27;{
+    &quot;scene_id&quot;: &quot;TV9831&quot;,
+    &quot;run_name&quot;: &quot;tv9831_urls&quot;,
+    &quot;track_urls&quot;: {
+      &quot;captain&quot;: &quot;https://example.com/captain.wav&quot;,
+      &quot;copilot&quot;: &quot;https://example.com/copilot.wav&quot;,
+      &quot;atc&quot;: &quot;https://example.com/atc.wav&quot;,
+      &quot;cam&quot;: &quot;https://example.com/cam.wav&quot;
+    },
+    &quot;stages&quot;: &quot;all&quot;
+  }&#x27; \
+  | python -c &quot;import json,sys; print(json.load(sys.stdin)[&#x27;job_id&#x27;])&quot;)
+
+echo &quot;$JOB_ID&quot;</code></pre></div>
+<h2 id="multitrack-使用服务器已有路径">使用服务器已有路径</h2>
+<p>路径必须在 178 上可访问。双立体声：</p>
+<div class="code-block"><div class="code-head"><span>bash</span><button type="button" class="copy-code">复制</button></div><pre><code>curl -fsS -X POST &quot;$MULTITRACK_BASE/jobs&quot; \
+  -H &#x27;Content-Type: application/json&#x27; \
+  -d &#x27;{
+    &quot;input_mode&quot;: &quot;qacvr_pair&quot;,
+    &quot;scene_id&quot;: &quot;TV9831&quot;,
+    &quot;run_name&quot;: &quot;tv9831_server_paths&quot;,
+    &quot;tracks&quot;: {
+      &quot;a&quot;: &quot;/path/on/178/flight-A.mp3&quot;,
+      &quot;b&quot;: &quot;/path/on/178/flight-B.mp3&quot;
+    },
+    &quot;stages&quot;: &quot;all&quot;
+  }&#x27;</code></pre></div>
+<p>四个独立轨道：</p>
+<div class="code-block"><div class="code-head"><span>bash</span><button type="button" class="copy-code">复制</button></div><pre><code>curl -fsS -X POST &quot;$MULTITRACK_BASE/jobs&quot; \
+  -H &#x27;Content-Type: application/json&#x27; \
+  -d &#x27;{
+    &quot;input_mode&quot;: &quot;four_tracks&quot;,
+    &quot;scene_id&quot;: &quot;TV9831&quot;,
+    &quot;run_name&quot;: &quot;tv9831_four_paths&quot;,
+    &quot;tracks&quot;: {
+      &quot;captain&quot;: &quot;/path/on/178/captain.wav&quot;,
+      &quot;copilot&quot;: &quot;/path/on/178/copilot.wav&quot;,
+      &quot;atc&quot;: &quot;/path/on/178/atc.wav&quot;,
+      &quot;cam&quot;: &quot;/path/on/178/cam.wav&quot;
+    },
+    &quot;stages&quot;: &quot;all&quot;
+  }&#x27;</code></pre></div>
+<h2 id="multitrack-查询任务">查询任务</h2>
+<div class="code-block"><div class="code-head"><span>bash</span><button type="button" class="copy-code">复制</button></div><pre><code>curl &quot;$MULTITRACK_BASE/jobs/$JOB_ID&quot;</code></pre></div>
+<p>主要状态包括 <code>queued</code>、<code>validating</code>、<code>waiting_for_download_slot</code>、<code>downloading</code>、<code>preparing</code>、<code>running</code>、 <code>succeeded</code>、<code>failed</code> 和 <code>cancelled</code>。</p>
+<p>查看最近任务：</p>
+<div class="code-block"><div class="code-head"><span>bash</span><button type="button" class="copy-code">复制</button></div><pre><code>curl &quot;$MULTITRACK_BASE/jobs?limit=20&quot;</code></pre></div>
+<p>查看日志：</p>
+<div class="code-block"><div class="code-head"><span>bash</span><button type="button" class="copy-code">复制</button></div><pre><code>curl &quot;$MULTITRACK_BASE/jobs/$JOB_ID/log&quot;</code></pre></div>
+<h2 id="multitrack-取消-恢复与重试">取消、恢复与重试</h2>
+<p>这些是新增的可选管理接口；原有提交和查询方式不变。</p>
+<p>取消排队、下载或运行中的任务：</p>
+<div class="code-block"><div class="code-head"><span>bash</span><button type="button" class="copy-code">复制</button></div><pre><code>curl -fsS -X POST &quot;$MULTITRACK_BASE/jobs/$JOB_ID/cancel&quot;</code></pre></div>
+<p>失败或取消后，从已准备好的输入和现有 unit 标记继续运行；不传请求体时保留原 <code>units</code>：</p>
+<div class="code-block"><div class="code-head"><span>bash</span><button type="button" class="copy-code">复制</button></div><pre><code>curl -fsS -X POST &quot;$MULTITRACK_BASE/jobs/$JOB_ID/resume&quot; \
+  -H &#x27;Content-Type: application/json&#x27; \
+  -d &#x27;{}&#x27;</code></pre></div>
+<p>也可以只恢复指定 unit，例如 unit 4：</p>
+<div class="code-block"><div class="code-head"><span>bash</span><button type="button" class="copy-code">复制</button></div><pre><code>curl -fsS -X POST &quot;$MULTITRACK_BASE/jobs/$JOB_ID/resume&quot; \
+  -H &#x27;Content-Type: application/json&#x27; \
+  -d &#x27;{&quot;units&quot;:&quot;4&quot;}&#x27;</code></pre></div>
+<p>完整重试会创建新 job，不覆盖原结果：</p>
+<div class="code-block"><div class="code-head"><span>bash</span><button type="button" class="copy-code">复制</button></div><pre><code>curl -fsS -X POST &quot;$MULTITRACK_BASE/jobs/$JOB_ID/retry&quot; \
+  -H &#x27;Content-Type: application/json&#x27; \
+  -d &#x27;{}&#x27;</code></pre></div>
+<p>URL 临时凭证不会写入任务记录。只有下载和规范化已经完成、<code>input_dir</code> 仍可用时，<code>resume</code>/<code>retry</code> 才能免 URL 恢复；否则需按原方式重新提交临时 URL。</p>
+<h2 id="multitrack-容量与归档">容量与归档</h2>
+<ul>
+<li>URL 下载和 multipart 上传都按单轨、四轨总量及磁盘保留空间做保护；超限分别返回 <code>413</code> 或 <code>507</code>。</li>
+<li>URL 下载任务按全局槽位排队，避免多个四轨任务同时占满 178 磁盘；排队时已返回 job ID。</li>
+<li>URL 原始下载文件在规范化成功后自动删除，正式输入与结果不受影响。</li>
+<li>新任务成功后异步镜像到 47 的 <code>/data/xijunting/atc_asr/multitrack_archive/&lt;job_id&gt;</code>；178 上仍保留在线展示所需文件。</li>
+<li><code>GET /jobs/&lt;job_id&gt;</code> 的 <code>archive</code> 字段记录归档状态。成功任务也可调用 <code>POST /jobs/&lt;job_id&gt;/archive</code> 手动重试归档。</li>
+<li>178 上 <code>18190</code> 对 ASR 模型栈使用 <code>Wants + After</code> 依赖。模型栈滚动重启期间预检会短暂返回 <code>503</code>，但不会再由 systemd 连带终止多轨 API 和已启动任务。</li>
+</ul>
+<h2 id="multitrack-查看结果页面">查看结果页面</h2>
+<p>整段任务页面：</p>
+<div class="code-block"><div class="code-head"><span>text</span><button type="button" class="copy-code">复制</button></div><pre><code>http://192.168.125.178:18190/jobs/&lt;job_id&gt;/viewer</code></pre></div>
+<p>指定 30 分钟单元页面：</p>
+<div class="code-block"><div class="code-head"><span>text</span><button type="button" class="copy-code">复制</button></div><pre><code>http://192.168.125.178:18190/jobs/&lt;job_id&gt;/units/unit_00_0-1800/viewer</code></pre></div>
+<h2 id="multitrack-下载结果">下载结果</h2>
+<div class="code-block"><div class="code-head"><span>bash</span><button type="button" class="copy-code">复制</button></div><pre><code>curl -fSLo index.html \
+  &quot;$MULTITRACK_BASE/jobs/$JOB_ID/result/index.html&quot;
+
+curl -fSLo transcript_full.json \
+  &quot;$MULTITRACK_BASE/jobs/$JOB_ID/result/transcript_full.json&quot;
+
+curl -fSLo transcript_full.txt \
+  &quot;$MULTITRACK_BASE/jobs/$JOB_ID/result/transcript_full.txt&quot;
+
+curl -fSLo unit_transcript.json \
+  &quot;$MULTITRACK_BASE/jobs/$JOB_ID/result/unit_00_0-1800/transcript.json&quot;</code></pre></div>
+<h2 id="multitrack-常用参数">常用参数</h2>
+<div class="table-wrap"><table><thead><tr>
+<th>参数</th>
+<th>默认值</th>
+<th>说明</th>
+</tr></thead><tbody>
+<tr>
+<td><code>run_name</code></td>
+<td>自动生成</td>
+<td>任务 ID 和输出目录名称；建议每次唯一</td>
+</tr>
+<tr>
+<td><code>scene_id</code></td>
+<td>自动生成</td>
+<td>场景名称</td>
+</tr>
+<tr>
+<td><code>stages</code></td>
+<td><code>all</code></td>
+<td>完整任务使用 <code>all</code></td>
+</tr>
+<tr>
+<td><code>execution_profile</code></td>
+<td><code>optimized</code></td>
+<td>正常调用保持默认值</td>
+</tr>
+<tr>
+<td><code>units</code></td>
+<td>空</td>
+<td>空表示全部；<code>0</code> 表示只处理第一个 30 分钟单元</td>
+</tr>
+<tr>
+<td><code>variants</code></td>
+<td><code>1.7b:df,0.6b:df,avia2:df</code></td>
+<td>三模型候选，一般不修改</td>
+</tr>
+<tr>
+<td><code>llm_model</code></td>
+<td><code>flash</code></td>
+<td>LLM 融合模型，可选 <code>flash</code> 或 <code>pro</code></td>
+</tr>
+<tr>
+<td><code>llm_api_key</code></td>
+<td>不传</td>
+<td>可选的本次请求临时 key；仅部分提交方式支持</td>
+</tr>
+<tr>
+<td><code>llm_workers</code></td>
+<td><code>4</code></td>
+<td>LLM 融合并发数</td>
+</tr>
+<tr>
+<td><code>llm_max_batches</code></td>
+<td><code>0</code></td>
+<td><code>0</code> 表示处理全部 LLM batch</td>
+</tr>
+</tbody></table></div>
+<p>自定义模型参数示例：</p>
+<div class="code-block"><div class="code-head"><span>bash</span><button type="button" class="copy-code">复制</button></div><pre><code>-F &#x27;variants=1.7b:df,0.6b:df,avia2:df&#x27;</code></pre></div>
+<p>JSON 提交方式：</p>
+<div class="code-block"><div class="code-head"><span>json</span><button type="button" class="copy-code">复制</button></div><pre><code>{
+  &quot;variants&quot;: &quot;1.7b:df,0.6b:df,avia2:df&quot;,
+  &quot;execution_profile&quot;: &quot;optimized&quot;,
+  &quot;stages&quot;: &quot;all&quot;
+}</code></pre></div></article>
+      <div class="footer">文档源文件由 ATC ASR 项目维护。页面仅包含接口调用说明。</div>
+    </main>
+  </div>
+  <script>
+    const tabs = [...document.querySelectorAll('.tab')];
+    function activate(name, updateHash = true) {
+      tabs.forEach((tab) => tab.classList.toggle('active', tab.dataset.doc === name));
+      document.querySelectorAll('[data-doc-panel]').forEach((panel) => panel.classList.toggle('active', panel.dataset.docPanel === name));
+      document.querySelectorAll('[data-toc]').forEach((toc) => toc.classList.toggle('active', toc.dataset.toc === name));
+      if (updateHash) history.replaceState(null, '', `#${name}`);
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }
+    tabs.forEach((tab) => tab.addEventListener('click', () => activate(tab.dataset.doc)));
+    const initial = location.hash.slice(1);
+    if (initial === 'multitrack' || initial === 'single') activate(initial, false);
+    document.querySelectorAll('.copy-code').forEach((button) => button.addEventListener('click', async () => {
+      const code = button.closest('.code-block').querySelector('code').textContent;
+      await navigator.clipboard.writeText(code);
+      button.textContent = '已复制';
+      setTimeout(() => button.textContent = '复制', 1200);
+    }));
+  </script>
+</body>
+</html>
